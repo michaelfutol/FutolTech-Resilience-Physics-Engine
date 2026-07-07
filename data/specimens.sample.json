@@ -1,0 +1,19 @@
+[
+  {
+    "id": "A0",
+    "name": "3m x 3m Sawali Test House",
+    "dimensions": {
+      "width": 3.0,
+      "length": 3.0,
+      "height": 2.5
+    },
+    "components": {
+      "frame_type": "mat_tubular_steel",
+      "wall_type": "mat_hardiflex_6mm",
+      "cladding_type": "mat_sawali",
+      "roof_type": "mat_gi_roof",
+      "base_type": "slab_on_grade"
+    },
+    "description": "Baseline working spec. Not expected to survive extreme loading."
+  }
+]

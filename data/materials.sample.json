@@ -1,0 +1,50 @@
+[
+  {
+    "id": "mat_tubular_steel",
+    "name": "25x25x1.5mm tubular steel",
+    "category": "frame",
+    "base_cost": 250,
+    "unit": "piece_6m",
+    "notes": "Standard light steel framing."
+  },
+  {
+    "id": "mat_hardiflex_6mm",
+    "name": "Hardiflex 6mm",
+    "category": "wall_backing",
+    "base_cost": 450,
+    "unit": "sheet_4x8",
+    "notes": "Fiber cement board."
+  },
+  {
+    "id": "mat_sawali",
+    "name": "Sawali / Bamboo Cladding",
+    "category": "wall_cladding",
+    "base_cost": 300,
+    "unit": "roll",
+    "notes": "Traditional woven bamboo matting."
+  },
+  {
+    "id": "mat_gi_roof",
+    "name": "GI Roofing Sheet",
+    "category": "roof",
+    "base_cost": 350,
+    "unit": "sheet_8ft",
+    "notes": "Corrugated galvanized iron sheet."
+  },
+  {
+    "id": "conn_anchor_bolt",
+    "name": "Anchor Bolt Placeholder",
+    "category": "connection_base",
+    "base_cost": 50,
+    "unit": "piece",
+    "notes": "Base plate to foundation connection."
+  },
+  {
+    "id": "conn_screw",
+    "name": "Screw Placeholder",
+    "category": "connection_light",
+    "base_cost": 1,
+    "unit": "piece",
+    "notes": "General purpose metal screw."
+  }
+]

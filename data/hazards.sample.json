@@ -1,0 +1,51 @@
+[
+  {
+    "id": "fair_weather",
+    "name": "Fair Weather",
+    "wind_kph": 15,
+    "rain": "none",
+    "description": "Standard baseline conditions."
+  },
+  {
+    "id": "strong_rain",
+    "name": "Strong Rain",
+    "wind_kph": 40,
+    "rain": "heavy_vertical",
+    "description": "Heavy precipitation, moderate wind."
+  },
+  {
+    "id": "monsoon_wind",
+    "name": "Monsoon Wind",
+    "wind_kph": 80,
+    "rain": "moderate",
+    "description": "Sustained seasonal winds."
+  },
+  {
+    "id": "typhoon",
+    "name": "Typhoon",
+    "wind_kph": 150,
+    "rain": "heavy_angled",
+    "description": "Significant wind load and water ingress pressure."
+  },
+  {
+    "id": "super_typhoon",
+    "name": "Super Typhoon",
+    "wind_kph": 220,
+    "rain": "extreme_horizontal",
+    "description": "Severe structural threat."
+  },
+  {
+    "id": "typhoon_index_300",
+    "name": "Typhoon Index 300",
+    "wind_kph": 300,
+    "rain": "extreme_horizontal",
+    "debris": "light_organic",
+    "effects": [
+      "roof_uplift",
+      "wall_pressure_suction",
+      "frame_racking",
+      "cladding_vibration"
+    ],
+    "description": "Extreme testing threshold."
+  }
+]
