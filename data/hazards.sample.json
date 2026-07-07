@@ -1,0 +1,37 @@
+{
+  "fair_weather": {
+    "wind_kph": 20,
+    "rain": "none"
+  },
+  "strong_rain": {
+    "wind_kph": 40,
+    "rain": "heavy"
+  },
+  "monsoon_wind": {
+    "wind_kph": 60,
+    "rain": "moderate"
+  },
+  "typhoon": {
+    "wind_kph": 120,
+    "rain": "heavy"
+  },
+  "super_typhoon": {
+    "wind_kph": 220,
+    "rain": "extreme"
+  },
+  "typhoon_index_300": {
+    "wind_kph": 300,
+    "rain": "horizontal heavy",
+    "debris": [
+      "leaves",
+      "twigs",
+      "small branches"
+    ],
+    "effects": [
+      "roof uplift",
+      "wall pressure/suction",
+      "frame racking",
+      "cladding vibration or detachment risk"
+    ]
+  }
+}

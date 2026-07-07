@@ -1,0 +1,12 @@
+[
+  {
+    "id": "A0",
+    "name": "3m x 3m Sawali Test House",
+    "dimensions": "3m x 3m",
+    "frame_type": "25x25x1.5mm tubular steel",
+    "wall_type": "Hardiflex 6mm",
+    "roof_type": "GI roofing sheet",
+    "base_type": "slab-on-grade",
+    "cladding": "sawali / bamboo cladding"
+  }
+]

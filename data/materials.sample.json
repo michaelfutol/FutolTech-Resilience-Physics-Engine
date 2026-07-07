@@ -1,0 +1,32 @@
+[
+  {
+    "id": "mat-001",
+    "name": "25x25x1.5mm tubular steel",
+    "type": "frame"
+  },
+  {
+    "id": "mat-002",
+    "name": "Hardiflex 6mm",
+    "type": "wall"
+  },
+  {
+    "id": "mat-003",
+    "name": "sawali / bamboo cladding",
+    "type": "cladding"
+  },
+  {
+    "id": "mat-004",
+    "name": "GI roofing sheet",
+    "type": "roof"
+  },
+  {
+    "id": "mat-005",
+    "name": "anchor bolt placeholder",
+    "type": "connection"
+  },
+  {
+    "id": "mat-006",
+    "name": "screw placeholder",
+    "type": "connection"
+  }
+]
