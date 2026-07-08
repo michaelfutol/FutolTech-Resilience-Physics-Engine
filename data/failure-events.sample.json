@@ -1,0 +1,56 @@
+[
+  {
+    "id": "e_vibration",
+    "time": "00:04",
+    "name": "Cladding Vibration",
+    "description": "Sawali outer cladding starts vibrating.",
+    "severity": "low",
+    "type": "cladding_vibration",
+    "target": "wall"
+  },
+  {
+    "id": "e_screw_pull",
+    "time": "00:09",
+    "name": "Screw Stress",
+    "description": "Hardiflex screws show stress at windward wall.",
+    "severity": "medium",
+    "type": "screw_stress",
+    "target": "wall"
+  },
+  {
+    "id": "e_roof_uplift",
+    "time": "00:14",
+    "name": "Roof Uplift",
+    "description": "Roof edge uplift begins due to high suction.",
+    "severity": "high",
+    "type": "roof_uplift",
+    "target": "roof"
+  },
+  {
+    "id": "e_racking",
+    "time": "00:19",
+    "name": "Frame Racking",
+    "description": "Lateral drift exceeds allowable limit.",
+    "severity": "high",
+    "type": "frame_racking",
+    "target": "frame"
+  },
+  {
+    "id": "e_conn_failure",
+    "time": "00:25",
+    "name": "Connection Failure",
+    "description": "First connection failure detected.",
+    "severity": "critical",
+    "type": "connection_failure",
+    "target": "base"
+  },
+  {
+    "id": "e_model_failed",
+    "time": "00:31",
+    "name": "Model Failed",
+    "description": "Structure marked as failed.",
+    "severity": "critical",
+    "type": "model_failed",
+    "target": "global"
+  }
+]

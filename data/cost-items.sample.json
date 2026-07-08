@@ -1,0 +1,66 @@
+[
+  {
+    "id": "c_tubular_frame",
+    "name": "Tubular Frame Cost",
+    "category": "Structure",
+    "unit": "module",
+    "placeholderCost": 15000,
+    "notes": "Cost for standard 3x3 module framing."
+  },
+  {
+    "id": "c_wall_board",
+    "name": "Wall Board Cost",
+    "category": "Envelope",
+    "unit": "sqm",
+    "placeholderCost": 350,
+    "notes": "Hardiflex board per sqm."
+  },
+  {
+    "id": "c_cladding",
+    "name": "Cladding Cost",
+    "category": "Envelope",
+    "unit": "sqm",
+    "placeholderCost": 150,
+    "notes": "Sawali cladding per sqm."
+  },
+  {
+    "id": "c_roof",
+    "name": "Roof Cost",
+    "category": "Envelope",
+    "unit": "sqm",
+    "placeholderCost": 400,
+    "notes": "GI corrugated sheet."
+  },
+  {
+    "id": "c_fasteners",
+    "name": "Fasteners",
+    "category": "Hardware",
+    "unit": "lot",
+    "placeholderCost": 2500,
+    "notes": "Screws, bolts, and straps."
+  },
+  {
+    "id": "c_base",
+    "name": "Base/Foundation",
+    "category": "Structure",
+    "unit": "module",
+    "placeholderCost": 10000,
+    "notes": "Slab on grade for 3x3."
+  },
+  {
+    "id": "c_labor",
+    "name": "Labor Placeholder",
+    "category": "Labor",
+    "unit": "module",
+    "placeholderCost": 12000,
+    "notes": "Estimated labor for 3x3 module."
+  },
+  {
+    "id": "c_delivery",
+    "name": "Delivery Placeholder",
+    "category": "Logistics",
+    "unit": "trip",
+    "placeholderCost": 1500,
+    "notes": "Standard local delivery."
+  }
+]
