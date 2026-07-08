@@ -1,5 +1,9 @@
 # Worklog
 
+## [2026-07-08] - Phase 1.5: UI Refinement Direction
+- Documented RPE Test Bench layout strategy and target visual aesthetics (`docs/ui-direction.md`, `docs/rpe-test-bench-layout.md`).
+- Prepared design templates and generated prompt assets for external tools like Stitch (`design/rpe-test-bench/*`).
+
 ## [2026-07-08] - Phase 1: Export Placeholders
 - Drafted `docs/export-plan.md` defining future export targets.
 - Built and integrated `ExportPanel` into the right sidebar.
