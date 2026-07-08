@@ -1,0 +1,18 @@
+[
+  {
+    "id": "fixed_duration",
+    "name": "Fixed Duration",
+    "description": "Runs the selected hazard for a user-supplied simulation time."
+  },
+  {
+    "id": "until_breaking_point",
+    "name": "Until First Critical Failure",
+    "description": "Runs until a critical failure threshold is reached."
+  },
+  {
+    "id": "continue_after_failure",
+    "name": "Continue After Failure",
+    "description": "Future mode for damage progression after first failure.",
+    "future": true
+  }
+]

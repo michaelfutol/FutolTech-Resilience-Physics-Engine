@@ -35,6 +35,10 @@ export default function Home() {
           availableUpgrades={modelData.availableUpgrades}
           selectedUpgradeIds={modelData.selectedUpgradeIds}
           toggleUpgrade={modelData.toggleUpgrade}
+          runModes={modelData.runModes}
+          runSettings={modelData.runSettings}
+          setRunSettings={modelData.setRunSettings}
+          recommendation={modelData.recommendation}
         />
       </div>
       <BottomTimeline 

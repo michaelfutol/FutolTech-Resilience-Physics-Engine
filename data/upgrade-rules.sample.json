@@ -1,0 +1,27 @@
+[
+  {
+    "failureType": "frame_racking",
+    "recommendedUpgrades": ["add-diagonal-bracing"],
+    "nextSpecimenId": "A1"
+  },
+  {
+    "failureType": "roof_uplift",
+    "recommendedUpgrades": ["roof-tie-down-straps"],
+    "nextSpecimenId": "A1"
+  },
+  {
+    "failureType": "connection_failure",
+    "recommendedUpgrades": ["base-anchor-upgrade"],
+    "nextSpecimenId": "A1"
+  },
+  {
+    "failureType": "screw_stress",
+    "recommendedUpgrades": ["improve-screw-spacing"],
+    "nextSpecimenId": "A1"
+  },
+  {
+    "failureType": "cladding_vibration",
+    "recommendedUpgrades": ["stronger-cladding-backing"],
+    "nextSpecimenId": "A1"
+  }
+]

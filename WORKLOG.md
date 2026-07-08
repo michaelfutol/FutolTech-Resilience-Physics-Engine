@@ -1,5 +1,11 @@
 # Worklog
 
+## [2026-07-08] - Phase 1: Export Placeholders
+- Drafted `docs/export-plan.md` defining future export targets.
+- Built and integrated `ExportPanel` into the right sidebar.
+- Wired export buttons to become active only post-simulation and connected them to placeholder alerts.
+- Confirmed full completion of Phase 1 MVP Shell.
+
 ## [2026-07-08] - Phase 1: Interactive Simulation Playback
 - Updated `failure-events.sample.json` with event timings and visual marker targets.
 - Implemented `startSimulation`, `resetSimulation` handlers in `useDemoModel` with `setInterval` tracking elapsed time.

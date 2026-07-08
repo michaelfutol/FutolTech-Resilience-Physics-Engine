@@ -14,7 +14,9 @@
 - [x] Load `Demo 01` sample from JSON into the application state dynamically.
 - [x] Implement a scripted 'Run' sequence for Typhoon Index 300 event timeline.
 - [x] Add editable upgrade options and cost impact placeholders.
-- [ ] Add placeholder export buttons (video, screenshots, report, cost table).
+- [x] Add placeholder export buttons (video, screenshots, report, cost table).
+- [x] Add simulation run modes UI placeholder.
+- [x] Document Prototype Rebuilder roadmap and add simple rule-based recommendation.
 
 ## Phase 2: Material and Cost Library
 - [ ] Implement editable materials.

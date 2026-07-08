@@ -51,3 +51,37 @@ export interface UpgradeOption {
   expectedBenefit: string;
   priority: "low" | "medium" | "high";
 }
+
+export type SimulationRunMode =
+  | "fixed_duration"
+  | "until_breaking_point"
+  | "continue_after_failure";
+
+export interface RunMode {
+  id: SimulationRunMode;
+  name: string;
+  description: string;
+  future?: boolean;
+}
+
+export interface UpgradeRule {
+  failureType: string;
+  recommendedUpgrades: string[];
+  nextSpecimenId: string;
+}
+
+export interface RunSettings {
+  mode: SimulationRunMode;
+  durationSeconds: number;
+  stopAtFirstCriticalFailure: boolean;
+}
+
+export interface PrototypeRecommendation {
+  currentSpecimenId: string;
+  nextSpecimenId: string;
+  reason: string;
+  recommendedUpgrades: string[];
+  estimatedAddedCostPhp: number;
+  materialFamilyChange?: boolean;
+  notes: string[];
+}

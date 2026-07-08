@@ -1,4 +1,5 @@
-import { Material, CostItem, FailureEvent, UpgradeOption } from "@/types/rpe";
+import { Material, CostItem, FailureEvent, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode } from "@/types/rpe";
+import ExportPanel from "./ExportPanel";
 
 interface RightPanelProps {
   materials: Material[];
@@ -8,21 +9,77 @@ interface RightPanelProps {
   availableUpgrades: UpgradeOption[];
   selectedUpgradeIds: string[];
   toggleUpgrade: (id: string) => void;
+  runModes: RunMode[];
+  runSettings: RunSettings;
+  setRunSettings: (settings: RunSettings) => void;
+  recommendation: PrototypeRecommendation | null;
 }
 
 export default function RightPanel({ 
   materials, costItems, simulationStatus, 
-  availableUpgrades, selectedUpgradeIds, toggleUpgrade 
+  availableUpgrades, selectedUpgradeIds, toggleUpgrade,
+  runModes, runSettings, setRunSettings, recommendation
 }: RightPanelProps) {
   const structureMaterials = materials.filter((m) => m.type !== "connection");
   const connections = materials.filter((m) => m.type === "connection");
 
   return (
-    <aside className="w-80 bg-slate-900 border-l border-slate-700 flex flex-col shrink-0 overflow-y-auto">
-      <div className="p-4 border-b border-slate-800">
-        <h2 className="font-medium text-slate-200">Simulation Results & Settings</h2>
+    <aside className="w-80 bg-slate-900 border-l border-slate-800 flex flex-col h-full overflow-hidden">
+      <div className="p-4 border-b border-slate-800 flex-none">
+        <h2 className="font-semibold text-slate-100 flex items-center justify-between">
+          Settings & Upgrades
+        </h2>
       </div>
-      <div className="p-4 space-y-6">
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        
+        {/* RUN SETTINGS PLACEHOLDER */}
+        <div className="bg-slate-800/50 rounded p-3 border border-slate-700">
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Run Settings</h3>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Run Mode:</label>
+              <select 
+                className="w-full bg-slate-900 border border-slate-700 rounded text-xs text-slate-300 p-1.5 focus:border-emerald-500 focus:outline-none"
+                value={runSettings.mode}
+                onChange={(e) => setRunSettings({...runSettings, mode: e.target.value as import("@/types/rpe").SimulationRunMode})}
+              >
+                {runModes.map((rm) => (
+                  <option key={rm.id} value={rm.id} disabled={rm.future}>
+                    {rm.name} {rm.future && "(Future)"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {runSettings.mode === "fixed_duration" && (
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Simulation Time:</label>
+                <select 
+                  className="w-full bg-slate-900 border border-slate-700 rounded text-xs text-slate-300 p-1.5 focus:border-emerald-500 focus:outline-none"
+                  value={runSettings.durationSeconds}
+                  onChange={(e) => setRunSettings({...runSettings, durationSeconds: parseInt(e.target.value)})}
+                >
+                  <option value={30}>30 sec default</option>
+                  <option value={60}>1 min</option>
+                  <option value={300}>5 min</option>
+                  <option value={-1}>custom input</option>
+                </select>
+              </div>
+            )}
+            
+            {runSettings.mode === "until_breaking_point" && (
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Stop Condition:</label>
+                <div className="w-full bg-slate-900 border border-slate-700 rounded text-xs text-slate-300 p-1.5">
+                  first critical failure
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {simulationStatus === "complete" && (
           <div className="bg-slate-800 rounded p-3 border border-red-900/50">
             <h3 className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-2">Simulation Summary</h3>
@@ -77,7 +134,9 @@ export default function RightPanel({
                 </div>
                 <div className="bg-emerald-950/30 rounded p-2 text-xs border border-emerald-900/30">
                   <span className="text-slate-400">Next specimen: </span>
-                  <span className="text-slate-200 font-medium">A1 — Braced 3m x 3m Sawali Test House</span>
+                  <span className="text-slate-200 font-medium">
+                    {recommendation ? `${recommendation.nextSpecimenId} (Recommended via Rebuilder)` : "A1 — Braced 3m x 3m Sawali Test House"}
+                  </span>
                 </div>
               </div>
             )}
@@ -123,6 +182,8 @@ export default function RightPanel({
             </div>
           </div>
         </div>
+
+        <ExportPanel simulationStatus={simulationStatus} />
       </div>
     </aside>
   );

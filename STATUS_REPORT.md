@@ -1,27 +1,30 @@
 # Status Report
 
 **Documented Stack:** React / Next.js, Three.js / React Three Fiber, Rapier.js / cannon-es.
-**Future Integrations:** Project Chrono, OpenSees, OpenFOAM, CalculiX, Blender.
-**Current State:** Phase 1 (Visual MVP Shell). Next.js application initialized, interactive timeline simulation running, and editable upgrade options implemented.
+**Future Integrations:** Project Chrono, OpenSees, OpenFOAM, CalculiX, Blender, BlueQubit.
+**Current State:** Phase 1 (Visual MVP Shell). Next.js application initialized, interactive timeline simulation running, editable upgrade options implemented, and run mode/rebuilder placeholders added.
 **Blockers:** None currently.
 
 ---
 
 ## Report for Lum / Project Owner
 
-### Kira Report — FutolTech RPE
+### Kira Report #06 — FutolTech RPE
 
 ### What I changed
-- Created `data/upgrades.sample.json` to hold the list of available structural upgrades.
-- Updated `src/types/rpe.ts` with the new `UpgradeOption` interface.
-- Added `getUpgradeOptions` to the `demo-data.ts` loader.
-- Enhanced the `useDemoModel` hook to track `availableUpgrades` and `selectedUpgradeIds` alongside a `toggleUpgrade` function.
-- Passed upgrade-related props from `page.tsx` down to the `RightPanel`.
-- Updated `RightPanel` to display the newly implemented Upgrade Options UI once the simulation completes, allowing the user to select upgrades.
-- Calculated and displayed a dynamically updating "Added cost placeholder" and a recommendation for the "Next specimen" inside `RightPanel`.
+- Created `docs/prototype-rebuilder.md` outlining the recommendation engine flow.
+- Created `docs/optimization-layer.md` detailing the progression from Rule-Based Recommender to QUBO/Quantum Optimizer.
+- Created `data/run-modes.sample.json` and `data/upgrade-rules.sample.json` to hold placeholder configurations.
+- Updated `src/types/rpe.ts` with `SimulationRunMode`, `RunSettings`, and `PrototypeRecommendation` types.
+- Integrated Run Modes UI into the `RightPanel` settings section.
+- Added a simple, rule-based "Next Specimen" recommender to `useDemoModel`, mapping active failures to predefined upgrade paths.
+- Ran lint and build successfully.
 
 ### Files changed
-- `data/upgrades.sample.json` (New)
+- `docs/prototype-rebuilder.md` (New)
+- `docs/optimization-layer.md` (New)
+- `data/run-modes.sample.json` (New)
+- `data/upgrade-rules.sample.json` (New)
 - `src/types/rpe.ts`
 - `src/lib/demo-data.ts`
 - `src/hooks/useDemoModel.ts`
@@ -30,18 +33,19 @@
 - Tracking docs: `STATUS_REPORT.md`, `WORKLOG.md`, `TASKS.md`, `NEXT_STEPS.md`
 
 ### Current app/repo status
-The engine now completes its failure simulation loop by offering interactive structural upgrade options. Users can select fixes to the identified weak points and instantly see an estimated cost penalty, fulfilling the MVP loop of failure -> assessment -> upgrade.
+The MVP architecture has expanded to establish the foundation for simulation variation and structural optimization. We now have the roadmap properly documented ensuring quantum operations remain securely allocated as future optimization steps, distinct from the classical physics simulation base.
 
 ### What is still placeholder
-- The 3D viewport displays a static conceptual house structure.
-- Physics calculations are static placeholders.
-- The base model material costs and the upgrade costs are unlinked from real calculations.
+- The 3D viewport displays a static conceptual house structure without deformation physics.
+- The prototype rebuilder recommendations use a simple static map, not full optimization or parametric constraint solving.
+- All export buttons fire mock alerts.
+- Selecting different simulation modes from the UI does not dynamically alter the playback logic yet.
 
 ### Recommended next task
-Add placeholder export buttons (e.g. "Export Video", "Save Screenshots", "Generate Cost Report") to round out the MVP UI shell before moving on to Phase 2 (real material and cost data).
+None right now. Ready for further instructions or structural modeling phase.
 
 ### Questions / decisions needed
-- None right now. The upgrade options interactive UI is complete and functioning.
+- None right now.
 
 ### Test/build result
 - `npm run lint` — Passed with 0 errors, 0 warnings.
@@ -49,4 +53,4 @@ Add placeholder export buttons (e.g. "Export Video", "Save Screenshots", "Genera
 
 ### Commit / branch info
 - branch: main
-- uncommitted changes: Added editable upgrade options and cost impact placeholders.
+- uncommitted changes: Added run modes UI and prototype rebuilder rules MVP.

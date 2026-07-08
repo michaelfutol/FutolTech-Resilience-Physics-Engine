@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getDemoSpecimen, getMaterials, getHazards, getFailureEvents, getCostItems, getUpgrades } from "@/lib/demo-data";
-import { Specimen, Material, Hazards, FailureEvent, CostItem, UpgradeOption } from "@/types/rpe";
+import { getDemoSpecimen, getMaterials, getHazards, getFailureEvents, getCostItems, getUpgrades, getRunModes, getUpgradeRules } from "@/lib/demo-data";
+import { Specimen, Material, Hazards, FailureEvent, CostItem, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode, UpgradeRule } from "@/types/rpe";
 
 export function useDemoModel() {
   const [specimen] = useState<Specimen | null>(getDemoSpecimen() || null);
@@ -11,6 +11,14 @@ export function useDemoModel() {
   const [costItems] = useState<CostItem[]>(getCostItems());
   const [availableUpgrades] = useState<UpgradeOption[]>(getUpgrades());
   const [selectedUpgradeIds, setSelectedUpgradeIds] = useState<string[]>([]);
+
+  // Simulation Settings
+  const [runModes] = useState<RunMode[]>(getRunModes());
+  const [runSettings, setRunSettings] = useState<RunSettings>({
+    mode: "fixed_duration",
+    durationSeconds: 30,
+    stopAtFirstCriticalFailure: false
+  });
 
   // Simulation State
   const [simulationStatus, setSimulationStatus] = useState<"idle" | "running" | "complete">("idle");
@@ -68,6 +76,26 @@ export function useDemoModel() {
     );
   };
 
+  const getRecommendation = (): PrototypeRecommendation | null => {
+    if (simulationStatus !== "complete" || !activeFailureEvent || !specimen) return null;
+
+    const rules = getUpgradeRules();
+    const matchedRule = rules.find((r: UpgradeRule) => r.failureType === activeFailureEvent.type);
+
+    if (matchedRule) {
+      return {
+        currentSpecimenId: specimen.id,
+        nextSpecimenId: matchedRule.nextSpecimenId,
+        reason: `Rule match for ${activeFailureEvent.type}`,
+        recommendedUpgrades: matchedRule.recommendedUpgrades,
+        estimatedAddedCostPhp: 0,
+        notes: []
+      };
+    }
+
+    return null;
+  };
+
   return {
     specimen,
     materials,
@@ -79,6 +107,10 @@ export function useDemoModel() {
     availableUpgrades,
     selectedUpgradeIds,
     toggleUpgrade,
+    runModes,
+    runSettings,
+    setRunSettings,
+    recommendation: getRecommendation(),
     simulationStatus,
     activeEventIndex,
     elapsedTime,
