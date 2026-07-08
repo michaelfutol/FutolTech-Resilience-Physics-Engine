@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getDemoSpecimen, getMaterials, getHazards, getFailureEvents, getCostItems } from "@/lib/demo-data";
-import { Specimen, Material, Hazards, FailureEvent, CostItem } from "@/types/rpe";
+import { getDemoSpecimen, getMaterials, getHazards, getFailureEvents, getCostItems, getUpgrades } from "@/lib/demo-data";
+import { Specimen, Material, Hazards, FailureEvent, CostItem, UpgradeOption } from "@/types/rpe";
 
 export function useDemoModel() {
   const [specimen] = useState<Specimen | null>(getDemoSpecimen() || null);
@@ -9,6 +9,8 @@ export function useDemoModel() {
   const [activeHazard, setActiveHazard] = useState<string>("typhoon_index_300");
   const [failureEvents] = useState<FailureEvent[]>(getFailureEvents());
   const [costItems] = useState<CostItem[]>(getCostItems());
+  const [availableUpgrades] = useState<UpgradeOption[]>(getUpgrades());
+  const [selectedUpgradeIds, setSelectedUpgradeIds] = useState<string[]>([]);
 
   // Simulation State
   const [simulationStatus, setSimulationStatus] = useState<"idle" | "running" | "complete">("idle");
@@ -60,6 +62,12 @@ export function useDemoModel() {
     setElapsedTime("00:00");
   };
 
+  const toggleUpgrade = (id: string) => {
+    setSelectedUpgradeIds(prev => 
+      prev.includes(id) ? prev.filter(u => u !== id) : [...prev, id]
+    );
+  };
+
   return {
     specimen,
     materials,
@@ -68,6 +76,9 @@ export function useDemoModel() {
     setActiveHazard,
     failureEvents,
     costItems,
+    availableUpgrades,
+    selectedUpgradeIds,
+    toggleUpgrade,
     simulationStatus,
     activeEventIndex,
     elapsedTime,

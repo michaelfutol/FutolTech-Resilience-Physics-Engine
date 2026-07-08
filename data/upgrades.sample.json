@@ -1,0 +1,50 @@
+[
+  {
+    "id": "add-diagonal-bracing",
+    "name": "Add diagonal bracing",
+    "targetWeakPoint": "frame_racking",
+    "estimatedCostPhp": 3500,
+    "expectedBenefit": "Reduces lateral sway and improves frame stability.",
+    "priority": "high"
+  },
+  {
+    "id": "roof-tie-down-straps",
+    "name": "Add roof tie-down straps",
+    "targetWeakPoint": "roof_uplift",
+    "estimatedCostPhp": 2500,
+    "expectedBenefit": "Improves roof-to-frame load path against uplift.",
+    "priority": "high"
+  },
+  {
+    "id": "upgrade-frame-size",
+    "name": "Upgrade frame size",
+    "targetWeakPoint": "frame_racking",
+    "estimatedCostPhp": 5000,
+    "expectedBenefit": "Increases overall structural rigidity.",
+    "priority": "medium"
+  },
+  {
+    "id": "improve-screw-spacing",
+    "name": "Improve screw spacing",
+    "targetWeakPoint": "screw_stress",
+    "estimatedCostPhp": 1200,
+    "expectedBenefit": "Distributes wind load more evenly across cladding.",
+    "priority": "medium"
+  },
+  {
+    "id": "stronger-cladding-backing",
+    "name": "Add stronger cladding backing",
+    "targetWeakPoint": "cladding_vibration",
+    "estimatedCostPhp": 2800,
+    "expectedBenefit": "Prevents sawali cladding from blowing out.",
+    "priority": "medium"
+  },
+  {
+    "id": "base-anchor-upgrade",
+    "name": "Add base anchor upgrade",
+    "targetWeakPoint": "connection_failure",
+    "estimatedCostPhp": 4000,
+    "expectedBenefit": "Secures the foundation connection from overturning forces.",
+    "priority": "high"
+  }
+]

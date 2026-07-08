@@ -42,3 +42,12 @@ export interface CostItem {
   placeholderCost: number;
   notes: string;
 }
+
+export interface UpgradeOption {
+  id: string;
+  name: string;
+  targetWeakPoint: string;
+  estimatedCostPhp: number;
+  expectedBenefit: string;
+  priority: "low" | "medium" | "high";
+}

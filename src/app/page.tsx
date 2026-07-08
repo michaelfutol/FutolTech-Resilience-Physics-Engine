@@ -32,6 +32,9 @@ export default function Home() {
           costItems={modelData.costItems} 
           simulationStatus={modelData.simulationStatus}
           activeFailureEvent={modelData.activeFailureEvent}
+          availableUpgrades={modelData.availableUpgrades}
+          selectedUpgradeIds={modelData.selectedUpgradeIds}
+          toggleUpgrade={modelData.toggleUpgrade}
         />
       </div>
       <BottomTimeline 

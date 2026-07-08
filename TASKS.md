@@ -13,7 +13,7 @@
 - [x] Setup Three.js / React Three Fiber placeholder in the viewport.
 - [x] Load `Demo 01` sample from JSON into the application state dynamically.
 - [x] Implement a scripted 'Run' sequence for Typhoon Index 300 event timeline.
-- [ ] Add editable upgrade options and cost impact placeholders.
+- [x] Add editable upgrade options and cost impact placeholders.
 - [ ] Add placeholder export buttons (video, screenshots, report, cost table).
 
 ## Phase 2: Material and Cost Library

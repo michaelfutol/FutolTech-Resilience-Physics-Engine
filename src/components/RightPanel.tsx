@@ -1,13 +1,19 @@
-import { Material, CostItem, FailureEvent } from "@/types/rpe";
+import { Material, CostItem, FailureEvent, UpgradeOption } from "@/types/rpe";
 
 interface RightPanelProps {
   materials: Material[];
   costItems: CostItem[];
   simulationStatus: "idle" | "running" | "complete";
   activeFailureEvent: FailureEvent | null;
+  availableUpgrades: UpgradeOption[];
+  selectedUpgradeIds: string[];
+  toggleUpgrade: (id: string) => void;
 }
 
-export default function RightPanel({ materials, costItems, simulationStatus }: RightPanelProps) {
+export default function RightPanel({ 
+  materials, costItems, simulationStatus, 
+  availableUpgrades, selectedUpgradeIds, toggleUpgrade 
+}: RightPanelProps) {
   const structureMaterials = materials.filter((m) => m.type !== "connection");
   const connections = materials.filter((m) => m.type === "connection");
 
@@ -32,6 +38,49 @@ export default function RightPanel({ materials, costItems, simulationStatus }: R
                 </ul>
               </div>
             </div>
+          </div>
+        )}
+
+        {simulationStatus === "complete" && (
+          <div className="bg-slate-800 rounded p-3 border border-emerald-900/50 mt-4">
+            <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">Upgrade Options</h3>
+            <div className="space-y-3">
+              {availableUpgrades.map(upgrade => {
+                const isSelected = selectedUpgradeIds.includes(upgrade.id);
+                return (
+                  <label key={upgrade.id} className={`flex flex-col gap-1 p-2 rounded border cursor-pointer transition-colors ${isSelected ? 'bg-emerald-900/20 border-emerald-500/50' : 'bg-slate-900/50 border-slate-700 hover:border-slate-500'}`}>
+                    <div className="flex items-start gap-2">
+                      <input 
+                        type="checkbox" 
+                        className="mt-1 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500" 
+                        checked={isSelected}
+                        onChange={() => toggleUpgrade(upgrade.id)}
+                      />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-slate-200">{upgrade.name}</span>
+                          <span className="text-xs font-mono text-emerald-400">+₱{upgrade.estimatedCostPhp.toLocaleString()}</span>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-tight mt-1">{upgrade.expectedBenefit}</p>
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            
+            {selectedUpgradeIds.length > 0 && (
+              <div className="mt-4 pt-3 border-t border-emerald-900/50">
+                <div className="flex justify-between text-sm font-medium text-emerald-400 mb-3">
+                  <span>Added cost placeholder:</span>
+                  <span className="font-mono">₱{availableUpgrades.filter(u => selectedUpgradeIds.includes(u.id)).reduce((sum, u) => sum + u.estimatedCostPhp, 0).toLocaleString()}</span>
+                </div>
+                <div className="bg-emerald-950/30 rounded p-2 text-xs border border-emerald-900/30">
+                  <span className="text-slate-400">Next specimen: </span>
+                  <span className="text-slate-200 font-medium">A1 — Braced 3m x 3m Sawali Test House</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
