@@ -22,8 +22,8 @@
 - [x] Document target UI aesthetic (engineering cockpit).
 - [x] Document detailed Test Bench layout components.
 - [x] Create design reference notes and Stitch prompts.
-- [ ] Implement new CSS and layout structure.
-- [ ] Update components to match new aesthetic.
+- [x] Implement new CSS and layout structure.
+- [x] Update components to match new aesthetic.
 
 ## Phase 2: Material and Cost Library
 - [ ] Implement editable materials.

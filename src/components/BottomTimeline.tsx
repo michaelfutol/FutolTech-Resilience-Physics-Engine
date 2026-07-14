@@ -1,4 +1,5 @@
 import { FailureEvent } from "@/types/rpe";
+import { rpeTokens } from "@/lib/ui/tokens";
 
 interface BottomTimelineProps {
   events: FailureEvent[];
@@ -10,16 +11,16 @@ export default function BottomTimeline({ events, activeEventIndex, elapsedTime }
   
   const getEventClass = (index: number, severity: string) => {
     // If it's in the future
-    if (activeEventIndex < index) return "text-slate-500 opacity-50";
+    if (activeEventIndex < index) return `${rpeTokens.colors.text.muted} opacity-50`;
     
     // If it's exactly the active one, highlight it
     if (activeEventIndex === index) {
       switch (severity) {
-        case "low": return "text-amber-400 bg-amber-400/10 -mx-2 px-2 py-0.5 rounded";
-        case "medium": return "text-orange-400 bg-orange-400/10 -mx-2 px-2 py-0.5 rounded";
-        case "high": return "text-red-400 bg-red-400/10 -mx-2 px-2 py-0.5 rounded";
-        case "critical": return "text-red-500 font-bold bg-red-500/10 -mx-2 px-2 py-0.5 rounded";
-        default: return "text-slate-200 bg-slate-800 -mx-2 px-2 py-0.5 rounded";
+        case "low": return `${rpeTokens.colors.status.caution} -mx-2 px-2 py-0.5 rounded border`;
+        case "medium": return `${rpeTokens.colors.status.warning} -mx-2 px-2 py-0.5 rounded border`;
+        case "high": return `${rpeTokens.colors.status.failure} -mx-2 px-2 py-0.5 rounded border`;
+        case "critical": return `${rpeTokens.colors.status.failure} font-bold -mx-2 px-2 py-0.5 rounded border`;
+        default: return `${rpeTokens.colors.text.primary} bg-slate-800 -mx-2 px-2 py-0.5 rounded border ${rpeTokens.colors.borders.default}`;
       }
     }
     
@@ -29,46 +30,46 @@ export default function BottomTimeline({ events, activeEventIndex, elapsedTime }
       case "medium": return "text-orange-500";
       case "high": return "text-red-500";
       case "critical": return "text-red-600 font-medium";
-      default: return "text-slate-400";
+      default: return rpeTokens.colors.text.secondary;
     }
   };
 
   return (
-    <div className="h-48 bg-slate-900 border-t border-slate-700 flex flex-col shrink-0">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800">
-        <h2 className="text-sm font-medium text-slate-200">Simulation Timeline & Events</h2>
-        <div className="text-xs text-slate-400 font-mono">{elapsedTime} / 00:31</div>
+    <div className={`h-48 ${rpeTokens.colors.background.panel} border-t ${rpeTokens.colors.borders.divider} flex flex-col shrink-0`}>
+      <div className={`flex items-center justify-between px-4 py-2 border-b ${rpeTokens.colors.borders.divider}`}>
+        <h2 className={`${rpeTokens.typography.heading}`}>Simulation Timeline & Events</h2>
+        <div className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.muted}`}>{elapsedTime} / 00:31</div>
       </div>
       
       <div className="flex-1 p-4 overflow-y-auto flex gap-6">
         <div className="w-1/2">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Event Log</h3>
-          <ul className="space-y-1 font-mono text-xs">
-            <li className={activeEventIndex >= -1 ? "text-slate-400" : "text-slate-600"}>
-              <span className="text-slate-500 mr-2">00:00</span> Wind loading begins
+          <h3 className={`${rpeTokens.typography.heading} mb-2`}>Event Log</h3>
+          <ul className={`space-y-1 ${rpeTokens.typography.data}`}>
+            <li className={activeEventIndex >= -1 ? rpeTokens.colors.text.secondary : rpeTokens.colors.text.muted}>
+              <span className={`${rpeTokens.colors.text.muted} mr-2`}>00:00</span> Wind loading begins
             </li>
             {events.map((event, i) => (
               <li key={event.id} className={`transition-all ${getEventClass(i, event.severity)}`}>
-                <span className="text-slate-500 mr-2">{event.time}</span>
+                <span className={`${rpeTokens.colors.text.muted} mr-2`}>{event.time}</span>
                 {event.name}: {event.description}
               </li>
             ))}
           </ul>
         </div>
         
-        <div className="w-1/2 border-l border-slate-800 pl-6 flex flex-col">
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Export & Upgrade</h3>
-          <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-700 rounded-lg text-slate-500 text-sm">
+        <div className={`w-1/2 border-l ${rpeTokens.colors.borders.divider} pl-6 flex flex-col`}>
+          <h3 className={`${rpeTokens.typography.heading} mb-2`}>Export & Upgrade</h3>
+          <div className={`flex-1 flex items-center justify-center border-2 border-dashed ${rpeTokens.colors.borders.default} rounded-lg ${rpeTokens.colors.text.muted} text-sm`}>
             Simulation results placeholder
           </div>
           <div className="flex gap-2 mt-3">
-            <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded text-xs transition-colors">
+            <button className={`flex-1 ${rpeTokens.colors.background.surface} hover:bg-slate-700 ${rpeTokens.colors.text.secondary} py-1.5 ${rpeTokens.layout.borderRadius} text-xs transition-colors`}>
               Export Report
             </button>
-            <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded text-xs transition-colors">
+            <button className={`flex-1 ${rpeTokens.colors.background.surface} hover:bg-slate-700 ${rpeTokens.colors.text.secondary} py-1.5 ${rpeTokens.layout.borderRadius} text-xs transition-colors`}>
               Cost Table
             </button>
-            <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded text-xs transition-colors">
+            <button className={`flex-1 ${rpeTokens.colors.background.surface} hover:bg-slate-700 ${rpeTokens.colors.text.secondary} py-1.5 ${rpeTokens.layout.borderRadius} text-xs transition-colors`}>
               Video Demo
             </button>
           </div>

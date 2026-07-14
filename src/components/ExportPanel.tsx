@@ -1,3 +1,5 @@
+import { rpeTokens } from "@/lib/ui/tokens";
+
 interface ExportPanelProps {
   simulationStatus: "idle" | "running" | "complete";
 }
@@ -8,15 +10,15 @@ export default function ExportPanel({ simulationStatus }: ExportPanelProps) {
   };
 
   const isEnabled = simulationStatus === "complete";
-  const buttonClass = `px-3 py-1.5 rounded text-xs font-medium text-left border transition-colors ${
+  const buttonClass = `px-3 py-1.5 ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} text-left border transition-colors ${
     isEnabled 
-      ? "bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700 hover:border-slate-400 cursor-pointer" 
-      : "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed"
+      ? `${rpeTokens.colors.background.surface} ${rpeTokens.colors.borders.default} ${rpeTokens.colors.text.accent} hover:bg-slate-700 hover:border-slate-500 cursor-pointer` 
+      : `${rpeTokens.colors.background.input} border-transparent ${rpeTokens.colors.text.muted} cursor-not-allowed`
   }`;
 
   return (
-    <div className="mt-6 pt-4 border-t border-slate-800">
-      <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Export & Reports</h3>
+    <div className={`mt-6 pt-4 border-t ${rpeTokens.colors.borders.divider}`}>
+      <h3 className={`${rpeTokens.typography.heading} mb-3`}>Export & Reports</h3>
       <div className="flex flex-col gap-2">
         <button 
           className={buttonClass} 

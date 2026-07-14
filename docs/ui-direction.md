@@ -14,3 +14,6 @@
 2. **Center (Viewport)**: High-performance 3D area, central focus of the app.
 3. **Right Panel (Command & Control)**: Run settings, dynamic results, upgrade toggles, and total cost logic.
 4. **Bottom Panel (Timeline)**: A granular slider/timeline tracking seconds of structural integrity before and during collapse.
+
+---
+**Implementation Note (Phase 1.5):** The UI tokens (`src/lib/ui/tokens.ts`) and layout structure described above have been implemented in the React components. However, advanced visualization features like dynamic stress heatmaps, accurate physics deformations, and fully interactive material catalogs remain future design targets.

@@ -6,12 +6,13 @@ import RightPanel from "@/components/RightPanel";
 import Viewport3D from "@/components/Viewport3D";
 import BottomTimeline from "@/components/BottomTimeline";
 import { useDemoModel } from "@/hooks/useDemoModel";
+import { rpeTokens } from "@/lib/ui/tokens";
 
 export default function Home() {
   const modelData = useDemoModel();
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-900 text-slate-200">
+    <div className={`flex flex-col h-screen overflow-hidden ${rpeTokens.colors.background.main} ${rpeTokens.colors.text.primary}`}>
       <TopBar 
         specimen={modelData.specimen} 
         activeHazard={modelData.activeHazard} 

@@ -2,45 +2,50 @@
 
 **Documented Stack:** React / Next.js, Three.js / React Three Fiber, Rapier.js / cannon-es.
 **Future Integrations:** Project Chrono, OpenSees, OpenFOAM, CalculiX, Blender, BlueQubit.
-**Current State:** Phase 1.5 (RPE Test Bench UI Refinement). Documentation and layout notes prepared for UI overhaul.
+**Current State:** Phase 1.5 (RPE Test Bench UI Refinement) UI Refactor completed.
 **Blockers:** None currently.
 
 ---
 
 ## Report for Lum / Project Owner
 
-### Kira Report #07 — FutolTech RPE
+### Kira Report #08 — FutolTech RPE
 
 ### What I changed
-- Created `docs/ui-direction.md` to define the target aesthetic ("engineering cockpit + disaster test lab + cost decision board").
-- Created `docs/rpe-test-bench-layout.md` detailing the hierarchical layout of the 4-pane technical workspace.
-- Created `design/rpe-test-bench/README.md` to establish the new design artifacts folder.
-- Created `design/rpe-test-bench/screen-notes.md` detailing the functional requirements of each planned screen.
-- Created `design/rpe-test-bench/stitch-prompts.md` providing ready-to-use prompts for Google Stitch MCP to generate the UI components.
+- Extracted design tokens to `src/lib/ui/tokens.ts` for consistent styling.
+- Refactored `TopBar`, `LeftPanel`, `RightPanel`, `BottomTimeline`, and `Viewport3D` to use `rpeTokens`.
+- Updated `ExportPanel` to use tokens and follow the visual hierarchy.
+- Updated documentation in `docs/ui-direction.md`, `docs/rpe-test-bench-layout.md`, and `design/rpe-test-bench/screen-notes.md` to clarify implemented vs future targets.
 - Ran lint and build successfully.
 
 ### Files changed
-- `docs/ui-direction.md` (New)
-- `docs/rpe-test-bench-layout.md` (New)
-- `design/rpe-test-bench/README.md` (New)
-- `design/rpe-test-bench/screen-notes.md` (New)
-- `design/rpe-test-bench/stitch-prompts.md` (New)
+- `src/lib/ui/tokens.ts` (New)
+- `src/app/page.tsx`
+- `src/components/TopBar.tsx`
+- `src/components/LeftPanel.tsx`
+- `src/components/RightPanel.tsx`
+- `src/components/BottomTimeline.tsx`
+- `src/components/Viewport3D.tsx`
+- `src/components/ExportPanel.tsx`
+- `docs/ui-direction.md`
+- `docs/rpe-test-bench-layout.md`
+- `design/rpe-test-bench/screen-notes.md`
 - Tracking docs: `STATUS_REPORT.md`, `WORKLOG.md`, `TASKS.md`, `NEXT_STEPS.md`
 
 ### Current app/repo status
-The project has successfully locked in its functional MVP and is now staged for Phase 1.5. The required aesthetic and structural UI documentation has been created, setting the stage for a UI overhaul to make the app look and feel like serious engineering software.
+The project has successfully implemented the Phase 1.5 UI Refactor. The app now visually matches the "engineering cockpit + disaster test lab + cost decision board" aesthetic, utilizing the `rpeTokens` for a consistent design language.
 
 ### What is still placeholder
-- The current Next.js UI is functional but lacks the deep "cockpit" aesthetic described in the new docs.
 - The 3D viewport displays a static conceptual house structure.
 - Physics and costing calculations are static algorithms.
 - All export buttons fire mock alerts.
+- Advanced visualization features like dynamic stress heatmaps, accurate physics deformations, and fully interactive material catalogs remain future design targets.
 
 ### Recommended next task
-Begin implementing the RPE Test Bench layout. This means updating `page.tsx`, `LeftPanel`, `RightPanel`, etc., using the newly defined UI aesthetic and layout rules.
+Implement dynamic playback logic that responds to changes in Run Settings (e.g., stopping at breaking points, custom duration).
 
 ### Questions / decisions needed
-- Would you like me to start rewriting the React components to match this new UI direction, or should we use the generated Stitch prompts to produce new mockups first?
+- Are you satisfied with the visual refactor of the RPE Test Bench? If so, shall we proceed with implementing the dynamic Run Modes (Run Until Breaking Point, etc.)?
 
 ### Test/build result
 - `npm run lint` — Passed with 0 errors, 0 warnings.
@@ -48,4 +53,4 @@ Begin implementing the RPE Test Bench layout. This means updating `page.tsx`, `L
 
 ### Commit / branch info
 - branch: main
-- uncommitted changes: Added design documentation for UI refinement.
+- uncommitted changes: UI Refactor with `rpeTokens`.

@@ -55,3 +55,6 @@
 - **Key Elements**:
   - Lineage view (A0 -> A1 -> A2 -> B0).
   - Comparison matrices (Cost vs. Resilience).
+
+---
+**Implementation Note (Phase 1.5):** The RPE Test Bench (Screen 2), Hazard Setup (Screen 3), Simulation Viewer (Screen 4), and Results (Screen 5) have been implemented as React components using the new token system. The Dashboard (Screen 1), Material Library (Screen 6), and Prototype Atlas (Screen 7) remain placeholders or mockups.

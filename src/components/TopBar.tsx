@@ -1,4 +1,5 @@
 import { Specimen, Hazards } from "@/types/rpe";
+import { rpeTokens } from "@/lib/ui/tokens";
 
 interface TopBarProps {
   specimen: Specimen | null;
@@ -30,20 +31,20 @@ export default function TopBar({
   };
 
   const buttonClass = simulationStatus === "running" 
-    ? "bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded font-medium transition-colors"
-    : "bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded font-medium transition-colors";
+    ? `${rpeTokens.colors.status.warning} hover:opacity-80 px-4 py-1.5 ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} transition-colors border`
+    : `${rpeTokens.colors.status.success} hover:opacity-80 px-4 py-1.5 ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} transition-colors border`;
 
   return (
-    <header className="h-14 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 text-white shrink-0">
+    <header className={`h-14 ${rpeTokens.colors.background.panel} border-b ${rpeTokens.colors.borders.divider} flex items-center justify-between px-6 shrink-0 z-10 ${rpeTokens.layout.shadow}`}>
       <div className="flex items-center gap-4">
-        <h1 className="font-semibold text-lg">FutolTech RPE</h1>
-        <span className="text-sm text-slate-400">
+        <h1 className={`${rpeTokens.typography.heading} text-lg`}>FutolTech RPE</h1>
+        <span className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.muted}`}>
           {specimen ? `${specimen.id} — ${specimen.name}` : "Loading..."}
         </span>
       </div>
       <div className="flex items-center gap-4">
         <select 
-          className="bg-slate-800 border border-slate-600 rounded px-3 py-1 text-sm outline-none focus:border-blue-500 disabled:opacity-50"
+          className={`${rpeTokens.colors.background.surface} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} px-3 py-1 ${rpeTokens.typography.data} ${rpeTokens.colors.text.secondary} outline-none focus:border-emerald-500/50 disabled:opacity-50`}
           value={activeHazard}
           onChange={(e) => setActiveHazard(e.target.value)}
           disabled={simulationStatus === "running"}

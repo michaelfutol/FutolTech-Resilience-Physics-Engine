@@ -47,3 +47,6 @@ A horizontal scrubber/timeline tracking the chronological progression of the sim
 - **Elapsed Time**: A running clock (e.g., 00:00 to 01:30).
 - **Sequence**: Chronological blocks representing completed events, the currently active event, and future predicted events.
 - **Failure Markers**: Distinct visual highlights (red/orange) on the timeline where thresholds are breached.
+
+---
+**Implementation Note (Phase 1.5):** The basic scaffolding and token-based styling for all 5 areas have been implemented. The timeline plays back static events, the left panel displays a static tree, the right panel controls settings, and the 3D viewport shows a static house with failure markers. Interactive dynamic dragging, physics interactions, and real-time stress values are future targets.
