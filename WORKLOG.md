@@ -1,14 +1,17 @@
 # Worklog
 
-## [2026-07-14] - Phase 1.5: Checkpoint, Audit, and Critical Bugfixes
+## [2026-07-14] - Phase 1.5: Checkpoint, Audit, and Final Warning Cleanups
 - Spawned 2 audit agents: Codebase Health Auditor and Build & Lint Validator.
 - **Found and fixed 3 critical bugs:**
-  - `LeftPanel.tsx` line 39: broken string interpolation (used `"..."` instead of `` `...` `` for template literal).
-  - `TopBar.tsx` line 47: dynamic `focus:${token}` class pattern invisible to Tailwind CSS content scanner.
-  - `RightPanel.tsx` lines 45, 61: same dynamic `focus:` prefix issue.
-- Identified 4 warnings for future work (hardcoded sim duration, CSS custom property conflicts, inline import type pattern).
+  - `LeftPanel.tsx` line 39: broken string interpolation.
+  - `TopBar.tsx` and `RightPanel.tsx`: dynamic `focus:` class pattern issues.
+- **Fixed 4 warnings:**
+  - `useDemoModel.ts`: wired `runSettings.durationSeconds` logic.
+  - `BottomTimeline.tsx`: dynamic time duration formatting.
+  - `globals.css`: stripped conflicting light-theme variables.
+  - `RightPanel.tsx`: fixed unused destructured props and inline imports.
 - Ran `npm run lint` (0 errors) and `npm run build` (compiled successfully).
-- Committed checkpoint: `95b8f52 Phase 1.5 UI refactor: apply rpeTokens to all components, fix 3 critical bugs`.
+- Committed checkpoint: `Kira Report #10: full audit, clean checkpoint`.
 
 ## [2026-07-08] - Phase 1.5: UI Token Refactor
 - Created `src/lib/ui/tokens.ts` defining the RPE visual language (dark cockpit aesthetic).

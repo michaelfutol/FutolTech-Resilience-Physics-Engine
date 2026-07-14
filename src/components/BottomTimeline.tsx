@@ -5,9 +5,10 @@ interface BottomTimelineProps {
   events: FailureEvent[];
   activeEventIndex: number;
   elapsedTime: string;
+  durationSeconds: number;
 }
 
-export default function BottomTimeline({ events, activeEventIndex, elapsedTime }: BottomTimelineProps) {
+export default function BottomTimeline({ events, activeEventIndex, elapsedTime, durationSeconds }: BottomTimelineProps) {
   
   const getEventClass = (index: number, severity: string) => {
     // If it's in the future
@@ -38,7 +39,9 @@ export default function BottomTimeline({ events, activeEventIndex, elapsedTime }
     <div className={`h-48 ${rpeTokens.colors.background.panel} border-t ${rpeTokens.colors.borders.divider} flex flex-col shrink-0`}>
       <div className={`flex items-center justify-between px-4 py-2 border-b ${rpeTokens.colors.borders.divider}`}>
         <h2 className={`${rpeTokens.typography.heading}`}>Simulation Timeline & Events</h2>
-        <div className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.muted}`}>{elapsedTime} / 00:31</div>
+        <div className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.muted}`}>
+          {elapsedTime} / {String(Math.floor(durationSeconds / 60)).padStart(2, '0')}:{String(durationSeconds % 60).padStart(2, '0')}
+        </div>
       </div>
       
       <div className="flex-1 p-4 overflow-y-auto flex gap-6">

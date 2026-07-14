@@ -46,6 +46,7 @@ export default function Home() {
         events={modelData.failureEvents} 
         activeEventIndex={modelData.activeEventIndex}
         elapsedTime={modelData.elapsedTime}
+        durationSeconds={modelData.runSettings.durationSeconds}
       />
     </div>
   );

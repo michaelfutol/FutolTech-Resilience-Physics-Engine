@@ -1,4 +1,4 @@
-import { Material, CostItem, FailureEvent, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode } from "@/types/rpe";
+import { Material, CostItem, FailureEvent, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode, SimulationRunMode } from "@/types/rpe";
 import ExportPanel from "./ExportPanel";
 import { rpeTokens } from "@/lib/ui/tokens";
 
@@ -17,7 +17,7 @@ interface RightPanelProps {
 }
 
 export default function RightPanel({ 
-  materials, costItems, simulationStatus, 
+  materials, costItems, simulationStatus,
   availableUpgrades, selectedUpgradeIds, toggleUpgrade,
   runModes, runSettings, setRunSettings, recommendation
 }: RightPanelProps) {
@@ -44,7 +44,7 @@ export default function RightPanel({
               <select 
                 className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.body} ${rpeTokens.colors.text.secondary} p-1.5 focus:border-emerald-500/50 outline-none`}
                 value={runSettings.mode}
-                onChange={(e) => setRunSettings({...runSettings, mode: e.target.value as import("@/types/rpe").SimulationRunMode})}
+                onChange={(e) => setRunSettings({...runSettings, mode: e.target.value as SimulationRunMode})}
               >
                 {runModes.map((rm) => (
                   <option key={rm.id} value={rm.id} disabled={rm.future}>

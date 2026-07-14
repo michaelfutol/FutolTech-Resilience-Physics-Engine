@@ -47,14 +47,17 @@ export function useDemoModel() {
         return prevIndex;
       });
 
-      if (currentSeconds >= 31) {
+      if (runSettings.mode === "fixed_duration" && currentSeconds >= runSettings.durationSeconds) {
+        clearInterval(interval);
+        setSimulationStatus("complete");
+      } else if (currentSeconds >= 300) { // Safety fallback for long or infinite modes
         clearInterval(interval);
         setSimulationStatus("complete");
       }
     }, 150); // Fast-forward time (150ms real = 1s simulation)
 
     return () => clearInterval(interval);
-  }, [simulationStatus, failureEvents]);
+  }, [simulationStatus, failureEvents, runSettings]);
 
   const startSimulation = () => {
     setSimulationStatus("running");
