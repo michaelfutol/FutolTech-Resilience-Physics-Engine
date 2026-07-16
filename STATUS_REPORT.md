@@ -71,10 +71,7 @@ Full coverage: project overview, tech stack, simulation flow, solver plan, mater
 | Phase 0: Repo Foundation | ✅ COMPLETE | 5/5 tasks |
 | Phase 1: Visual MVP Shell | ✅ COMPLETE | 9/9 tasks |
 | Phase 1.5: UI Refinement | ✅ COMPLETE | 5/5 tasks |
-| Phase 2: Material & Cost Library | ⬜ IN PROGRESS (Plan Created) | 0/2 tasks |
-| Phase 3: Failure Event Logic | ⬜ NOT STARTED | 0/1 tasks |
-| Phase 4: Upload Support | ⬜ NOT STARTED | 0/1 tasks |
-| Phase 5: Future Integrations | ⬜ DOCUMENTED ONLY | 0/1 tasks |
+| Phase 2: Material & Cost Library | ⬜ BLOCKED (Pending Repo Sync) | 0/2 tasks |
 
 ---
 
@@ -88,5 +85,6 @@ Full coverage: project overview, tech stack, simulation flow, solver plan, mater
 
 ### Next Action
 
-I have generated an **Implementation Plan** for Phase 2 (Material & Cost Library). 
-Please review the plan to confirm we are aligned on how the Editable Materials should work before I execute it.
+1. Verify repository sync (GitHub push) and report SHA/status to Lum.
+2. Draft an **Implementation Plan** for Phase 2 based on the 7 new locked decisions (A-G).
+3. Do not begin Phase 2 code changes until the checkpoint is confirmed.

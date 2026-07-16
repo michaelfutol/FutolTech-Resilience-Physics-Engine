@@ -26,8 +26,15 @@
 - [x] Update components to match new aesthetic.
 
 ## Phase 2: Material and Cost Library
-- [ ] Implement editable materials.
-- [ ] Implement rough costing placeholders.
+- [ ] Separate materials into Material/Product Library and Assembly Library (frame, wall, roof, floor, opening protection, vent, connection).
+- [ ] Implement Specimen Configuration assigning assemblies to A0/A1/A2.
+- [ ] Make materials editable via controlled dropdown selection from approved alternatives.
+- [ ] Implement separate quantity/unit-cost overrides for local prices.
+- [ ] Connect costing: use quantity × unit rate plus labor, installation, and waste allowance. (Fixed upgrade modifiers are temporary UI placeholders only).
+- [ ] Upgrade logic: Selecting an upgrade must automatically add or replace all affected manifest and cost items.
+- [ ] Prototyping logic: Applying upgrades must produce a derived A1 candidate with ancestry, not mutate A0.
+- [ ] Curate a small material/assembly test set relevant to Dignity Native Homes 3x3m specimen.
+- [ ] Tag unknown/unvalidated engineering properties as placeholder/unverified (no inventing values).
 
 ## Phase 3: Failure Event Logic
 - [ ] Code basic rules for likely failure points.

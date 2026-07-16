@@ -7,7 +7,7 @@ Docs and sample data only.
 Basic 3D viewport, model builder placeholders, scripted hazard animation.
 
 ## Phase 2 — Material and cost library
-Add editable materials, quantities, and rough costing.
+Separate Material/Product Library from Assembly Library. Assign assemblies to Specimen (A0/A1/A2). Make materials editable via controlled dropdowns with quantity/unit-cost overrides. Upgrades derive new candidates rather than mutating base specimens. Costing uses quantity × unit rate + labor/waste.
 
 ## Phase 3 — Failure event logic
 Basic rules for likely failure points.
