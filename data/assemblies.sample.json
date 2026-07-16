@@ -1,0 +1,428 @@
+[
+  {
+    "id": "asm-frame-25",
+    "name": "25x25mm Steel Tube Frame",
+    "category": "frame",
+    "components": [
+      {
+        "productId": "prod-tube-25",
+        "quantity": 36,
+        "unit": "length_m",
+        "wastePercent": 0.05,
+        "role": "structural members",
+        "installationNotes": "Welded joints"
+      }
+    ],
+    "allowances": {
+      "labor": 1500,
+      "equipment": 500,
+      "installation": 200
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-frame-38",
+    "name": "38x38mm Steel Tube Frame",
+    "category": "frame",
+    "components": [
+      {
+        "productId": "prod-tube-38",
+        "quantity": 36,
+        "unit": "length_m",
+        "wastePercent": 0.05,
+        "role": "structural members",
+        "installationNotes": "Welded joints"
+      }
+    ],
+    "allowances": {
+      "labor": 1800,
+      "equipment": 500,
+      "installation": 200
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-frame-bamboo-hybrid",
+    "name": "Bamboo-Steel Hybrid Frame",
+    "category": "frame",
+    "components": [
+      {
+        "productId": "prod-bamboo-steel-hybrid",
+        "quantity": 24,
+        "unit": "length_m",
+        "wastePercent": 0.1,
+        "role": "structural members",
+        "installationNotes": "Bolted connections"
+      }
+    ],
+    "allowances": {
+      "labor": 2000,
+      "equipment": 200,
+      "installation": 300
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-wall-fcb-6mm",
+    "name": "6mm FCB Wall Backing",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-fcb-6mm",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.1,
+        "role": "backing",
+        "installationNotes": "Screwed to frame"
+      }
+    ],
+    "allowances": {
+      "labor": 800,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-wall-fcb-9mm",
+    "name": "9mm FCB Wall Backing",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-fcb-9mm",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.1,
+        "role": "backing",
+        "installationNotes": "Screwed to frame"
+      }
+    ],
+    "allowances": {
+      "labor": 900,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-wall-plywood-12mm",
+    "name": "12mm Marine Plywood Wall Backing",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-plywood-12mm",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.1,
+        "role": "backing",
+        "installationNotes": "Screwed to frame"
+      }
+    ],
+    "allowances": {
+      "labor": 800,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-clad-sawali",
+    "name": "Sawali Outer Cladding",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-sawali",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.15,
+        "role": "cladding",
+        "installationNotes": "Nailed to backing"
+      }
+    ],
+    "allowances": {
+      "labor": 500,
+      "equipment": 50,
+      "installation": 50
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-clad-bamboo-slat",
+    "name": "Treated Bamboo Slats Cladding",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-bamboo-slats",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.1,
+        "role": "cladding",
+        "installationNotes": "Nailed/screwed to backing"
+      }
+    ],
+    "allowances": {
+      "labor": 700,
+      "equipment": 50,
+      "installation": 50
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-clad-native-screen",
+    "name": "Replaceable Native Screen Cladding",
+    "category": "wall",
+    "components": [
+      {
+        "productId": "prod-native-screen",
+        "quantity": 27,
+        "unit": "area_m2",
+        "wastePercent": 0.05,
+        "role": "cladding",
+        "installationNotes": "Fastened to backing"
+      }
+    ],
+    "allowances": {
+      "labor": 400,
+      "equipment": 50,
+      "installation": 50
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-roof-cgi",
+    "name": "Corrugated GI Roof",
+    "category": "roof",
+    "components": [
+      {
+        "productId": "prod-cgi",
+        "quantity": 12,
+        "unit": "area_m2",
+        "wastePercent": 0.1,
+        "role": "covering",
+        "installationNotes": "Umbrella nails"
+      }
+    ],
+    "allowances": {
+      "labor": 600,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-roof-upvc",
+    "name": "UPVC Roof",
+    "category": "roof",
+    "components": [
+      {
+        "productId": "prod-upvc",
+        "quantity": 12,
+        "unit": "area_m2",
+        "wastePercent": 0.05,
+        "role": "covering",
+        "installationNotes": "Screwed with washers"
+      }
+    ],
+    "allowances": {
+      "labor": 600,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-roof-anahaw",
+    "name": "Engineered Anahaw Roof",
+    "category": "roof",
+    "components": [
+      {
+        "productId": "prod-anahaw-roof",
+        "quantity": 12,
+        "unit": "area_m2",
+        "wastePercent": 0.15,
+        "role": "covering",
+        "installationNotes": "Tied to purlins"
+      }
+    ],
+    "allowances": {
+      "labor": 1000,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-restraint-standard",
+    "name": "Standard Fastener System",
+    "category": "restraint",
+    "components": [
+      {
+        "productId": "prod-fastener-standard",
+        "quantity": 100,
+        "unit": "piece",
+        "wastePercent": 0.1,
+        "role": "fastening",
+        "installationNotes": "Standard spacing"
+      }
+    ],
+    "allowances": {
+      "labor": 200,
+      "equipment": 50,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-restraint-strap",
+    "name": "Roof Tie-Down Straps",
+    "category": "restraint",
+    "components": [
+      {
+        "productId": "prod-tie-down-strap",
+        "quantity": 12,
+        "unit": "piece",
+        "wastePercent": 0,
+        "role": "tie_down",
+        "installationNotes": "Attached to frame and roof"
+      }
+    ],
+    "allowances": {
+      "labor": 300,
+      "equipment": 50,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-restraint-spiderweb",
+    "name": "Spiderweb Roof Restraint",
+    "category": "restraint",
+    "components": [
+      {
+        "productId": "prod-spiderweb-restraint",
+        "quantity": 1,
+        "unit": "piece",
+        "wastePercent": 0,
+        "role": "over_roof_restraint",
+        "installationNotes": "Draped and anchored"
+      }
+    ],
+    "allowances": {
+      "labor": 800,
+      "equipment": 100,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-brace-none",
+    "name": "No Diagonal Brace",
+    "category": "bracing",
+    "components": [],
+    "allowances": {
+      "labor": 0,
+      "equipment": 0,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-brace-steel",
+    "name": "Steel Diagonal Brace",
+    "category": "bracing",
+    "components": [
+      {
+        "productId": "prod-steel-brace",
+        "quantity": 8,
+        "unit": "piece",
+        "wastePercent": 0,
+        "role": "diagonal_brace",
+        "installationNotes": "Welded to corners"
+      }
+    ],
+    "allowances": {
+      "labor": 600,
+      "equipment": 200,
+      "installation": 100
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-brace-cable",
+    "name": "Tension Strap / Cable Brace",
+    "category": "bracing",
+    "components": [
+      {
+        "productId": "prod-cable-brace",
+        "quantity": 8,
+        "unit": "piece",
+        "wastePercent": 0,
+        "role": "tension_brace",
+        "installationNotes": "Tensioned via turnbuckle"
+      }
+    ],
+    "allowances": {
+      "labor": 400,
+      "equipment": 100,
+      "installation": 50
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-floor-none",
+    "name": "Slab-on-Grade (No Floor Assembly)",
+    "category": "floor",
+    "components": [],
+    "allowances": {
+      "labor": 0,
+      "equipment": 0,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-opening-none",
+    "name": "No Opening Protection",
+    "category": "opening_protection",
+    "components": [],
+    "allowances": {
+      "labor": 0,
+      "equipment": 0,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-vent-none",
+    "name": "No Baffled Vents",
+    "category": "vent",
+    "components": [],
+    "allowances": {
+      "labor": 0,
+      "equipment": 0,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  },
+  {
+    "id": "asm-conn-standard",
+    "name": "Standard Nails & Screws Connection",
+    "category": "connection",
+    "components": [
+      {
+        "productId": "prod-fastener-standard",
+        "quantity": 500,
+        "unit": "piece",
+        "wastePercent": 0.05,
+        "role": "general_connection",
+        "installationNotes": "Standard framing connections"
+      }
+    ],
+    "allowances": {
+      "labor": 500,
+      "equipment": 50,
+      "installation": 0
+    },
+    "verificationStatus": "unverified"
+  }
+]

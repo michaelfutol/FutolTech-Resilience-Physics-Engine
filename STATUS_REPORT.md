@@ -1,8 +1,9 @@
 # Status Report
 
-**Documented Stack:** React / Next.js 16, Three.js / React Three Fiber v9, Rapier.js / cannon-es.  
-**Future Integrations:** Project Chrono, OpenSees, OpenFOAM, CalculiX, Blender, BlueQubit.  
-**Current State:** Phase 1.5 COMPLETE + AUDIT CLEARED. Ready for Phase 2.  
+**Current Installed Stack:** React / Next.js 16, Three.js / React Three Fiber v9, Drei, Tailwind CSS, TypeScript.
+**Planned Visual Physics Candidates:** Rapier.js, cannon-es (not yet installed/integrated).
+**Future Solvers:** Project Chrono, OpenSees, OpenFOAM, CalculiX, Blender, BlueQubit.
+**Current State (Phase 1.5):** UI shell, scripted event playback, rule-based recommendation placeholders, static conceptual 3D structure. It is NOT yet a real force-based or deformation-based physics engine.
 **Blockers:** None.
 
 ---

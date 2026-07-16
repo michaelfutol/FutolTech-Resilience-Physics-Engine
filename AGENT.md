@@ -10,7 +10,8 @@ The project is a visual simulation and costing workspace for low-cost Filipino h
 - The project voice should be practical, engineering-aware, and honest.
 
 ## Tech Stack
-- **MVP Stack:** React / Next.js, Three.js or React Three Fiber, Rapier.js (preferred) / cannon-es. JSON sample data, scripted failure event timeline.
+- **Current Stack:** React / Next.js, Three.js / React Three Fiber, Drei, Tailwind CSS, TypeScript. JSON sample data, scripted failure event timeline.
+- **Planned Visual Physics:** Rapier.js or cannon-es (not yet installed).
 - **Future Integrations:** Project Chrono / PyChrono, OpenSees, OpenFOAM, CalculiX / Code_Aster, Blender. (Document only, do not build yet).
 
 ## Hard Rules

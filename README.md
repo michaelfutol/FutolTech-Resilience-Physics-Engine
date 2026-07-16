@@ -28,10 +28,9 @@ Create/load a 3m x 3m test house → assign materials and connections → choose
 - Costed upgrade paths based on failure points.
 - Upload support for GLB/GLTF, and later OBJ/IFC/SketchUp.
 
-## Suggested Future Tech Stack
-- **Frontend:** React / Next.js
-- **3D Viewport:** Three.js / React Three Fiber
-- **Visual Physics:** Rapier.js or cannon-es
+## Tech Stack
+- **Current Stack:** React / Next.js, Three.js / React Three Fiber, Drei, Tailwind CSS, TypeScript. (Current state is UI shell, scripted event playback, rule-based recommendation placeholders, static conceptual 3D structure. It is not yet a real force-based or deformation-based physics engine).
+- **Planned Visual Physics Candidates:** Rapier.js or cannon-es (not yet installed).
 
 **DISCLAIMER:** Conceptual simulation only. Final structural design must be verified by licensed engineering review, code-based analysis, and physical testing.
 

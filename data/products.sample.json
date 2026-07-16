@@ -1,0 +1,211 @@
+[
+  {
+    "id": "prod-tube-25",
+    "name": "25x25x1.5 mm Steel Tube",
+    "category": "steel_frame",
+    "unit": "length_m",
+    "dimensions": "25x25x1.5 mm",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-tube-38",
+    "name": "38x38x1.5 mm Steel Tube",
+    "category": "steel_frame",
+    "unit": "length_m",
+    "dimensions": "38x38x1.5 mm",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-bamboo-steel-hybrid",
+    "name": "Bamboo-Steel Hybrid Post",
+    "category": "hybrid_frame",
+    "unit": "length_m",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-fcb-6mm",
+    "name": "6 mm Fiber Cement Board",
+    "category": "board",
+    "unit": "area_m2",
+    "dimensions": "1.2x2.4 m",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-fcb-9mm",
+    "name": "9 mm Fiber Cement Board",
+    "category": "board",
+    "unit": "area_m2",
+    "dimensions": "1.2x2.4 m",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-plywood-12mm",
+    "name": "12 mm Marine Plywood",
+    "category": "board",
+    "unit": "area_m2",
+    "dimensions": "1.2x2.4 m",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-sawali",
+    "name": "Sawali Mat",
+    "category": "native_cladding",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-bamboo-slats",
+    "name": "Treated Bamboo Slats",
+    "category": "native_cladding",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-native-screen",
+    "name": "Replaceable Native Screen",
+    "category": "native_cladding",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-cgi",
+    "name": "Corrugated GI Sheet",
+    "category": "roofing",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-upvc",
+    "name": "UPVC Sheet",
+    "category": "roofing",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-anahaw-roof",
+    "name": "Engineered Anahaw",
+    "category": "roofing",
+    "unit": "area_m2",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-fastener-standard",
+    "name": "Standard Fastener",
+    "category": "hardware",
+    "unit": "piece",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-tie-down-strap",
+    "name": "Roof Tie-Down Strap",
+    "category": "hardware",
+    "unit": "piece",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-spiderweb-restraint",
+    "name": "Spiderweb Roof Restraint System",
+    "category": "hardware",
+    "unit": "piece",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-steel-brace",
+    "name": "Steel Diagonal Brace",
+    "category": "hardware",
+    "unit": "piece",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  },
+  {
+    "id": "prod-cable-brace",
+    "name": "Tension Strap / Cable Brace",
+    "category": "hardware",
+    "unit": "piece",
+    "engineeringProperties": {
+      "yieldStrengthMPa": null,
+      "tensileStrengthMPa": null,
+      "upliftResistanceKN": null,
+      "densityKgM3": null
+    }
+  }
+]

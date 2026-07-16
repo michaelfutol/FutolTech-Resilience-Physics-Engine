@@ -1,14 +1,72 @@
+export interface Product {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  dimensions?: string;
+  engineeringProperties: {
+    yieldStrengthMPa: number | null;
+    tensileStrengthMPa: number | null;
+    upliftResistanceKN: number | null;
+    densityKgM3: number | null;
+  };
+}
+
+export interface AssemblyComponent {
+  productId: string;
+  quantity: number;
+  unit: string;
+  wastePercent: number;
+  role: string;
+  installationNotes?: string;
+}
+
+export interface Assembly {
+  id: string;
+  name: string;
+  category: "frame" | "wall" | "roof" | "floor" | "opening_protection" | "vent" | "connection" | "restraint" | "bracing";
+  components: AssemblyComponent[];
+  allowances: {
+    labor: number;
+    equipment: number;
+    installation: number;
+  };
+  verificationStatus: "unverified" | "verified";
+}
+
+export interface CostRate {
+  id: string;
+  referenceId: string;
+  currency: string;
+  unitRate: number;
+  geographicArea: string;
+  effectiveDate: string;
+  sourceNote: string;
+  rateType: "library" | "supplier_quote" | "user_override";
+  confidence: "low" | "medium" | "high";
+  verificationStatus: "unverified" | "verified";
+}
+
 export interface Specimen {
   id: string;
   name: string;
-  dimensions: string;
-  frame_type: string;
-  wall_type: string;
-  roof_type: string;
-  base_type: string;
-  cladding: string;
+  parentSpecimenId: string | null;
+  appliedUpgradeIds: string[];
+  assemblySelections: Record<string, string>;
+  createdFromDraft: boolean;
+  notes: string;
+  verificationStatus: "unverified" | "verified";
+
+  // Legacy fields (to be removed in Phase 2D)
+  dimensions?: string;
+  frame_type?: string;
+  wall_type?: string;
+  roof_type?: string;
+  base_type?: string;
+  cladding?: string;
 }
 
+// Legacy Material (to be removed in Phase 2D)
 export interface Material {
   id: string;
   name: string;
