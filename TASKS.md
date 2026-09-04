@@ -3,154 +3,154 @@
 ## Phase 0: Repo Foundation
 - [x] Initial repository setup and folder structure.
 - [x] Create project documentation (README, ROADMAP, MVP scope, etc.).
-- [x] Set up sample JSON data files (`materials`, `specimens`, `hazards`).
-- [x] Add missing sample JSON data files (`failure-events`, `cost-items`).
+- [x] Set up sample JSON data files.
 - [x] Establish agent instructions and reporting formats.
 - [x] Lock a finite RPE v1.0 roadmap with explicit completion gates.
 - [x] Mirror the finite roadmap to Google Drive for durable planning continuity.
 
 ## Phase 1: Visual MVP Shell
 - [x] Initialize React / Next.js project in root.
-- [x] Build the layout shell (Top bar, Left model tree panel, Center 3D viewport, Right settings panel, Bottom timeline).
-- [x] Setup Three.js / React Three Fiber placeholder in the viewport.
-- [x] Load `Demo 01` sample from JSON into application state.
+- [x] Build the engineering-cockpit layout shell.
+- [x] Set up Three.js / React Three Fiber conceptual viewport.
+- [x] Load Demo 01 sample data into application state.
 - [x] Implement scripted Typhoon Index 300 event playback.
-- [x] Add editable upgrade placeholders and cost impact placeholders.
-- [x] Add placeholder export buttons (video, screenshots, report, cost table).
-- [x] Add simulation run-mode UI placeholder.
-- [x] Document Prototype Rebuilder roadmap and rule-based recommendation placeholder.
+- [x] Add export/run-mode/prototype-rebuilder placeholders.
 
-## Phase 1.5: UI Refinement (Test Bench)
-- [x] Document target engineering-cockpit aesthetic.
-- [x] Document detailed Test Bench layout components.
-- [x] Create design reference notes and Stitch prompts.
-- [x] Implement CSS/layout structure.
-- [x] Update components to the token-based aesthetic.
+## Phase 1.5: UI Refinement
+- [x] Document and implement token-based Test Bench visual language.
+- [x] Audit and clean the Phase 1 UI shell.
 
 ## Phase 2A: Data Spine and Integrity
 - [x] Separate Product/Material Library from Assembly Library.
 - [x] Add `CostRate` data separate from permanent product identity.
 - [x] Add Specimen Configuration with assembly selections and ancestry fields.
 - [x] Curate an initial Dignity 3×3 m product/assembly/rate dataset.
-- [x] Mark unknown/unvalidated engineering properties as null/unverified rather than inventing values.
-- [x] Add runtime catalog/reference validation.
-- [x] Harden validation for order-independent references, parent specimens, unit compatibility, category-slot compatibility, dates, negative values, and allowances.
-- [x] Add GitHub Actions CI baseline: install, lint, strict TypeScript, tests, build.
-- [x] Wire Product / Assembly / CostRate loaders into the demo data layer.
-- [x] Fix Phase 2A A0 lookup regression (`specimen-a0-dignity-3x3` vs legacy `A0`).
-- [x] Add automated catalog-validation test execution to CI.
-- [ ] Add upgrade-reference validation after upgrade schema is migrated into the Phase 2 model.
+- [x] Keep unknown/unvalidated engineering properties explicit `null` / unverified.
+- [x] Add and harden runtime catalog/reference validation.
+- [x] Add GitHub Actions CI: install, lint, strict TypeScript, tests, production build.
+- [x] Wire Product / Assembly / CostRate loaders into the application.
+- [x] Fix A0 lookup regression.
+- [x] Add automated catalog-validation tests to CI.
+- [x] Add Phase 2 `UpgradeDefinition` reference/category/readiness validation.
+- [x] Separate wall backing and outer cladding into distinct assembly slots.
 
-## Phase 2B: Costing Engine
-- [x] Implement pure `calculateAssemblyCost` function.
-- [x] Implement pure `calculateSpecimenCost` function.
+## Phase 2B: Deterministic Costing Engine
+- [x] Implement pure `calculateAssemblyCost` and `calculateSpecimenCost` functions.
 - [x] Apply material waste exactly once and only to material quantity.
-- [x] Keep labor/equipment/installation separate and traceable.
-- [x] Support library/supplier rates plus explicit user overrides without overwriting source data.
-- [x] Add deterministic costing tests.
-- [x] Run costing against the curated A0 sample in automated validation.
-- [x] Add explicit rounding policy for engineering quantities and currency totals.
-- [x] Separate wall backing and outer cladding into distinct specimen/cost layers.
-- [x] Add non-destructive local unit-rate overrides.
-- [x] Add non-destructive quantity/takeoff overrides in the costing core with validation.
-- [x] Reject missing rates, incompatible currencies, invalid quantities, duplicate quantity overrides, and overrides for unselected assemblies.
-- [x] Wire traceable Phase 2B costing results and local unit-rate overrides into the UI.
+- [x] Keep material/labor/equipment/installation separately traceable.
+- [x] Add explicit currency/money/quantity rounding policy.
+- [x] Support source rates plus non-destructive local unit-rate overrides.
+- [x] Support non-destructive quantity/takeoff overrides.
+- [x] Preserve library quantity and effective quantity separately.
+- [x] Reject missing rates, incompatible currencies, invalid/duplicate overrides, and overrides for unselected assemblies.
+- [x] Verify curated A0 itemized reconciliation in automated tests.
+- [x] Wire calculated costs and local cost context into the UI.
 
-## Phase 2C: Prototype Derivation
+## Phase 2C: Immutable Prototype Derivation
 - [x] Keep A0 immutable.
-- [x] Add temporary draft configuration state.
+- [x] Add temporary structural draft state.
 - [x] Implement assembly/substitution diff against A0.
-- [x] Add explicit `Create Candidate` action to create A1.
-- [x] Record `parentSpecimenId`, applied upgrades, and manifest differences in candidate derivation data.
+- [x] Implement deterministic assembly-backed upgrade application.
+- [x] Replace conflicting upgrade ancestry deterministically.
+- [x] Add explicit `Create Candidate` action for A1/A2.
+- [x] Record `parentSpecimenId`, applied upgrade IDs, and changed assembly manifest.
 - [x] Verify Reset restores original A0.
-- [x] Add automated immutability / derivation tests.
-- [x] Keep procurement price/quantity context separate from structural specimen ancestry.
+- [x] Keep procurement price/quantity context separate from structural ancestry.
+- [x] Persist derived candidates in a versioned browser-local workspace.
+- [x] Revalidate persisted candidates against the current immutable catalog on reload.
+- [x] Show saved candidate lineage and rejected-workspace warnings in Model Builder.
 
-## Phase 2D: Catalog / Cost UI
-- [x] Replace the primary legacy material/cost display with Product/Assembly-driven controls.
-- [x] Add assembly alternative dropdowns by compatible slot/category.
-- [ ] Add quantity override controls to the visible UI; backend support is complete and tested.
-- [x] Add unit-cost override controls with clear provenance behavior.
-- [x] Display unverified engineering/assembly properties visibly as `[Unverified]`.
-- [x] Display baseline vs draft/local-rate cost delta and itemized allowances.
-- [ ] Migrate legacy fixed UpgradeOption / UpgradeRule placeholders into the Phase 2 assembly/candidate model.
-- [ ] Retire legacy `Material`, `CostItem`, and fixed upgrade UI/data paths after migration is complete.
+## Phase 2D: Catalog / Cost / Upgrade UI
+- [x] Replace primary legacy Material/CostItem display with Product/Assembly controls.
+- [x] Add compatible assembly alternative dropdowns.
+- [x] Add visible quantity/takeoff override controls with library-vs-effective provenance.
+- [x] Add visible unit-cost override controls with provenance behavior.
+- [x] Display `[Unverified]` engineering/assembly state visibly.
+- [x] Display A0 baseline vs draft/local-context cost delta and itemized allowances.
+- [x] Replace fixed-peso upgrade UI with assembly-backed upgrade definitions.
+- [x] Show blocked `needs_definition` upgrades rather than inventing missing engineering definitions.
+- [x] Retire legacy `Material`, `CostItem`, fixed `UpgradeOption`, and `UpgradeRule` paths from active application code.
+- [x] Drive Model Builder from the same assembly selections used by costing/derivation.
 
-## Phase 2E: Phase 2 Verification
-- [x] Add unit/reference/cost/derivation tests to CI.
-- [x] Confirm deterministic calculated totals equal itemized totals for the curated A0 benchmark.
-- [x] Run lint, strict TypeScript, tests, and production build successfully in CI after the latest cost-context repair.
-- [ ] Add UI-level regression coverage for assembly selection, unit-rate override, quantity override, Reset, and Create Candidate interactions.
-- [ ] Update README and final Phase 2 checkpoint after legacy upgrade paths are retired.
-- [ ] Declare the Phase 2 exit gate passed only after the remaining UI migration and regression coverage are complete.
+## Phase 2E: Verification and Checkpoint
+- [x] Unit/reference/cost/derivation tests run in CI.
+- [x] Candidate-workspace persistence tests run in CI.
+- [x] End-to-end workflow regression: A0 → real upgrade → cost → A1 → persist → reload → revalidate.
+- [x] Lint, strict TypeScript, automated tests, and production build green at checkpoint `efcf319faaf0d4ab9832bbeb45be4cba9b6d1e75`.
+- [x] Document Blender / Unreal / solver-neutral engine-bridge architecture without making them engineering truth sources.
+- [ ] Perform manual browser visual acceptance of assembly selectors, quantity/rate overrides, upgrade Apply, Reset, Create Candidate, refresh persistence, and candidate lineage.
+- [ ] Record final Phase 2 exit checkpoint after visual acceptance.
+
+## Cross-Cutting Dependency Hygiene
+- [ ] Investigate current npm audit advisories deliberately (CI reports 1 moderate + 7 high); identify direct/transitive packages before changing dependencies.
+- [ ] Do not use `npm audit fix --force` blindly.
+- [ ] Resolve or explicitly risk-document relevant advisories before adding the first new physics dependency.
 
 ## Phase 3: Genesis Test Chamber — First Real Physics Milestone
+- [ ] Define versioned Genesis scene/wind input/result types.
 - [ ] Create semi-transparent Null House envelope as a volume/boundary reference only.
-- [ ] Add wind smoke/streamline visualization.
-- [ ] Ensure wind passes through the Null House with no false PASS result; state should be N/A because no structure exists.
+- [ ] State Null House result as **N/A**, not PASS, because no physical structure exists.
+- [ ] Add Fast Smoke / streamline wind visualization.
+- [ ] Add transparent simplified analytical wind-action calculation with stated assumptions and units.
 - [ ] Add one physical wall/panel specimen.
-- [ ] Implement transparent wind-action calculation from stated assumptions.
-- [ ] Add connection object(s) with explicit demand/capacity state.
+- [ ] Add explicit connection object(s) with demand/capacity state; unknown capacities remain unverified/null.
 - [ ] Add first breakable connection.
-- [ ] On failure, detach panel and convert it to a free rigid body/debris object.
-- [ ] Log the complete load/failure sequence.
+- [ ] Install/integrate Rapier only after dependency-audit gate.
+- [ ] On failure, detach panel and convert it to free rigid-body/debris state.
+- [ ] Log complete load → demand → threshold → release → debris sequence.
 - [ ] Add A/B comparison mode for identical hazard runs.
 
 ## Phase 4: Whole-House Hazard Expansion
 - [ ] Add complete frame/roof/wall systems.
 - [ ] Add uplift, racking, anchorage and storm-harness tests.
-- [ ] Add driven-rain visualization and ingress model.
-- [ ] Add debris profiles and secondary impact sequence.
-- [ ] Add coastal storm-surge / buoyancy / hydrodynamic modules.
-- [ ] Add historical-event profiles distinct from code speeds and RPE stress-test indices.
+- [ ] Add driven rain, debris sequence, coastal surge/buoyancy/hydrodynamics.
+- [ ] Keep historical events, code design conditions, and RPE stress indices distinct.
 
 ## Phase 5: Dignity Housing Family
-- [ ] Lock Studio Core as the minimum model and first ₱50k research target.
+- [ ] Lock Studio Core as minimum model / first ₱50k research target.
 - [ ] Add 1BR, 2BR, and 3BR controlled variants.
 - [ ] Add elevated resilient base typology.
 - [ ] Add site-screened slab/raft base typology.
-- [ ] Preserve common resilience logic across all sizes.
 
 ## Phase 6: BIM / IFC Import
-- [ ] Define supported IFC subset and import readiness report.
-- [ ] Preserve object identity, geometry, material assignment, and relationships where available.
-- [ ] Map missing simulation properties to explicit validation warnings rather than invented defaults.
-- [ ] Import and save one simple Studio or 2-storey frame as an RPE specimen.
-- [ ] Treat Blender/Bonsai as an optional authoring/inspection bridge, not an engineering-truth source.
+- [ ] Define supported IFC subset and import-readiness report.
+- [ ] Preserve identity, geometry, material assignment, and relationships where available.
+- [ ] Missing simulation properties produce warnings, never invented defaults.
+- [ ] Import one Studio or 2-storey frame as an RPE specimen.
+- [ ] Keep Blender/Bonsai as optional authoring/inspection/render bridge.
 
 ## Phase 7: Structural Solver Coupling
 - [ ] Define solver-neutral structural result schema.
 - [ ] Add OpenSees/OpenSeesPy workflow for one benchmark.
-- [ ] Add CalculiX path for selected detailed finite-element problems where appropriate.
-- [ ] Preserve solver version, idealization, boundary conditions, materials, damping, convergence, source inputs, and result hashes.
+- [ ] Add CalculiX for selected detailed finite-element problems where appropriate.
+- [ ] Preserve solver version, idealization, boundary conditions, material model, damping, convergence, inputs, and hashes.
 
 ## Phase 8: Wind CFD Coupling
 - [ ] Define CFD result mapping to RPE surfaces.
 - [ ] Add OpenFOAM workflow for one simple building.
 - [ ] Keep Fast Smoke Mode distinct from CFD Smoke Mode.
-- [ ] Compare simplified wind pressure and CFD pressure fields.
+- [ ] Compare simplified analytical pressure with CFD pressure fields.
 
 ## Phase 9: Multi-Hazard Layers
-- [ ] Add driven-rain ingress model.
-- [ ] Add debris impact model and secondary debris behavior.
-- [ ] Add flood/coastal hydrostatic, hydrodynamic, buoyancy, and saltwater-exposure layers.
-- [ ] Keep each hazard independently parameterized and traceable.
+- [ ] Driven-rain ingress.
+- [ ] Debris impact and secondary debris.
+- [ ] Flood/coastal hydrostatic, hydrodynamic, buoyancy, and saltwater exposure.
 
 ## Phase 10: Engineering Benchmark Library
-- [ ] RPE-WIN-001 — Window Assembly Extreme Wind Test.
-- [ ] RPE-RC-001 — RC Column–Footing Lateral Pull.
-- [ ] RPE-MAS-001 — 4 m × 4 m CHB Wall Strengthening Comparison.
-- [ ] RPE-RC-002 — 2-Storey RC Earthquake Response.
-- [ ] Make benchmark runs versioned, repeatable, and comparable side by side.
+- [ ] `RPE-WIN-001` — Window Assembly Extreme Wind Test.
+- [ ] `RPE-RC-001` — RC Column–Footing Lateral Pull.
+- [ ] `RPE-MAS-001` — 4 m × 4 m CHB Wall Strengthening Comparison.
+- [ ] `RPE-RC-002` — 2-Storey RC Earthquake Response.
+- [ ] Make benchmark runs versioned, repeatable, and side-by-side comparable.
 
 ## Phase 11: Physical Validation and Calibration
 - [ ] Freeze manual, solver, and RPE predictions before physical testing.
-- [ ] Attach calibrated load/displacement/test evidence to selected benchmarks when feasible.
+- [ ] Attach calibrated test evidence when feasible.
 - [ ] Record discrepancies without overwriting original predictions.
 - [ ] Calibrate only through new model/version records.
 
 ## Phase 12: RPE v1.0 Release and Freeze
-- [ ] Reproducible deployment and passing CI/test suite.
+- [ ] Reproducible deployment and green CI/test suite.
 - [ ] Stable specimen schema and migrations.
 - [ ] Supported BIM/IFC import path.
 - [ ] Deterministic costing and candidate derivation.
@@ -158,12 +158,12 @@
 - [ ] One structural-solver workflow.
 - [ ] One CFD workflow.
 - [ ] Wind and earthquake benchmark cases.
-- [ ] Result-report export with provenance and limitations.
+- [ ] Result/report export with provenance and limitations.
 - [ ] Physical-calibration interface documented and implemented.
 - [ ] Dignity Studio/1BR/2BR/3BR specimen family.
 - [ ] Declare RPE v1.0 complete and feature-freeze except defects.
 
 ## Permanent Validation Doctrine
-- [ ] For each serious benchmark: CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY.
-- [ ] Preserve discrepancies; investigate them rather than hiding or averaging them away.
-- [ ] Keep physical-test data as a separate evidence layer when future destructive tests become available.
+- [ ] For every serious benchmark: **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**.
+- [ ] Preserve discrepancies; investigate rather than hide or average them away.
+- [ ] Keep manual/code, solver, RPE physics, visualization, and physical-test evidence as distinct layers.
