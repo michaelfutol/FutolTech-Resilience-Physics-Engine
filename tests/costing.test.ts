@@ -24,7 +24,11 @@ test("assembly costing applies waste exactly once", () => {
   const result = calculateAssemblyCost(getAssembly("asm-frame-25"), products, rates);
   const component = result.components[0];
 
+  assert.equal(component.componentIndex, 0);
+  assert.equal(component.libraryQuantity, 36);
   assert.equal(component.baseQuantity, 36);
+  assert.equal(component.quantityOverrideApplied, false);
+  assert.equal(component.quantityOverrideSourceNote, null);
   assert.equal(component.wastePercent, 0.05);
   assert.equal(component.quantityWithWaste, 37.8);
   assert.equal(component.unitRate, 150);
@@ -34,6 +38,68 @@ test("assembly costing applies waste exactly once", () => {
   assert.equal(result.equipmentCost, 500);
   assert.equal(result.installationCost, 200);
   assert.equal(result.totalCost, 7870);
+});
+
+test("quantity override is non-destructive, traceable, and receives waste once", () => {
+  const assembly = getAssembly("asm-frame-25");
+  const originalQuantity = assembly.components[0].quantity;
+
+  const result = calculateAssemblyCost(assembly, products, rates, {
+    quantityOverrides: [
+      {
+        assemblyId: "asm-frame-25",
+        componentIndex: 0,
+        quantity: 40,
+        sourceNote: "Measured procurement takeoff",
+      },
+    ],
+  });
+
+  const component = result.components[0];
+  assert.equal(component.libraryQuantity, 36);
+  assert.equal(component.baseQuantity, 40);
+  assert.equal(component.quantityOverrideApplied, true);
+  assert.equal(component.quantityOverrideSourceNote, "Measured procurement takeoff");
+  assert.equal(component.quantityWithWaste, 42);
+  assert.equal(component.materialCost, 6300);
+  assert.equal(result.totalCost, 8500);
+  assert.equal(assembly.components[0].quantity, originalQuantity);
+});
+
+test("invalid quantity overrides fail loudly", () => {
+  const assembly = getAssembly("asm-frame-25");
+
+  assert.throws(
+    () =>
+      calculateAssemblyCost(assembly, products, rates, {
+        quantityOverrides: [
+          { assemblyId: assembly.id, componentIndex: 9, quantity: 40 },
+        ],
+      }),
+    /invalid component index/
+  );
+
+  assert.throws(
+    () =>
+      calculateAssemblyCost(assembly, products, rates, {
+        quantityOverrides: [
+          { assemblyId: assembly.id, componentIndex: 0, quantity: -1 },
+        ],
+      }),
+    /finite non-negative number/
+  );
+});
+
+test("specimen costing rejects quantity overrides for unselected assemblies", () => {
+  assert.throws(
+    () =>
+      calculateSpecimenCost(specimens[0], assemblies, products, rates, {
+        quantityOverrides: [
+          { assemblyId: "asm-frame-38", componentIndex: 0, quantity: 40 },
+        ],
+      }),
+    /not selected by specimen/
+  );
 });
 
 test("user rate override is non-destructive and traceable", () => {
