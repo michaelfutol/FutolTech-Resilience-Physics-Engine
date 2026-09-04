@@ -5,7 +5,12 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Box, Grid, Html, Line } from "@react-three/drei";
 
 import { Specimen, FailureEvent } from "@/types/rpe";
-import { GENESIS_SCHEMA_VERSION, type GenesisNullHouseResult } from "@/types/genesis";
+import {
+  GENESIS_SCHEMA_VERSION,
+  type GenesisNullHouseResult,
+  type GenesisPanelExperimentResult,
+} from "@/types/genesis";
+import { calculateGenesisPanelExperiment } from "@/lib/genesis/panelExperiment";
 import { rpeTokens } from "@/lib/ui/tokens";
 
 interface Viewport3DProps {
@@ -13,7 +18,7 @@ interface Viewport3DProps {
   activeFailureEvent: FailureEvent | null;
 }
 
-type ViewMode = "conceptual" | "genesis_null";
+type ViewMode = "conceptual" | "genesis_null" | "genesis_panel";
 
 const NULL_HOUSE_RESULT: GenesisNullHouseResult = {
   schemaVersion: GENESIS_SCHEMA_VERSION,
@@ -21,6 +26,12 @@ const NULL_HOUSE_RESULT: GenesisNullHouseResult = {
   structuralResult: "N/A",
   reason: "no_physical_specimen",
 };
+
+function parseInputNumber(value: string): number | null {
+  if (value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 function FastSmoke({ directionDegrees }: { directionDegrees: number }) {
   const radians = (directionDegrees * Math.PI) / 180;
@@ -78,17 +89,176 @@ function GenesisNullHouse({ directionDegrees }: { directionDegrees: number | nul
   );
 }
 
+function connectionColor(experiment: GenesisPanelExperimentResult | null): string {
+  if (!experiment || experiment.connection.state === "unverified") return "#94a3b8";
+  if (experiment.connection.state === "exceeded") return "#ef4444";
+  return "#22c55e";
+}
+
+function GenesisPanelScene({
+  widthM,
+  heightM,
+  directionDegrees,
+  experiment,
+}: {
+  widthM: number;
+  heightM: number;
+  directionDegrees: number | null;
+  experiment: GenesisPanelExperimentResult | null;
+}) {
+  const halfWidth = widthM / 2;
+  const halfHeight = heightM / 2;
+  const markerColor = connectionColor(experiment);
+
+  const forceVector = useMemo(() => {
+    if (directionDegrees === null) return null;
+    const radians = (directionDegrees * Math.PI) / 180;
+    return [
+      [0, halfHeight, 0],
+      [Math.cos(radians) * 1.8, halfHeight, Math.sin(radians) * 1.8],
+    ] as [number, number, number][];
+  }, [directionDegrees, halfHeight]);
+
+  const connectionPositions: [number, number, number][] = [
+    [0.08, 0.08, -halfWidth + 0.08],
+    [0.08, 0.08, halfWidth - 0.08],
+    [0.08, heightM - 0.08, -halfWidth + 0.08],
+    [0.08, heightM - 0.08, halfWidth - 0.08],
+  ];
+
+  return (
+    <group>
+      <GenesisNullHouse directionDegrees={directionDegrees} />
+
+      <Box args={[0.08, heightM, widthM]} position={[0, halfHeight, 0]}>
+        <meshStandardMaterial color="#64748b" transparent opacity={0.72} />
+      </Box>
+
+      {connectionPositions.map((position, index) => (
+        <Box key={index} args={[0.14, 0.14, 0.14]} position={position}>
+          <meshStandardMaterial color={markerColor} />
+        </Box>
+      ))}
+
+      {forceVector && (
+        <Line
+          points={forceVector}
+          color="#f59e0b"
+          lineWidth={2.2}
+          transparent
+          opacity={0.9}
+        />
+      )}
+
+      <Html position={[0.2, heightM + 0.2, 0]} center>
+        <div className="rounded border border-slate-600 bg-slate-950/90 px-2 py-1 text-[10px] text-slate-200 whitespace-nowrap">
+          Panel 001 · normal +X · coefficient supplied by user
+        </div>
+      </Html>
+
+      {experiment && (
+        <Html position={[0.2, halfHeight, halfWidth + 0.35]} center>
+          <div className="rounded border border-slate-600 bg-slate-950/90 px-2 py-1 text-[10px] text-slate-200 whitespace-nowrap">
+            F = {experiment.wind.panelForceN.toFixed(2)} N · demand ={" "}
+            {experiment.connection.demandN.toFixed(2)} N
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
 export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("conceptual");
   const [speedText, setSpeedText] = useState("");
   const [directionText, setDirectionText] = useState("");
+  const [airDensityText, setAirDensityText] = useState("");
+  const [panelWidthText, setPanelWidthText] = useState("");
+  const [panelHeightText, setPanelHeightText] = useState("");
+  const [pressureCoefficientText, setPressureCoefficientText] = useState("");
+  const [connectionCapacityText, setConnectionCapacityText] = useState("");
 
-  const speedKph = speedText.trim() === "" ? null : Number(speedText);
-  const directionDegrees = directionText.trim() === "" ? null : Number(directionText);
-  const validSpeed = speedKph !== null && Number.isFinite(speedKph) && speedKph >= 0;
-  const validDirection =
-    directionDegrees !== null && Number.isFinite(directionDegrees);
+  const speedKph = parseInputNumber(speedText);
+  const directionDegrees = parseInputNumber(directionText);
+  const airDensityKgPerM3 = parseInputNumber(airDensityText);
+  const panelWidthM = parseInputNumber(panelWidthText);
+  const panelHeightM = parseInputNumber(panelHeightText);
+  const pressureCoefficient = parseInputNumber(pressureCoefficientText);
+  const connectionCapacityN = parseInputNumber(connectionCapacityText);
+
+  const validSpeed = speedKph !== null && speedKph >= 0;
+  const validDirection = directionDegrees !== null;
+  const validDensity = airDensityKgPerM3 !== null && airDensityKgPerM3 > 0;
+  const validPanelWidth = panelWidthM !== null && panelWidthM > 0;
+  const validPanelHeight = panelHeightM !== null && panelHeightM > 0;
+  const validPressureCoefficient = pressureCoefficient !== null;
+  const validConnectionCapacity =
+    connectionCapacityText.trim() === "" ||
+    (connectionCapacityN !== null && connectionCapacityN >= 0);
+
   const smokeEnabled = validSpeed && validDirection;
+  const panelGeometryReady = validPanelWidth && validPanelHeight;
+  const panelExperimentReady =
+    validSpeed &&
+    validDensity &&
+    validPanelWidth &&
+    validPanelHeight &&
+    validPressureCoefficient &&
+    validConnectionCapacity;
+
+  const panelExperiment = useMemo<GenesisPanelExperimentResult | null>(() => {
+    if (
+      !panelExperimentReady ||
+      speedKph === null ||
+      airDensityKgPerM3 === null ||
+      panelWidthM === null ||
+      panelHeightM === null ||
+      pressureCoefficient === null
+    ) {
+      return null;
+    }
+
+    try {
+      return calculateGenesisPanelExperiment(
+        {
+          schemaVersion: GENESIS_SCHEMA_VERSION,
+          speedKph,
+          airDensityKgPerM3,
+          sourceNote: "Interactive Genesis Panel 001 input",
+          verificationState: "unverified",
+        },
+        {
+          id: "genesis-panel-001",
+          widthM: panelWidthM,
+          heightM: panelHeightM,
+          pressureCoefficient,
+          sourceNote: "Interactive Genesis Panel 001 input",
+          verificationState: "unverified",
+        },
+        {
+          id: "genesis-connection-001",
+          capacityN:
+            connectionCapacityText.trim() === "" ? null : connectionCapacityN,
+          sourceNote:
+            connectionCapacityText.trim() === ""
+              ? "Capacity not supplied"
+              : "Interactive Genesis Panel 001 input",
+          verificationState: "unverified",
+        },
+      );
+    } catch {
+      return null;
+    }
+  }, [
+    panelExperimentReady,
+    speedKph,
+    airDensityKgPerM3,
+    panelWidthM,
+    panelHeightM,
+    pressureCoefficient,
+    connectionCapacityText,
+    connectionCapacityN,
+  ]);
 
   const getMarkerPosition = (target: string): [number, number, number] => {
     switch (target) {
@@ -117,7 +287,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
 
-        {viewMode === "conceptual" ? (
+        {viewMode === "conceptual" && (
           <>
             <Box args={[3, 0.1, 3]} position={[0, 0, 0]}>
               <meshStandardMaterial color="#1e293b" />
@@ -147,18 +317,33 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
               </Html>
             )}
           </>
-        ) : (
+        )}
+
+        {viewMode === "genesis_null" && (
           <GenesisNullHouse
             directionDegrees={smokeEnabled ? directionDegrees : null}
           />
         )}
+
+        {viewMode === "genesis_panel" && panelGeometryReady && panelWidthM !== null && panelHeightM !== null ? (
+          <GenesisPanelScene
+            widthM={panelWidthM}
+            heightM={panelHeightM}
+            directionDegrees={smokeEnabled ? directionDegrees : null}
+            experiment={panelExperiment}
+          />
+        ) : viewMode === "genesis_panel" ? (
+          <GenesisNullHouse
+            directionDegrees={smokeEnabled ? directionDegrees : null}
+          />
+        ) : null}
 
         <Grid infiniteGrid fadeDistance={20} sectionColor="#334155" cellColor="#0f172a" />
         <OrbitControls makeDefault />
       </Canvas>
 
       <div className={`absolute top-4 left-4 ${rpeTokens.colors.background.panel} px-3 py-2 ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} ${rpeTokens.colors.text.muted} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.shadow}`}>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             className="rounded border border-slate-600 px-2 py-1 text-xs"
@@ -171,13 +356,23 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             className="rounded border border-sky-700 px-2 py-1 text-xs"
             onClick={() => setViewMode("genesis_null")}
           >
-            Genesis Null House
+            Null House
+          </button>
+          <button
+            type="button"
+            className="rounded border border-amber-700 px-2 py-1 text-xs"
+            onClick={() => setViewMode("genesis_panel")}
+          >
+            Panel 001
           </button>
         </div>
         <div className="mt-1">
-          {viewMode === "conceptual"
-            ? `Conceptual Physics Viewport — ${specimen ? specimen.name : "Loading..."}`
-            : "Genesis Test Chamber — empty envelope only"}
+          {viewMode === "conceptual" &&
+            `Conceptual Physics Viewport — ${specimen ? specimen.name : "Loading..."}`}
+          {viewMode === "genesis_null" &&
+            "Genesis Test Chamber — empty envelope only"}
+          {viewMode === "genesis_panel" &&
+            "Genesis Test Chamber — analytical Panel 001"}
         </div>
       </div>
 
@@ -216,6 +411,138 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                 ? `Visualization inputs accepted: ${speedKph} kph @ ${directionDegrees}°.`
                 : "Enter explicit speed and direction to display streamlines."}
             </div>
+          </div>
+        </div>
+      )}
+
+      {viewMode === "genesis_panel" && (
+        <div className="absolute top-4 right-4 w-72 max-h-[calc(100%-2rem)] overflow-y-auto rounded border border-slate-700 bg-slate-950/95 p-3 text-xs text-slate-200 shadow-lg">
+          <div className="font-semibold text-amber-300">Genesis Panel 001</div>
+          <p className="mt-1 text-slate-400">
+            Analytical first-panel experiment. All engineering inputs are explicit. No detachment or rigid-body physics is simulated yet.
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <label className="block text-slate-300">
+              Wind (kph)
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={speedText}
+                onChange={(event) => setSpeedText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+            <label className="block text-slate-300">
+              Direction (°)
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={directionText}
+                onChange={(event) => setDirectionText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+            <label className="block text-slate-300">
+              Air density (kg/m³)
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={airDensityText}
+                onChange={(event) => setAirDensityText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+            <label className="block text-slate-300">
+              Coefficient C
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={pressureCoefficientText}
+                onChange={(event) => setPressureCoefficientText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+            <label className="block text-slate-300">
+              Panel width (m)
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={panelWidthText}
+                onChange={(event) => setPanelWidthText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+            <label className="block text-slate-300">
+              Panel height (m)
+              <input
+                className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                inputMode="decimal"
+                value={panelHeightText}
+                onChange={(event) => setPanelHeightText(event.target.value)}
+                placeholder="required"
+              />
+            </label>
+          </div>
+
+          <label className="mt-2 block text-slate-300">
+            Equivalent connection capacity (N)
+            <input
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+              inputMode="decimal"
+              value={connectionCapacityText}
+              onChange={(event) => setConnectionCapacityText(event.target.value)}
+              placeholder="optional; blank = unverified"
+            />
+          </label>
+
+          <div className="mt-3 border-t border-slate-800 pt-2 text-slate-300">
+            {!panelExperiment && (
+              <div className="text-slate-500">
+                Enter valid wind, density, panel geometry, and coefficient inputs. Capacity may remain blank, in which case connection status stays UNVERIFIED.
+              </div>
+            )}
+
+            {panelExperiment && (
+              <div className="space-y-1">
+                <div>
+                  Area: <strong>{panelExperiment.panel.exposedAreaM2.toFixed(4)} m²</strong>
+                </div>
+                <div>
+                  Wind speed: <strong>{panelExperiment.wind.speedMps.toFixed(4)} m/s</strong>
+                </div>
+                <div>
+                  Dynamic pressure q: <strong>{panelExperiment.wind.dynamicPressurePa.toFixed(2)} Pa</strong>
+                </div>
+                <div>
+                  Signed panel force F: <strong>{panelExperiment.wind.panelForceN.toFixed(2)} N</strong>
+                </div>
+                <div>
+                  Connection demand: <strong>{panelExperiment.connection.demandN.toFixed(2)} N</strong>
+                </div>
+                <div>
+                  Capacity:{" "}
+                  <strong>
+                    {panelExperiment.connection.capacityN === null
+                      ? "UNVERIFIED"
+                      : `${panelExperiment.connection.capacityN.toFixed(2)} N`}
+                  </strong>
+                </div>
+                <div className="pt-1">
+                  State:{" "}
+                  <strong>
+                    {panelExperiment.experimentState === "threshold_exceeded"
+                      ? "THRESHOLD EXCEEDED"
+                      : panelExperiment.experimentState === "within_capacity"
+                        ? "WITHIN CAPACITY"
+                        : "UNVERIFIED CONNECTION"}
+                  </strong>
+                </div>
+                <div className="pt-1 text-[10px] text-slate-500">
+                  Evidence layer: {panelExperiment.evidenceLayer}. Threshold exceedance does not detach the panel yet; Rapier integration remains gated.
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
