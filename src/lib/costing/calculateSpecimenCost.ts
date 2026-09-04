@@ -7,6 +7,7 @@ import type {
   SpecimenCostResult,
 } from "@/types/rpe";
 import { calculateAssemblyCost } from "./calculateAssemblyCost";
+import { roundMoney } from "./rounding";
 
 interface CalculateSpecimenCostOptions {
   overrides?: CostRateOverride[];
@@ -40,24 +41,21 @@ export function calculateSpecimenCost(
     };
   });
 
-  const materialSubtotal = assemblyCosts.reduce(
-    (sum, item) => sum + item.assembly.materialSubtotal,
-    0
+  const materialSubtotal = roundMoney(
+    assemblyCosts.reduce((sum, item) => sum + item.assembly.materialSubtotal, 0)
   );
-  const laborSubtotal = assemblyCosts.reduce(
-    (sum, item) => sum + item.assembly.laborCost,
-    0
+  const laborSubtotal = roundMoney(
+    assemblyCosts.reduce((sum, item) => sum + item.assembly.laborCost, 0)
   );
-  const equipmentSubtotal = assemblyCosts.reduce(
-    (sum, item) => sum + item.assembly.equipmentCost,
-    0
+  const equipmentSubtotal = roundMoney(
+    assemblyCosts.reduce((sum, item) => sum + item.assembly.equipmentCost, 0)
   );
-  const installationSubtotal = assemblyCosts.reduce(
-    (sum, item) => sum + item.assembly.installationCost,
-    0
+  const installationSubtotal = roundMoney(
+    assemblyCosts.reduce((sum, item) => sum + item.assembly.installationCost, 0)
   );
-  const totalCost =
-    materialSubtotal + laborSubtotal + equipmentSubtotal + installationSubtotal;
+  const totalCost = roundMoney(
+    materialSubtotal + laborSubtotal + equipmentSubtotal + installationSubtotal
+  );
 
   return {
     specimenId: specimen.id,
