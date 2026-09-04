@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildGenesisEvidenceLog,
   calculateGenesisPanelExperiment,
   calculateRectangularPanelAreaM2,
 } from "../src/lib/genesis/panelExperiment";
@@ -30,7 +31,7 @@ test("rectangular panel area is explicit and rejects missing geometry assumption
   assert.throws(() => calculateRectangularPanelAreaM2(2, -1), /greater than zero/);
 });
 
-test("panel experiment records geometry, wind action, and an unverified connection separately", () => {
+test("panel experiment records geometry, wind action, provenance, and an unverified connection separately", () => {
   const result = calculateGenesisPanelExperiment(wind, panel, {
     id: "connection-001",
     capacityN: null,
@@ -44,6 +45,11 @@ test("panel experiment records geometry, wind action, and an unverified connecti
   assert.equal(result.connection.state, "unverified");
   assert.equal(result.experimentState, "unverified_connection");
   assert.equal(result.evidenceLayer, "rpe_analytical");
+  assert.equal(result.provenance.windSourceNote, "synthetic test fixture");
+  assert.equal(
+    result.provenance.connectionSourceNote,
+    "capacity intentionally not supplied",
+  );
 });
 
 test("panel experiment exposes threshold exceedance without simulating detachment", () => {
@@ -72,4 +78,40 @@ test("panel experiment remains within capacity when demand does not exceed the s
 
   assert.equal(result.connection.state, "within_capacity");
   assert.equal(result.experimentState, "within_capacity");
+});
+
+test("evidence log is deterministic and blocks release when capacity is unknown", () => {
+  const experiment = calculateGenesisPanelExperiment(wind, panel, {
+    id: "connection-001",
+    capacityN: null,
+    sourceNote: "capacity intentionally not supplied",
+    verificationState: "unverified",
+  });
+  const log = buildGenesisEvidenceLog(experiment);
+
+  assert.deepEqual(
+    log.map((event) => [event.sequence, event.eventType, event.status]),
+    [
+      [1, "wind_input", "recorded"],
+      [2, "dynamic_pressure", "recorded"],
+      [3, "panel_force", "recorded"],
+      [4, "connection_assessment", "unverified"],
+      [5, "release_gate", "blocked"],
+    ],
+  );
+  assert.match(log[4].message, /capacity is unverified/i);
+});
+
+test("threshold exceedance is logged but release remains blocked until rigid-body physics exists", () => {
+  const experiment = calculateGenesisPanelExperiment(wind, panel, {
+    id: "connection-001",
+    capacityN: 150,
+    sourceNote: "synthetic threshold fixture",
+    verificationState: "unverified",
+  });
+  const log = buildGenesisEvidenceLog(experiment);
+
+  assert.equal(log[3].status, "threshold_exceeded");
+  assert.equal(log[4].status, "blocked");
+  assert.match(log[4].message, /not simulated/i);
 });
