@@ -35,6 +35,11 @@ interface Viewport3DProps {
 
 type ViewMode = "conceptual" | "genesis_null" | "genesis_panel";
 
+type CollisionEvidenceState = {
+  inputKey: string;
+  snapshot: GenesisLiveSimulationEvidenceSnapshot | null;
+};
+
 const NULL_HOUSE_RESULT: GenesisNullHouseResult = {
   schemaVersion: GENESIS_SCHEMA_VERSION,
   evidenceLayer: "rpe_simulation",
@@ -333,7 +338,10 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const [angularXText, setAngularXText] = useState("");
   const [angularYText, setAngularYText] = useState("");
   const [angularZText, setAngularZText] = useState("");
-  const [liveEvidence, setLiveEvidence] = useState<GenesisLiveSimulationEvidenceSnapshot | null>(null);
+  const [collisionEvidenceState, setCollisionEvidenceState] = useState<CollisionEvidenceState>({
+    inputKey: "",
+    snapshot: null,
+  });
 
   const speedKph = parseInputNumber(speedText);
   const directionDegrees = parseInputNumber(directionText);
@@ -423,28 +431,58 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const panelEvidenceLog = useMemo(() => (panelExperiment ? buildGenesisEvidenceLog(panelExperiment) : []), [panelExperiment]);
   const simulationReady = releaseGate?.state === "release_ready" && releaseGate.canRelease && dynamicsGate?.state === "simulation_ready" && dynamicsGate.canSimulate;
 
-  useEffect(() => {
-    if (!releaseGate || !dynamicsGate) {
-      setLiveEvidence(null);
-      return;
-    }
+  const liveEvidenceInputKey = [
+    speedText,
+    directionText,
+    airDensityText,
+    panelWidthText,
+    panelHeightText,
+    pressureCoefficientText,
+    connectionCapacityText,
+    panelMassText,
+    gravityXText,
+    gravityYText,
+    gravityZText,
+    linearXText,
+    linearYText,
+    linearZText,
+    angularXText,
+    angularYText,
+    angularZText,
+  ].join("|");
 
+  const baseLiveEvidence = useMemo<GenesisLiveSimulationEvidenceSnapshot | null>(() => {
+    if (!releaseGate || !dynamicsGate) return null;
     try {
-      setLiveEvidence(createGenesisLiveSimulationEvidence(panelEvidenceLog, releaseGate, dynamicsGate));
+      return createGenesisLiveSimulationEvidence(panelEvidenceLog, releaseGate, dynamicsGate);
     } catch {
-      setLiveEvidence(null);
+      return null;
     }
   }, [panelEvidenceLog, releaseGate, dynamicsGate]);
 
+  const liveEvidence =
+    collisionEvidenceState.inputKey === liveEvidenceInputKey && collisionEvidenceState.snapshot
+      ? collisionEvidenceState.snapshot
+      : baseLiveEvidence;
+
   const handlePanelCollisionEnter = () => {
-    setLiveEvidence((current) => {
-      if (!current) return current;
+    if (!baseLiveEvidence) return;
+
+    setCollisionEvidenceState((current) => {
+      const startingSnapshot =
+        current.inputKey === liveEvidenceInputKey && current.snapshot
+          ? current.snapshot
+          : baseLiveEvidence;
+
       try {
-        return recordGenesisRapierCollisionEnter(current, {
-          panelId: "genesis-panel-001",
-          otherObjectId: null,
-          sourceNote: "Live Rapier onCollisionEnter callback from Genesis Panel 001; the other collider has no explicitly modeled or caller-supplied RPE object identity.",
-        });
+        return {
+          inputKey: liveEvidenceInputKey,
+          snapshot: recordGenesisRapierCollisionEnter(startingSnapshot, {
+            panelId: "genesis-panel-001",
+            otherObjectId: null,
+            sourceNote: "Live Rapier onCollisionEnter callback from Genesis Panel 001; the other collider has no explicitly modeled or caller-supplied RPE object identity.",
+          }),
+        };
       } catch {
         return current;
       }
