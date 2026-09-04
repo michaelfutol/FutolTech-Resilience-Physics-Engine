@@ -17,7 +17,9 @@
     "tests/**/*.ts",
     "src/lib/costing/**/*.ts",
     "src/lib/catalog/validateReferences.ts",
-    "src/types/rpe.ts"
+    "src/lib/genesis/**/*.ts",
+    "src/types/rpe.ts",
+    "src/types/genesis.ts"
   ],
   "exclude": ["node_modules", ".next", ".test-dist"]
 }
