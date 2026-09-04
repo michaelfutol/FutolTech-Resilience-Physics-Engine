@@ -1,47 +1,61 @@
 # Status Report
 
 **Repository:** `michaelfutol/FutolTech-Resilience-Physics-Engine`  
-**Active takeover branch:** `lum-rpe-takeover`  
-**Takeover date:** 2026-09-04  
-**Takeover base:** `694fadb53ab6bb22a73854242dea71e2df1cee7a` — Phase 2A schemas, curated JSON libraries, and validation module.
+**Active branch:** `lum-rpe-takeover`  
+**Roadmap:** finite RPE v1.0 plan locked on 2026-09-04.
 
 ## Current truth
 
 **Installed stack:** React / Next.js 16, Three.js / React Three Fiber v9, Drei, Tailwind CSS, TypeScript.  
-**Planned visual-physics candidate:** Rapier.js — not yet installed/integrated.  
-**Future engineering/physics integrations:** Project Chrono, OpenSees/OpenSeesPy, OpenFOAM, CalculiX, Blender/Bonsai, IfcOpenShell, BlueQubit.
+**Planned real-time mechanics candidate:** Rapier.js — not yet installed/integrated.  
+**Future engineering/visual bridges:** OpenSees/OpenSeesPy, OpenFOAM, CalculiX, IfcOpenShell, Blender/Bonsai. Unreal Engine is a future immersive visualization/digital-twin bridge, not an engineering-truth source and is not yet implemented.
 
-The application is currently an **engineering UI shell with scripted event playback**, rule-based recommendation placeholders, a static conceptual 3D structure, and an emerging deterministic data/costing core. It is **not yet a force-based, deformation-based, CFD, or nonlinear structural physics engine**.
+The application remains a **scripted visual simulation shell plus a now-substantial deterministic Phase 2 data/cost/prototype core**. It is not yet a force-based, CFD, nonlinear structural, or validated physical simulation engine.
 
-## Finite roadmap lock — 2026-09-04
+## Phase 2 implementation state
 
-- `ROADMAP.md` now defines a finite 12-phase path through **RPE v1.0 Release and Freeze**.
-- RPE v1.0 has explicit completion gates so the build cannot remain an endless prototype.
-- The roadmap is mirrored in Google Drive under folder `FutolTech Resilience Physics Engine (RPE)` as document `RPE v1.0 Finite Build Roadmap`.
-- GitHub remains the code and implementation source of truth. Google Drive is the durable planning/document mirror.
-- Features not required for v1.0—such as city-scale CFD, complete general-purpose FEA replacement, full fracture mechanics, quantum optimization, and every code/material/hazard combination—are explicitly deferred to v1.x/v2.0+.
+### Data spine
+- Product, Assembly, CostRate, Specimen and verification/provenance structures are active.
+- Runtime catalog validation is active and covered by automated tests.
+- Unknown engineering properties remain explicit `null`/unverified values; no defaults are invented.
+- Wall backing and outer cladding are separate costed specimen layers.
 
-## Takeover progress — 2026-09-04
+### Deterministic costing
+- Pure assembly and specimen costing functions are implemented.
+- Material quantity, waste, labor, equipment, and installation remain separately traceable.
+- Currency and engineering-quantity rounding policy prevents floating-point residue from leaking into displayed/reconciled totals.
+- Local unit-rate overrides do not mutate the library.
+- Quantity/takeoff overrides are implemented in the costing core and remain separate from structural specimen ancestry.
+- Invalid/missing rates, incompatible currency, invalid/duplicate quantities, and quantity overrides for unselected assemblies fail loudly.
+- Curated A0 total is checked by automated tests and itemized reconciliation.
 
-- Created `lum-rpe-takeover` from Phase 2A checkpoint `694fadb`.
-- Hardened runtime catalog validation:
-  - order-independent reference checks,
-  - parent-specimen validation,
-  - product/component unit compatibility,
-  - specimen-slot/assembly-category compatibility,
-  - ISO date validation,
-  - negative engineering/cost/allowance guards.
-- Added GitHub Actions CI using `npm ci`, lint, strict TypeScript, and production build.
-- Detected and repaired the stale npm lockfile instead of bypassing CI.
-- Moved CI to Node 22 to satisfy current dependency engine requirements.
-- Fixed Phase 2A baseline lookup regression: the app previously searched only for legacy specimen ID `A0` while the curated dataset uses `specimen-a0-dignity-3x3`.
-- Wired Product, Assembly, CostRate, and catalog validation loaders into `demo-data.ts` while preserving legacy Phase 1 loaders until UI migration is complete.
-- Added traceable Phase 2B costing result types.
-- Implemented pure `calculateAssemblyCost` and `calculateSpecimenCost` functions.
-- Costing keeps material, waste, labor, equipment, and installation distinct. Explicit user rate overrides are applied at calculation time and do not mutate library rates.
-- Automated costing tests and UI wiring are still pending.
+### Immutable prototype workflow
+- A0 remains immutable.
+- Temporary draft state, assembly substitution diff, Reset, and explicit Create Candidate workflow are implemented.
+- Derived candidate records preserve `parentSpecimenId`, applied upgrades and changed selections.
+- Automated tests verify A0 is not silently mutated.
+- Procurement price/quantity context is explicitly distinct from structural candidate identity.
 
-## Verified implementation state
+### UI migration
+- Product/Assembly-driven selectors now replace the primary legacy material/cost display.
+- Compatible assembly alternatives, traceable baseline-vs-draft cost delta, local unit-rate override, and `[Unverified]` labels are visible.
+- Quantity override backend exists but the visible quantity-edit control is still pending.
+- Legacy Phase 1 UpgradeOption/UpgradeRule and related Material/CostItem paths remain temporarily for scripted-demo continuity and must still be migrated/retired.
+
+## CI state
+
+The previous head failed strict TypeScript because `page.tsx` referenced the old `clearCostRateOverrides` hook name after price and quantity overrides were unified into cost context. That mismatch was repaired without discarding the new backend.
+
+Verified checkpoint `45013897736cbab0164f20974f39a826e5f706ee` passed:
+- dependency install;
+- lint;
+- strict TypeScript;
+- automated catalog/costing/immutability tests;
+- production build.
+
+Subsequent documentation-only synchronization commits should not change application behavior; final branch CI must still be checked after the documentation checkpoint.
+
+## Phase status
 
 | Area | State |
 |---|---|
@@ -49,20 +63,16 @@ The application is currently an **engineering UI shell with scripted event playb
 | Phase 1 visual MVP shell | Complete |
 | Phase 1.5 UI refinement | Complete |
 | Finite RPE v1.0 roadmap | Locked and mirrored to Drive |
-| Product / Assembly / CostRate schemas | Implemented in Phase 2A |
-| Curated products / assemblies / rates / A0 specimen data | Implemented; values remain provisional/unverified where marked |
-| Runtime catalog validation | Implemented and hardened |
-| GitHub Actions CI | Added; dependency reproducibility repair recorded |
-| Bottom-up costing core | Pure functions implemented; tests/UI integration pending |
-| Draft A0 → A1 candidate derivation | Not yet implemented |
-| Editable material/assembly UI | Not yet implemented |
-| Real wind force calculation | Not yet implemented |
-| Smoke / streamline wind visualization | Not yet implemented |
-| Breakable connections / flying debris | Not yet implemented |
-| Structural deformation solver | Not yet implemented |
-| BIM/IFC import | Not yet implemented |
-| Rain / coastal water physics | Not yet implemented |
-| External solver coupling | Not yet implemented |
+| Phase 2A data spine/integrity | Substantially complete; upgrade-reference migration remains |
+| Phase 2B deterministic costing | Core complete and tested |
+| Phase 2C immutable prototype derivation | Core complete and tested |
+| Phase 2D catalog/cost UI | Active; quantity UI + legacy upgrade migration remain |
+| Phase 2E verification | Active; core CI green, UI regression/final checkpoint remain |
+| Phase 3 Genesis Test Chamber | Not started; correctly gated behind Phase 2 |
+| BIM/IFC import | Not started |
+| Structural solver coupling | Not started |
+| OpenFOAM CFD coupling | Not started |
+| Physical validation | Future evidence/calibration track |
 
 ## Engineering doctrine
 
@@ -70,23 +80,16 @@ RPE development follows:
 
 **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**
 
-Manual/code-based calculations, conventional engineering solvers, RPE visualization/physics, and future physical tests are separate evidence layers. A visual simulation must never be presented as independent proof of structural capacity.
+Manual/code calculations, conventional engineering solvers, RPE visualization/physics, Blender/Unreal presentation layers, and future physical tests are separate evidence layers. None may silently stand in for another.
 
-## Locked RPE v1.0 phase structure
+## Immediate gated work
 
-0. Repository foundation — complete.
-1. Visual MVP / engineering cockpit — complete.
-2. Data spine, costing, and immutable prototypes — active.
-3. Genesis Test Chamber / first real mechanics.
-4. Small-house wind system.
-5. Dignity housing family: Studio, 1BR, 2BR, 3BR.
-6. BIM / IFC import pipeline.
-7. Structural solver coupling: OpenSees/OpenSeesPy, selected CalculiX.
-8. Wind CFD coupling: OpenFOAM.
-9. Multi-hazard layers: driven rain, debris, flood/coastal water.
-10. Engineering benchmark library.
-11. Physical validation and calibration.
-12. RPE v1.0 release and feature freeze.
+1. Expose tested quantity/takeoff overrides in the Phase 2 UI with clear library-vs-effective quantity provenance.
+2. Migrate legacy fixed upgrade options/rules into the Phase 2 assembly/candidate model and validate upgrade references.
+3. Add UI-level regression coverage for assembly selection, rate override, quantity override, Reset, and Create Candidate.
+4. Retire legacy Material/CostItem/Upgrade placeholder paths after equivalent Phase 2 behavior exists.
+5. Run the full CI gate and record the Phase 2 exit checkpoint.
+6. Only then begin Phase 3 Genesis Test Chamber: Null House → smoke visualization → one physical panel → calculated wind action → breakable connection → detached rigid-body debris.
 
 ## Permanent benchmark targets
 
@@ -94,22 +97,3 @@ Manual/code-based calculations, conventional engineering solvers, RPE visualizat
 - `RPE-RC-001` — RC Column–Footing Lateral Pull.
 - `RPE-MAS-001` — 4 m × 4 m CHB Wall Strengthening Comparison.
 - `RPE-RC-002` — 2-Storey RC Earthquake Response.
-
-## Immediate roadmap
-
-1. Add automated catalog and costing tests and make them part of CI.
-2. Run the curated A0 specimen through the deterministic cost engine and verify itemized totals.
-3. Implement immutable draft-candidate workflow: A0 baseline → draft changes → explicit Create Candidate → A1.
-4. Retire legacy `Material` / `CostItem` UI paths after the new Product/Assembly model is wired through.
-5. Only after Phase 2 passes its exit gate, build **Genesis Test Chamber**:
-   - transparent Null House envelope,
-   - smoke/streamline wind visualization,
-   - add one physical panel,
-   - calculate wind action from stated assumptions,
-   - breakable connection,
-   - detached panel becomes a free body / debris object.
-6. Expand only after the one-panel mechanics are stable and testable.
-
-## Historical checkpoint
-
-Kira Report #10 (2026-07-14) remains part of repository history as the Phase 1.5 UI/audit checkpoint. The later Phase 2A commit `694fadb` superseded its stale statement that Phase 2 was blocked pending repository synchronization.
