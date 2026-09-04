@@ -1,9 +1,20 @@
 # Worklog
 
+## [2026-09-05] - Explicit Debris Dynamics Gate + Canonical State Reconciliation
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and checked the latest branch/CI state before coding.
+- Found that canonical code/commit history had advanced beyond the written status documents: dependency remediation had already completed, Next.js and matching `eslint-config-next` were on 16.3.4, a clean dependency-audit gate had been recorded, `@react-three/rapier@2.2.0` had been installed, Panel 001/A-B comparison work had landed, and the rigid-body release eligibility gate was already implemented/tested.
+- Confirmed pre-batch branch head `c65d5b7c38442cdc307c7a34a8e4489349204e64` passed RPE CI run 117.
+- Added an explicit Genesis debris-dynamics input/result contract. Gravity vector, initial linear velocity, and initial angular velocity are nullable and provenance-bearing; no hidden motion-driving value is introduced.
+- Added `assessGenesisDebrisDynamicsGate`: debris simulation cannot bypass a non-ready analytical release gate and remains blocked until all three rigid-body initial-condition vectors are explicitly supplied.
+- Explicit zero vectors are accepted because zero is a stated input; missing vectors remain missing and block simulation.
+- Added regression tests for unresolved release, missing gravity, missing linear velocity, missing angular velocity, explicit zero-vector readiness, and rejection of non-finite vector values. Synthetic test numbers remain fixtures only and are not adopted as engineering properties.
+- Updated `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` to reconcile documentation with canonical branch truth and preserve the next Rapier gate.
+- Post-release wind force/impulse remains intentionally undefined. No panel force is converted into debris impulse without a separately declared loading/time/aerodynamic model.
+
 ## [2026-09-05] - Genesis Null House / Fast Smoke + Dependency Gate Classification
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and confirmed branch head `edab3d686351b519f8fe7d9d04dfff0c5fb1e236` had successful RPE CI run 86 before coding.
 - Classified a concrete direct dependency blocker: `next@16.2.10` is within multiple July 2026 advisory ranges; public advisories identify 16.2.11 as the minimum fixed release for the reviewed issues. Recorded the gate in `docs/DEPENDENCY_ADVISORY_CLASSIFICATION.md`.
-- Did not use `npm audit fix --force`, did not hand-edit lockfile integrity data, and did not install Rapier.
+- Did not use `npm audit fix --force`, did not hand-edit lockfile integrity data, and did not install Rapier in that batch.
 - Added a self-contained Genesis Null House mode to `Viewport3D` using only existing React Three Fiber / Drei dependencies.
 - Null House renders as a semi-transparent wireframe envelope only; no walls, roof, frame, mass, stiffness, connections, or structural capacity are assigned.
 - Exposed the typed Null House result contract in the viewport: `N/A / no_physical_specimen`, evidence layer `rpe_simulation`.
@@ -11,21 +22,17 @@
 - Fast Smoke requires user-entered wind speed and direction; both fields start blank so no hidden wind input is adopted.
 - The current speed input is visualization metadata only; it does not generate pressure, force, PASS/FAIL, solver output, CFD output, or physical-test evidence.
 - Existing conceptual scripted viewport remains available as a separate mode so prior Phase 1 playback is not silently reclassified as mechanics.
-- Updated `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` to preserve the dependency and evidence gates.
 
 ## [2026-09-04] - Genesis Analytical Wind Foundation
 - Re-read the locked roadmap, status, tasks, next steps, worklog, active branch, and latest CI before coding.
-- Confirmed canonical active branch `lum-rpe-takeover` at `bd45e6bb4e8d485a0d14b776d38af78a3221151f`; its latest CI run was green before this batch.
 - Added versioned Genesis evidence/input/result types separating manual/code, solver, RPE analytical, RPE simulation, and physical-test layers.
 - Added pure kph→m/s conversion and simplified analytical dynamic-pressure calculation `q = 0.5ρV²`.
 - Added pure panel action `F = qAC` with exposed area and pressure coefficient supplied explicitly by the caller.
 - Added deterministic connection demand/capacity assessment; missing capacity remains `null` and returns `unverified` rather than PASS.
 - Locked Null House structural result type to `N/A / no_physical_specimen`.
 - Added automated tests using synthetic arithmetic fixtures only; no test number is adopted as a real material, site, code, or connection property.
-- Updated `package.json` and `tsconfig.tests.json` so Genesis tests run in the normal CI gate.
-- Code checkpoint `effa98b6f4b40199737c148c0fbc83b62dfd2ad0` passed dependency install, lint, strict TypeScript/test compilation, automated tests, and production build in GitHub Actions run 85.
-- Rapier was intentionally not installed. Dependency-advisory classification remains a gate.
-- Manual Phase 2 browser acceptance remains outstanding and was not falsely marked complete.
+- Rapier was intentionally not installed in that batch. Dependency-advisory classification remained a gate at that time.
+- Manual Phase 2 browser acceptance remained outstanding and was not falsely marked complete.
 
 ## [2026-09-04] - Phase 2 Costing, Prototype, and CI Repair Checkpoint
 - Completed automated catalog-validation execution in CI.
@@ -37,10 +44,8 @@
 - Added quantity/takeoff override support to the costing core. Quantity overrides preserve library quantity, effective quantity, waste basis and source note, and are intentionally treated as procurement/cost context rather than structural specimen ancestry.
 - Added validation that rejects invalid/duplicate quantity overrides and quantity overrides for assemblies not selected by the specimen.
 - Kept user price and quantity context separate from structural candidate identity; cost-context changes do not rewrite A0 or change candidate ancestry.
-- Detected CI failure at branch head `6f899b68460239c70ec1e66da7f4b09d60a36555`: `page.tsx` still referenced the pre-refactor `clearCostRateOverrides` hook name.
-- Repaired the prop contract without discarding the unified cost-context backend.
-- Verified checkpoint `45013897736cbab0164f20974f39a826e5f706ee` passed dependency install, lint, strict TypeScript, automated tests, and production build.
-- Synchronized `TASKS.md`, `STATUS_REPORT.md`, and `NEXT_STEPS.md` so remaining work is explicit rather than stale.
+- Detected and repaired a CI failure caused by a stale pre-refactor hook reference rather than skipping the failed check.
+- Synchronized project control documents so remaining work is explicit rather than stale.
 
 ## [2026-09-04] - Finite RPE v1.0 Roadmap Locked
 - Replaced the open-ended roadmap with a finite 12-phase build plan and explicit RPE v1.0 completion gates.

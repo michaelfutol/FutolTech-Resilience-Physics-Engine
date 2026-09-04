@@ -4,16 +4,16 @@ The finite RPE v1.0 roadmap remains locked in `ROADMAP.md`. GitHub is the implem
 
 ## Current checkpoint
 
-Genesis now includes the tested analytical foundation plus a viewport **Null House / Fast Smoke** path. The Null House is an empty envelope only and reports `N/A / no physical specimen`. Fast Smoke is browser visualization only and is explicitly non-CFD.
+The canonical branch is past the earlier dependency gate. Next.js and matching ESLint configuration are on 16.3.4, a clean audit gate was recorded, and `@react-three/rapier@2.2.0` is installed. Genesis includes Null House, NON-CFD Fast Smoke, Panel 001 analytical wind action, equivalent connection assessment, A/B comparison, a rigid-body release eligibility gate, and an explicit debris-dynamics initial-condition gate.
 
 ## Immediate execution order
 
-1. **Dependency remediation gate:** `next@16.2.10` is in currently documented vulnerable ranges. Upgrade `next` and matching `eslint-config-next` to a compatible patched release (minimum identified fix 16.2.11), regenerate `package-lock.json`, run a fresh `npm audit`, classify remaining advisories, and run the full CI gate. Do not force-upgrade blindly.
-2. **Phase 2 browser acceptance:** in a real browser, verify assembly alternatives, quantity override, unit-rate override, derived cost, assembly-backed upgrade Apply, Reset, Create Candidate, refresh persistence, saved lineage, invalid-workspace warnings, and the new Genesis mode switch.
-3. **Final Phase 2 checkpoint:** after browser acceptance and dependency remediation, record the exit SHA.
-4. **One-panel analytical action batch:** render one physical panel and feed it only the tested analytical result `q = 0.5ρV²`, `F = qAC` with caller-supplied/provenanced density, area, and coefficient. Do not infer any material property or capacity.
-5. **Connection mechanics batch:** show demand/capacity state. Null capacity stays unverified. Only after the dependency gate is green may Rapier be introduced for released/debris rigid-body motion.
-6. **Genesis acceptance:** demonstrate `Null House → Fast Smoke → panel → calculated action → connection demand/capacity → release (when supported) → debris`, with synchronized provenance/event records.
+1. **Debris simulation wiring:** expose explicit panel mass, gravity vector, initial linear velocity, and initial angular velocity in the Genesis Panel UI. Blank values must remain missing; do not provide engineering defaults.
+2. **Rapier activation gate:** only instantiate a released dynamic panel when analytical connection release is `release_ready` and debris dynamics are `simulation_ready`.
+3. **No invented launch model:** do not convert panel force into an impulse or post-release wind force without a separately declared time/load/aerodynamic model. The first Rapier path should consume only explicit rigid-body initial conditions.
+4. **Collision/evidence sequence:** record analytical threshold, release eligibility, simulation readiness, rigid-body activation, and collision/debris events as distinct evidence stages.
+5. **Phase 2 browser acceptance:** independently verify assembly alternatives, quantity override, unit-rate override, derived cost, upgrade Apply, Reset, Create Candidate, refresh persistence, saved lineage, invalid-workspace warnings, and Genesis mode switching; then record the Phase 2 exit SHA.
+6. **Genesis acceptance:** demonstrate `Null House → Fast Smoke → panel → calculated action → connection demand/capacity → gated release → explicit rigid-body simulation`, preserving provenance and limitations.
 
 ## Evidence boundary
 

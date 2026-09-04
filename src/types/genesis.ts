@@ -9,6 +9,12 @@ export type GenesisEvidenceLayer =
 
 export type GenesisVerificationState = "verified" | "provisional" | "unverified";
 
+export interface GenesisVector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface GenesisWindInput {
   schemaVersion: typeof GENESIS_SCHEMA_VERSION;
   speedKph: number;
@@ -44,6 +50,14 @@ export interface GenesisConnectionInput {
 
 export interface GenesisRigidBodyInput {
   massKg: number | null;
+  sourceNote: string;
+  verificationState: GenesisVerificationState;
+}
+
+export interface GenesisDebrisDynamicsInput {
+  gravityMps2: GenesisVector3 | null;
+  initialLinearVelocityMps: GenesisVector3 | null;
+  initialAngularVelocityRadPerSec: GenesisVector3 | null;
   sourceNote: string;
   verificationState: GenesisVerificationState;
 }
@@ -121,6 +135,28 @@ export interface GenesisRigidBodyGateResult {
   provenance: {
     rigidBodySourceNote: string;
     rigidBodyVerificationState: GenesisVerificationState;
+  };
+}
+
+export type GenesisDebrisDynamicsGateState =
+  | "blocked_release_not_ready"
+  | "blocked_gravity_missing"
+  | "blocked_linear_velocity_missing"
+  | "blocked_angular_velocity_missing"
+  | "simulation_ready";
+
+export interface GenesisDebrisDynamicsGateResult {
+  schemaVersion: typeof GENESIS_SCHEMA_VERSION;
+  evidenceLayer: "rpe_simulation";
+  state: GenesisDebrisDynamicsGateState;
+  canSimulate: boolean;
+  gravityMps2: GenesisVector3 | null;
+  initialLinearVelocityMps: GenesisVector3 | null;
+  initialAngularVelocityRadPerSec: GenesisVector3 | null;
+  reason: string;
+  provenance: {
+    dynamicsSourceNote: string;
+    dynamicsVerificationState: GenesisVerificationState;
   };
 }
 

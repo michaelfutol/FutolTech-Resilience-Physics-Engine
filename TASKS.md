@@ -17,16 +17,16 @@
 - [x] Retire legacy Material/CostItem/fixed UpgradeRule paths from active application code.
 - [x] Automated catalog/cost/derivation/persistence/workflow tests and CI.
 - [ ] Perform manual browser visual acceptance: selectors, quantity/rate overrides, upgrade Apply, Reset, Create Candidate, refresh persistence, lineage, validation warnings.
-- [ ] Record final Phase 2 exit checkpoint after browser acceptance and dependency classification/remediation.
+- [ ] Record final Phase 2 exit checkpoint after browser acceptance.
 
 ## Cross-Cutting Dependency Hygiene
-- [x] Classify the direct Next.js advisory gate and record it in `docs/DEPENDENCY_ADVISORY_CLASSIFICATION.md`.
-- [ ] Upgrade `next` + matching `eslint-config-next` from vulnerable 16.2.10 to a compatible patched release (minimum identified fix 16.2.11).
-- [ ] Regenerate `package-lock.json`; do not hand-edit integrity data.
-- [ ] Run a fresh `npm audit` and classify any remaining direct/transitive advisories.
-- [ ] Run full CI after the dependency patch.
-- [ ] Do not use `npm audit fix --force` blindly.
-- [ ] Keep Rapier blocked until the dependency gate is green.
+- [x] Classify the direct Next.js advisory gate.
+- [x] Upgrade `next` + matching `eslint-config-next`; canonical branch is now on `16.3.4`.
+- [x] Regenerate `package-lock.json` without hand-editing integrity data.
+- [x] Run fresh dependency audit and remediate remaining advisories without force.
+- [x] Record clean dependency-audit gate.
+- [x] Install `@react-three/rapier@2.2.0` after the dependency gate became green.
+- [x] Remove one-shot dependency maintenance/install workflows after use.
 
 ## Phase 3 — Genesis Test Chamber
 - [x] Define versioned Genesis wind, panel, connection, evidence-layer and result types.
@@ -37,12 +37,17 @@
 - [x] Lock Null House result type to `N/A / no_physical_specimen`.
 - [x] Create semi-transparent Null House envelope in the viewport and expose the `N/A` result contract.
 - [x] Add Fast Smoke / streamline visualization explicitly labeled non-CFD and disabled until explicit speed/direction input is supplied.
-- [ ] Add one panel wired to the analytical wind-action result.
-- [ ] Add explicit connection object/event state in the scene.
-- [ ] Install/integrate Rapier only after dependency-audit gate.
-- [ ] On verified threshold exceedance, detach panel into rigid-body/debris state.
-- [ ] Log load → demand → threshold → release → debris sequence with provenance.
-- [ ] Add A/B comparison/replay path.
+- [x] Add one panel wired to the analytical wind-action result.
+- [x] Add explicit equivalent connection state and provenance/evidence sequence.
+- [x] Add deterministic A/B analytical comparison path and tests.
+- [x] Add deterministic rigid-body release eligibility gate and tests.
+- [x] Add explicit debris-dynamics initial-condition gate; no gravity/velocity/spin is silently invented.
+- [x] Install Rapier after dependency-audit gate.
+- [ ] Wire explicit panel mass plus gravity/initial velocity inputs into the Genesis UI.
+- [ ] On `release_ready` + `simulation_ready`, instantiate the panel as a Rapier rigid body.
+- [ ] Add collision/debris event logging while keeping RPE simulation distinct from analytical evidence.
+- [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
+- [ ] Add synchronized A/B simulation/replay path.
 
 ## Later phases
 - [ ] Whole-house hazard mechanics.
