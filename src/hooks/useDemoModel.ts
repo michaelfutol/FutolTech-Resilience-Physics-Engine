@@ -72,39 +72,50 @@ export function useDemoModel() {
   // Browser-local workspace persistence is a convenience layer only. Every loaded
   // candidate is revalidated against the current immutable catalog before use.
   useEffect(() => {
-    if (!specimen) {
-      setCandidateWorkspaceReady(true);
-      return;
-    }
+    let cancelled = false;
 
-    const parsed = parseCandidateWorkspace(
-      window.localStorage.getItem(CANDIDATE_WORKSPACE_STORAGE_KEY),
-      specimen.id
-    );
-    const warnings = [...parsed.errors];
-    const validCandidates: Specimen[] = [];
+    const hydrateWorkspace = () => {
+      if (cancelled) return;
 
-    for (const candidate of parsed.candidates) {
-      const validation = validateCatalog(
-        products,
-        assemblies,
-        costRates,
-        [specimen, candidate],
-        upgradeDefinitions
-      );
-      if (validation.valid) {
-        validCandidates.push(candidate);
-      } else {
-        warnings.push(
-          `Saved candidate ${candidate.id} rejected by current catalog: ${validation.errors.join(" | ")}`
-        );
+      if (!specimen) {
+        setCandidateWorkspaceReady(true);
+        return;
       }
-    }
 
-    setSavedCandidates(validCandidates);
-    setCandidateSequence(nextCandidateSequence(validCandidates));
-    setCandidateWorkspaceWarnings(warnings);
-    setCandidateWorkspaceReady(true);
+      const parsed = parseCandidateWorkspace(
+        window.localStorage.getItem(CANDIDATE_WORKSPACE_STORAGE_KEY),
+        specimen.id
+      );
+      const warnings = [...parsed.errors];
+      const validCandidates: Specimen[] = [];
+
+      for (const candidate of parsed.candidates) {
+        const validation = validateCatalog(
+          products,
+          assemblies,
+          costRates,
+          [specimen, candidate],
+          upgradeDefinitions
+        );
+        if (validation.valid) {
+          validCandidates.push(candidate);
+        } else {
+          warnings.push(
+            `Saved candidate ${candidate.id} rejected by current catalog: ${validation.errors.join(" | ")}`
+          );
+        }
+      }
+
+      setSavedCandidates(validCandidates);
+      setCandidateSequence(nextCandidateSequence(validCandidates));
+      setCandidateWorkspaceWarnings(warnings);
+      setCandidateWorkspaceReady(true);
+    };
+
+    queueMicrotask(hydrateWorkspace);
+    return () => {
+      cancelled = true;
+    };
   }, [specimen, products, assemblies, costRates, upgradeDefinitions]);
 
   const baselineCost = useMemo(() => {
