@@ -2,6 +2,7 @@ import specimensData from "../../data/specimens.sample.json";
 import productsData from "../../data/products.sample.json";
 import assembliesData from "../../data/assemblies.sample.json";
 import costRatesData from "../../data/cost-rates.sample.json";
+import upgradeDefinitionsData from "../../data/upgrade-definitions.sample.json";
 import materialsData from "../../data/materials.sample.json";
 import hazardsData from "../../data/hazards.sample.json";
 import failureEventsData from "../../data/failure-events.sample.json";
@@ -20,6 +21,7 @@ import type {
   Product,
   RunMode,
   Specimen,
+  UpgradeDefinition,
   UpgradeOption,
   UpgradeRule,
 } from "@/types/rpe";
@@ -29,6 +31,8 @@ export const getSpecimens = (): Specimen[] => specimensData as Specimen[];
 export const getProducts = (): Product[] => productsData as Product[];
 export const getAssemblies = (): Assembly[] => assembliesData as Assembly[];
 export const getCostRates = (): CostRate[] => costRatesData as CostRate[];
+export const getUpgradeDefinitions = (): UpgradeDefinition[] =>
+  upgradeDefinitionsData as UpgradeDefinition[];
 
 // Legacy Phase 1 data loaders retained until Phase 2D migration is complete.
 export const getMaterials = (): Material[] => materialsData as Material[];
@@ -40,7 +44,13 @@ export const getRunModes = (): RunMode[] => runModesData as RunMode[];
 export const getUpgradeRules = (): UpgradeRule[] => upgradeRulesData as UpgradeRule[];
 
 export const validateDemoCatalog = () =>
-  validateCatalog(getProducts(), getAssemblies(), getCostRates(), getSpecimens());
+  validateCatalog(
+    getProducts(),
+    getAssemblies(),
+    getCostRates(),
+    getSpecimens(),
+    getUpgradeDefinitions()
+  );
 
 // Baseline specimen helper. Prefer the explicit Dignity A0 ID and retain a
 // legacy fallback so older sample data does not silently break the UI.
