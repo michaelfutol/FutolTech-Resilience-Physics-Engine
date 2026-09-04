@@ -45,7 +45,9 @@
 - [x] Add immutable live-simulation evidence bridge for Rapier collision-enter observations with upstream activation enforcement.
 - [x] Add reusable ordered Genesis evidence-ledger UI component.
 - [x] Add and execute live-simulation-evidence regression tests in CI.
-- [ ] Wire the live evidence bridge into the actual Rapier `onCollisionEnter` callback and mount the ledger component in Genesis UI.
+- [x] Wire the live evidence bridge into the actual Rapier `onCollisionEnter` callback and mount the ledger component in Genesis UI.
+- [ ] Define an explicit provenance-bearing collision-target contract and visible caller-declared target before attempting a browser collision acceptance run.
+- [ ] Verify a genuine live collision callback in-browser and confirm changed explicit inputs do not retain stale collision observations.
 - [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
 - [ ] Add synchronized A/B simulation/replay path.
 

@@ -1,5 +1,17 @@
 # Worklog
 
+## [2026-09-05] - Genesis Live Rapier Evidence Wiring
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `172b9c014f55acf62471756f3913a816ddc504c7` had successful RPE CI run 127 before changing code.
+- Wired the existing `createGenesisLiveSimulationEvidence` / `recordGenesisRapierCollisionEnter` bridge into the actual Genesis Panel 001 Rapier path.
+- `RigidBody.onCollisionEnter` now records only a genuine Rapier callback; no collision is synthesized when Rapier reports none.
+- Mounted `GenesisEventLedgerPanel` in the Genesis UI so analytical events, release gate, dynamics gate, simulation activation, and any real collision-enter observation share one ordered reviewable ledger while retaining their evidence-layer labels.
+- Kept `otherObjectId: null` when there is no explicitly modeled/caller-supplied RPE object identity instead of manufacturing an identity.
+- No collision target, floor, obstacle, friction, restitution, impact mechanics, arbitrary launch condition, or post-release aerodynamic forcing was added merely to generate an event.
+- Initial implementation commit `97a9a07c755c7d9f8a1ed700143e124c49708d0e` failed RPE CI run 128 at lint (`react-hooks/set-state-in-effect`) because the first wiring initialized live evidence synchronously inside a React effect. TypeScript/tests/build were skipped by CI as designed; the failure was not ignored.
+- Repair commit `808b55747359aa73011c8b18c6e62e218f08f749` replaced effect-driven evidence initialization with a derived immutable base snapshot plus state only for genuine collision observations. Collision state is keyed to the current explicit Genesis input context so stale observations do not carry across changed inputs.
+- RPE CI run 129 passed dependency install, lint, strict TypeScript, automated tests, and production build.
+- Exact next gate: define an explicit provenance-bearing collision-target identity/geometry contract, add one visible caller-declared target, then perform browser acceptance of a genuine Rapier collision callback and input-context reset. Contact mechanics and post-release aerodynamics remain undefined.
+
 ## [2026-09-05] - Genesis Live Simulation Evidence Bridge
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `c5cbe59e2055d49ddcd89630f25c2cce08d7b873` had successful RPE CI run 125 before changing code.
 - Added `src/lib/genesis/liveSimulationEvidence.ts`, a pure immutable adapter for the forthcoming live Rapier callback path. It creates a snapshot from analytical evidence plus the existing release/dynamics gates and appends collision-enter observations only through the deterministic ordered event-ledger contract.
@@ -9,7 +21,7 @@
 - Added the new regression suite to the explicit `npm test` command.
 - Implementation checkpoint `d9a5f3f3f92a30dd85e4aa62577ed2102f6188ed` passed RPE CI run 126: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
 - Did not add a hidden collision target, friction, restitution, impact force/energy calculation, arbitrary launch condition, or post-release aerodynamic forcing.
-- Exact next gate is actual `Viewport3D` wiring: initialize the live evidence snapshot when existing release/dynamics gates are ready, append only real Rapier `onCollisionEnter` callbacks, and mount the reusable evidence panel.
+- Exact next gate was actual `Viewport3D` wiring: initialize the live evidence snapshot when existing release/dynamics gates are ready, append only real Rapier `onCollisionEnter` callbacks, and mount the reusable evidence panel.
 
 ## [2026-09-05] - Deterministic Genesis Simulation Event Ledger
 - Implemented a pure deterministic ordered Genesis simulation-event ledger in `src/lib/genesis/simulationEventLedger.ts`.

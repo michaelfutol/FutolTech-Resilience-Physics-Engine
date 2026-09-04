@@ -29,11 +29,13 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - Deterministic rigid-body release and debris-dynamics gates are implemented and tested. Missing mass/gravity/initial velocities block simulation; explicitly supplied zero vectors are accepted.
 - Genesis Panel 001 exposes explicit mass, gravity, initial linear velocity, and initial angular velocity. Rapier activates only when both gates are ready.
 - Analytical panel force is not converted into a launch impulse or post-release aerodynamic force.
-- A deterministic ordered simulation-event ledger preserves analytical events first, then release gate, dynamics gate, simulation activation, and optional collision-enter records as `rpe_simulation` evidence.
-- A new pure live-simulation evidence bridge now converts explicit Rapier collision-enter observations into immutable ledger snapshots. It preserves upstream activation gating and refuses collision records before activation.
-- A reusable `GenesisEventLedgerPanel` component is available to expose ordered evidence in the UI without adding engineering authority to collision observations.
-- CI explicitly runs the release-to-simulation, event-ledger, and live-simulation-evidence regression suites.
-- Implementation checkpoint `d9a5f3f3f92a30dd85e4aa62577ed2102f6188ed` passed RPE CI run 126: install, lint, strict TypeScript, automated tests, and production build all succeeded.
+- The deterministic ordered simulation-event ledger preserves analytical events first, then release gate, dynamics gate, simulation activation, and optional collision-enter records as `rpe_simulation` evidence.
+- The live evidence bridge is now wired into the actual Genesis Rapier `onCollisionEnter` path. The Genesis UI renders the combined ordered analytical→simulation ledger using `GenesisEventLedgerPanel`.
+- Live collision observations use `otherObjectId: null` when Rapier provides no explicitly modeled/caller-supplied RPE object identity; no object identity is manufactured.
+- Collision observations are reset by input-context identity when the explicit Genesis inputs change, so stale collision records are not carried into a changed run context.
+- No collision target, floor, obstacle, friction, restitution, impact mechanics, or post-release aerodynamic loading was added merely to force an event.
+- Implementation commit `97a9a07c755c7d9f8a1ed700143e124c49708d0e` failed RPE CI run 128 at lint because live-evidence state was synchronously initialized inside a React effect; TypeScript/tests/build were correctly skipped.
+- Repair commit `808b55747359aa73011c8b18c6e62e218f08f749` replaced that effect-driven state initialization with derived base evidence plus state only for genuine collision observations. RPE CI run 129 passed install, lint, strict TypeScript, automated tests, and production build.
 
 ## Engineering doctrine
 
@@ -43,4 +45,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Wire `createGenesisLiveSimulationEvidence` / `recordGenesisRapierCollisionEnter` and `GenesisEventLedgerPanel` into the live Genesis `Viewport3D` path. Record simulation activation when the existing gates are ready and append only actual Rapier `onCollisionEnter` observations against explicitly modeled objects. Do not add hidden collision geometry, contact properties, arbitrary launch conditions, impact mechanics, or post-release aerodynamics merely to produce an event. Phase 2 browser acceptance remains an independent outstanding gate.
+Define an explicit, provenance-bearing Genesis collision-target contract and add one visible caller-declared collision object only after its geometry/identity inputs are explicit. Then verify in-browser that a genuine Rapier `onCollisionEnter` observation is appended to the ledger and that changing the run inputs clears stale collision context. Do not assign hidden contact properties, friction, restitution, impact force/energy, damage, or post-release aerodynamic forcing. Phase 2 browser acceptance remains an independent outstanding gate.
