@@ -59,6 +59,7 @@ export function calculateAnalyticalPanelWind(
   panel: GenesisPanelInput,
 ): GenesisAnalyticalWindResult {
   const speedMps = kphToMps(wind.speedKph);
+  const directionDegrees = requireFinite("directionDegrees", wind.directionDegrees);
   const dynamicPressurePa = calculateDynamicPressurePa(
     speedMps,
     wind.airDensityKgPerM3,
@@ -76,6 +77,7 @@ export function calculateAnalyticalPanelWind(
     dynamicPressurePa,
     panelForceN,
     assumptions: {
+      directionDegrees,
       airDensityKgPerM3: wind.airDensityKgPerM3,
       exposedAreaM2: panel.exposedAreaM2,
       pressureCoefficient: panel.pressureCoefficient,
