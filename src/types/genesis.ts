@@ -85,4 +85,37 @@ export interface GenesisPanelExperimentResult {
   wind: GenesisAnalyticalWindResult;
   connection: GenesisConnectionAssessment;
   experimentState: GenesisPanelExperimentState;
+  provenance: {
+    windSourceNote: string;
+    panelSourceNote: string;
+    connectionSourceNote: string;
+    windVerificationState: GenesisVerificationState;
+    panelVerificationState: GenesisVerificationState;
+    connectionVerificationState: GenesisVerificationState;
+  };
+}
+
+export type GenesisEvidenceEventType =
+  | "wind_input"
+  | "dynamic_pressure"
+  | "panel_force"
+  | "connection_assessment"
+  | "release_gate";
+
+export type GenesisEvidenceEventStatus =
+  | "recorded"
+  | "unverified"
+  | "within_capacity"
+  | "threshold_exceeded"
+  | "not_triggered"
+  | "blocked";
+
+export interface GenesisEvidenceEvent {
+  sequence: number;
+  eventType: GenesisEvidenceEventType;
+  evidenceLayer: "rpe_analytical";
+  status: GenesisEvidenceEventStatus;
+  message: string;
+  values: Record<string, number | string | null>;
+  sourceNotes: string[];
 }
