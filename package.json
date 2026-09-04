@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.tests.json && node --test .test-dist/tests/catalog-validation.test.js .test-dist/tests/costing.test.js .test-dist/tests/specimen-draft.test.js"
+    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.tests.json && node --test .test-dist/tests/catalog-validation.test.js .test-dist/tests/costing.test.js .test-dist/tests/specimen-draft.test.js .test-dist/tests/candidate-workspace.test.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
