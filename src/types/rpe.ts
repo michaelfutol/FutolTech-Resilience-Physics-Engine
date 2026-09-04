@@ -129,14 +129,6 @@ export interface Specimen {
   createdFromDraft: boolean;
   notes: string;
   verificationStatus: "unverified" | "verified";
-
-  // Legacy fields (to be removed in Phase 2D)
-  dimensions?: string;
-  frame_type?: string;
-  wall_type?: string;
-  roof_type?: string;
-  base_type?: string;
-  cladding?: string;
 }
 
 export interface UpgradeAssemblyChange {
@@ -153,13 +145,6 @@ export interface UpgradeDefinition {
   status: "ready" | "needs_definition";
   assemblyChanges: UpgradeAssemblyChange[];
   notes: string[];
-}
-
-// Legacy Material (to be removed in Phase 2D)
-export interface Material {
-  id: string;
-  name: string;
-  type: string;
 }
 
 export interface HazardEffect {
@@ -181,25 +166,6 @@ export interface FailureEvent {
   target: string;
 }
 
-// Legacy fixed-cost Phase 1 upgrade types retained only until Phase 2 migration is complete.
-export interface CostItem {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  placeholderCost: number;
-  notes: string;
-}
-
-export interface UpgradeOption {
-  id: string;
-  name: string;
-  targetWeakPoint: string;
-  estimatedCostPhp: number;
-  expectedBenefit: string;
-  priority: "low" | "medium" | "high";
-}
-
 export type SimulationRunMode =
   | "fixed_duration"
   | "until_breaking_point"
@@ -212,24 +178,8 @@ export interface RunMode {
   future?: boolean;
 }
 
-export interface UpgradeRule {
-  failureType: string;
-  recommendedUpgrades: string[];
-  nextSpecimenId: string;
-}
-
 export interface RunSettings {
   mode: SimulationRunMode;
   durationSeconds: number;
   stopAtFirstCriticalFailure: boolean;
-}
-
-export interface PrototypeRecommendation {
-  currentSpecimenId: string;
-  nextSpecimenId: string;
-  reason: string;
-  recommendedUpgrades: string[];
-  estimatedAddedCostPhp: number;
-  materialFamilyChange?: boolean;
-  notes: string[];
 }
