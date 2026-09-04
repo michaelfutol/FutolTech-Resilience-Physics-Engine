@@ -13,6 +13,24 @@
 
 The application is currently an **engineering UI shell with scripted event playback**, rule-based recommendation placeholders, and a static conceptual 3D structure. It is **not yet a force-based, deformation-based, CFD, or nonlinear structural physics engine**.
 
+## Takeover progress — 2026-09-04
+
+- Created `lum-rpe-takeover` from Phase 2A checkpoint `694fadb`.
+- Hardened runtime catalog validation:
+  - order-independent reference checks,
+  - parent-specimen validation,
+  - product/component unit compatibility,
+  - specimen-slot/assembly-category compatibility,
+  - ISO date validation,
+  - negative engineering/cost/allowance guards.
+- Added GitHub Actions CI using `npm ci`, lint, strict TypeScript, and production build.
+- Fixed Phase 2A baseline lookup regression: the app previously searched only for legacy specimen ID `A0` while the curated dataset uses `specimen-a0-dignity-3x3`.
+- Wired Product, Assembly, CostRate, and catalog validation loaders into `demo-data.ts` while preserving legacy Phase 1 loaders until UI migration is complete.
+- Added traceable Phase 2B costing result types.
+- Implemented pure `calculateAssemblyCost` and `calculateSpecimenCost` functions.
+- Costing now keeps material, waste, labor, equipment, and installation distinct. Explicit user rate overrides are applied at calculation time and do not mutate library rates.
+- Automated costing tests and UI wiring are still pending.
+
 ## Verified implementation state
 
 | Area | State |
@@ -21,10 +39,10 @@ The application is currently an **engineering UI shell with scripted event playb
 | Phase 1 visual MVP shell | Complete |
 | Phase 1.5 UI refinement | Complete |
 | Product / Assembly / CostRate schemas | Implemented in Phase 2A |
-| Curated products / assemblies / rates / A0 specimen data | Implemented, values remain provisional/unverified where marked |
-| Runtime catalog validation | Implemented and hardened on `lum-rpe-takeover` |
-| GitHub Actions CI | Added on `lum-rpe-takeover` |
-| Bottom-up costing engine | Not yet implemented |
+| Curated products / assemblies / rates / A0 specimen data | Implemented; values remain provisional/unverified where marked |
+| Runtime catalog validation | Implemented and hardened |
+| GitHub Actions CI | Added; runs on takeover/default branch pushes and pull requests |
+| Bottom-up costing core | Pure functions implemented; tests/UI integration pending |
 | Draft A0 → A1 candidate derivation | Not yet implemented |
 | Editable material/assembly UI | Not yet implemented |
 | Real wind force calculation | Not yet implemented |
@@ -44,8 +62,8 @@ Manual/code-based calculations, conventional engineering solvers, RPE visualizat
 
 ## Immediate roadmap
 
-1. Finish Phase 2A data integrity and keep all unknown engineering values explicitly unverified.
-2. Implement Phase 2B pure costing functions.
+1. Add automated catalog and costing tests and make them part of CI.
+2. Run the curated A0 specimen through the deterministic cost engine and verify itemized totals.
 3. Implement immutable draft-candidate workflow: A0 baseline → draft changes → explicit Create Candidate → A1.
 4. Retire legacy `Material` / `CostItem` UI paths after the new Product/Assembly model is wired through.
 5. Build **Genesis Test Chamber** as the first real physics milestone:
