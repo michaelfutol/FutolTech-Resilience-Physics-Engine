@@ -33,6 +33,8 @@ export default function Home() {
         <RightPanel
           products={modelData.products}
           assemblies={modelData.assemblies}
+          upgradeDefinitions={modelData.upgradeDefinitions}
+          recommendedUpgradeDefinitions={modelData.recommendedUpgradeDefinitions}
           catalogValidation={modelData.catalogValidation}
           draft={modelData.draft}
           draftDiff={modelData.draftDiff}
@@ -43,6 +45,7 @@ export default function Home() {
           baselineCost={modelData.baselineCost}
           draftCost={modelData.draftCost}
           updateDraftAssembly={modelData.updateDraftAssembly}
+          applyUpgrade={modelData.applyUpgrade}
           updateCostRateOverride={modelData.updateCostRateOverride}
           updateQuantityOverride={modelData.updateQuantityOverride}
           clearCostContextOverrides={modelData.clearCostContextOverrides}
@@ -51,13 +54,9 @@ export default function Home() {
           createdCandidate={modelData.createdCandidate}
           simulationStatus={modelData.simulationStatus}
           activeFailureEvent={modelData.activeFailureEvent}
-          availableUpgrades={modelData.availableUpgrades}
-          selectedUpgradeIds={modelData.selectedUpgradeIds}
-          toggleUpgrade={modelData.toggleUpgrade}
           runModes={modelData.runModes}
           runSettings={modelData.runSettings}
           setRunSettings={modelData.setRunSettings}
-          recommendation={modelData.recommendation}
         />
       </div>
       <BottomTimeline
