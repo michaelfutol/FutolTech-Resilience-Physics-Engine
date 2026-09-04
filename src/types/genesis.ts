@@ -25,6 +25,15 @@ export interface GenesisPanelInput {
   verificationState: GenesisVerificationState;
 }
 
+export interface GenesisRectangularPanelInput {
+  id: string;
+  widthM: number;
+  heightM: number;
+  pressureCoefficient: number;
+  sourceNote: string;
+  verificationState: GenesisVerificationState;
+}
+
 export interface GenesisConnectionInput {
   id: string;
   capacityN: number | null;
@@ -56,4 +65,24 @@ export interface GenesisConnectionAssessment {
   demandN: number;
   capacityN: number | null;
   state: "unverified" | "within_capacity" | "exceeded";
+}
+
+export type GenesisPanelExperimentState =
+  | "unverified_connection"
+  | "within_capacity"
+  | "threshold_exceeded";
+
+export interface GenesisPanelExperimentResult {
+  schemaVersion: typeof GENESIS_SCHEMA_VERSION;
+  evidenceLayer: "rpe_analytical";
+  panel: {
+    id: string;
+    widthM: number;
+    heightM: number;
+    exposedAreaM2: number;
+    pressureCoefficient: number;
+  };
+  wind: GenesisAnalyticalWindResult;
+  connection: GenesisConnectionAssessment;
+  experimentState: GenesisPanelExperimentState;
 }
