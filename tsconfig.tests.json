@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "incremental": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "outDir": ".test-dist",
+    "rootDir": ".",
+    "allowJs": false,
+    "isolatedModules": false,
+    "plugins": [],
+    "types": ["node"]
+  },
+  "include": [
+    "tests/**/*.ts",
+    "src/lib/costing/**/*.ts",
+    "src/lib/catalog/validateReferences.ts",
+    "src/types/rpe.ts"
+  ],
+  "exclude": ["node_modules", ".next", ".test-dist"]
+}
