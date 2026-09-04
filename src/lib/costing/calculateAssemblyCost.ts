@@ -5,6 +5,7 @@ import type {
   CostRateOverride,
   Product,
 } from "@/types/rpe";
+import { roundMoney, roundQuantity } from "./rounding";
 
 interface CalculateAssemblyCostOptions {
   overrides?: CostRateOverride[];
@@ -64,8 +65,10 @@ export function calculateAssemblyCost(
     }
 
     const unitRate = override?.unitRate ?? selectedRate!.unitRate;
-    const quantityWithWaste = component.quantity * (1 + component.wastePercent);
-    const materialCost = quantityWithWaste * unitRate;
+    const quantityWithWaste = roundQuantity(
+      component.quantity * (1 + component.wastePercent)
+    );
+    const materialCost = roundMoney(quantityWithWaste * unitRate);
 
     return {
       productId: product.id,
@@ -84,11 +87,15 @@ export function calculateAssemblyCost(
     };
   });
 
-  const materialSubtotal = components.reduce((sum, component) => sum + component.materialCost, 0);
-  const laborCost = assembly.allowances.labor;
-  const equipmentCost = assembly.allowances.equipment;
-  const installationCost = assembly.allowances.installation;
-  const totalCost = materialSubtotal + laborCost + equipmentCost + installationCost;
+  const materialSubtotal = roundMoney(
+    components.reduce((sum, component) => sum + component.materialCost, 0)
+  );
+  const laborCost = roundMoney(assembly.allowances.labor);
+  const equipmentCost = roundMoney(assembly.allowances.equipment);
+  const installationCost = roundMoney(assembly.allowances.installation);
+  const totalCost = roundMoney(
+    materialSubtotal + laborCost + equipmentCost + installationCost
+  );
 
   return {
     assemblyId: assembly.id,
