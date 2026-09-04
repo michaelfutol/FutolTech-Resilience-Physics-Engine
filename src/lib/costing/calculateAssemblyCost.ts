@@ -1,6 +1,7 @@
 import type {
   Assembly,
   AssemblyCostResult,
+  AssemblyQuantityOverride,
   CostRate,
   CostRateOverride,
   Product,
@@ -9,6 +10,7 @@ import { roundMoney, roundQuantity } from "./rounding";
 
 interface CalculateAssemblyCostOptions {
   overrides?: CostRateOverride[];
+  quantityOverrides?: AssemblyQuantityOverride[];
   currency?: string;
 }
 
@@ -48,10 +50,38 @@ export function calculateAssemblyCost(
     (options.overrides ?? []).map((override) => [override.referenceId, override])
   );
 
+  const relevantQuantityOverrides = (options.quantityOverrides ?? []).filter(
+    (override) => override.assemblyId === assembly.id
+  );
+  const quantityOverridesByComponent = new Map<number, AssemblyQuantityOverride>();
+
+  for (const override of relevantQuantityOverrides) {
+    if (
+      !Number.isInteger(override.componentIndex) ||
+      override.componentIndex < 0 ||
+      override.componentIndex >= assembly.components.length
+    ) {
+      throw new Error(
+        `Quantity override for assembly ${assembly.id} has invalid component index ${override.componentIndex}`
+      );
+    }
+    if (!Number.isFinite(override.quantity) || override.quantity < 0) {
+      throw new Error(
+        `Quantity override for assembly ${assembly.id} component ${override.componentIndex} must be a finite non-negative number`
+      );
+    }
+    if (quantityOverridesByComponent.has(override.componentIndex)) {
+      throw new Error(
+        `Duplicate quantity override for assembly ${assembly.id} component ${override.componentIndex}`
+      );
+    }
+    quantityOverridesByComponent.set(override.componentIndex, override);
+  }
+
   const currency = options.currency ?? "PHP";
   if (!currency.trim()) throw new Error("Costing currency cannot be empty");
 
-  const components = assembly.components.map((component) => {
+  const components = assembly.components.map((component, componentIndex) => {
     const product = productsById.get(component.productId);
     if (!product) {
       throw new Error(`Assembly ${assembly.id} references missing product ${component.productId}`);
@@ -64,6 +94,7 @@ export function calculateAssemblyCost(
     }
 
     const override = overridesByReference.get(component.productId);
+    const quantityOverride = quantityOverridesByComponent.get(componentIndex);
     const selectedRate = selectRate(component.productId, rates, currency);
 
     if (!override && !selectedRate) {
@@ -86,17 +117,25 @@ export function calculateAssemblyCost(
     }
 
     const unitRate = override?.unitRate ?? selectedRate!.unitRate;
+    const libraryQuantity = component.quantity;
+    const baseQuantity = quantityOverride?.quantity ?? libraryQuantity;
     const quantityWithWaste = roundQuantity(
-      component.quantity * (1 + component.wastePercent)
+      baseQuantity * (1 + component.wastePercent)
     );
     const materialCost = roundMoney(quantityWithWaste * unitRate);
 
     return {
+      componentIndex,
       productId: product.id,
       productName: product.name,
       role: component.role,
       unit: component.unit,
-      baseQuantity: component.quantity,
+      libraryQuantity,
+      baseQuantity,
+      quantityOverrideApplied: Boolean(quantityOverride),
+      quantityOverrideSourceNote: quantityOverride
+        ? quantityOverride.sourceNote?.trim() || "User quantity override"
+        : null,
       wastePercent: component.wastePercent,
       quantityWithWaste,
       unitRate,
