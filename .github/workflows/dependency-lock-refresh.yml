@@ -25,10 +25,11 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Regenerate lockfile with patched Next.js
+      - name: Regenerate lockfile with patched framework and safe audit fixes
         run: |
-          npm install --package-lock-only --ignore-scripts --save-exact next@16.2.11
-          npm install --package-lock-only --ignore-scripts --save-dev --save-exact eslint-config-next@16.2.11
+          npm install --package-lock-only --ignore-scripts --save-exact next@16.3.4
+          npm install --package-lock-only --ignore-scripts --save-dev --save-exact eslint-config-next@16.3.4
+          npm audit fix --package-lock-only --ignore-scripts
 
       - name: Fresh npm audit classification
         run: |
@@ -67,5 +68,5 @@ jobs:
             echo "No dependency metadata changes to commit."
             exit 0
           fi
-          git commit -m "Patch Next.js dependency gate to 16.2.11"
+          git commit -m "Remediate dependency advisory gate"
           git push origin HEAD:lum-rpe-takeover
