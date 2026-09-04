@@ -1,5 +1,6 @@
 import type {
   Assembly,
+  AssemblyQuantityOverride,
   CostRateOverride,
   FailureEvent,
   Product,
@@ -32,11 +33,17 @@ interface RightPanelProps {
   draftHasChanges: boolean;
   draftHasCostOverrides: boolean;
   costRateOverrides: CostRateOverride[];
+  quantityOverrides: AssemblyQuantityOverride[];
   baselineCost: SpecimenCostResult | null;
   draftCost: SpecimenCostResult | null;
   updateDraftAssembly: (slot: string, assemblyId: string) => void;
   updateCostRateOverride: (referenceId: string, unitRate: number | null) => void;
-  clearCostRateOverrides: () => void;
+  updateQuantityOverride: (
+    assemblyId: string,
+    componentIndex: number,
+    quantity: number | null
+  ) => void;
+  clearCostContextOverrides: () => void;
   resetDraft: () => void;
   createCandidate: () => void;
   createdCandidate: Specimen | null;
@@ -69,6 +76,10 @@ function productHasUnverifiedProperties(product: Product): boolean {
   return Object.values(product.engineeringProperties).some((value) => value === null);
 }
 
+function quantityOverrideKey(assemblyId: string, componentIndex: number): string {
+  return `${assemblyId}:${componentIndex}`;
+}
+
 export default function RightPanel({
   products,
   assemblies,
@@ -78,11 +89,13 @@ export default function RightPanel({
   draftHasChanges,
   draftHasCostOverrides,
   costRateOverrides,
+  quantityOverrides,
   baselineCost,
   draftCost,
   updateDraftAssembly,
   updateCostRateOverride,
-  clearCostRateOverrides,
+  updateQuantityOverride,
+  clearCostContextOverrides,
   resetDraft,
   createCandidate,
   createdCandidate,
@@ -96,8 +109,14 @@ export default function RightPanel({
   recommendation,
 }: RightPanelProps) {
   const productsById = new Map(products.map((product) => [product.id, product]));
-  const overridesByReference = new Map(
+  const rateOverridesByReference = new Map(
     costRateOverrides.map((override) => [override.referenceId, override])
+  );
+  const quantityOverridesByComponent = new Map(
+    quantityOverrides.map((override) => [
+      quantityOverrideKey(override.assemblyId, override.componentIndex),
+      override,
+    ])
   );
   const draftCostBySlot = new Map(
     (draftCost?.assemblyCosts ?? []).map((item) => [item.slot, item.assembly])
@@ -118,7 +137,9 @@ export default function RightPanel({
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {!catalogValidation.valid && (
-          <div className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}>
+          <div
+            className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}
+          >
             <h3 className={`${rpeTokens.typography.heading} !text-red-400 mb-2`}>
               Catalog Validation Failed
             </h3>
@@ -215,7 +236,9 @@ export default function RightPanel({
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <label className={rpeTokens.typography.label}>{formatSlot(slot)}</label>
                       {selectedAssembly?.verificationStatus !== "verified" && (
-                        <span className="text-[10px] font-semibold text-amber-400">[Unverified]</span>
+                        <span className="text-[10px] font-semibold text-amber-400">
+                          [Unverified]
+                        </span>
                       )}
                     </div>
 
@@ -239,16 +262,21 @@ export default function RightPanel({
                             No material line items in this assembly.
                           </div>
                         ) : (
-                          selectedAssembly.components.map((component) => {
+                          selectedAssembly.components.map((component, componentIndex) => {
                             const product = productsById.get(component.productId);
                             const costedComponent = slotCost?.components.find(
-                              (item) => item.productId === component.productId
+                              (item) => item.componentIndex === componentIndex
                             );
-                            const override = overridesByReference.get(component.productId);
+                            const rateOverride = rateOverridesByReference.get(
+                              component.productId
+                            );
+                            const quantityOverride = quantityOverridesByComponent.get(
+                              quantityOverrideKey(selectedAssembly.id, componentIndex)
+                            );
 
                             return (
                               <div
-                                key={`${slot}-${component.productId}`}
+                                key={`${slot}-${componentIndex}-${component.productId}`}
                                 className={`text-[11px] border-t ${rpeTokens.colors.borders.divider} pt-2 first:border-t-0 first:pt-0`}
                               >
                                 <div className="flex justify-between gap-2">
@@ -260,15 +288,60 @@ export default function RightPanel({
                                   )}
                                 </div>
                                 <div className={rpeTokens.colors.text.muted}>
-                                  {component.quantity} {component.unit} + {Math.round(component.wastePercent * 100)}% waste
+                                  Library: {component.quantity} {component.unit} · effective:{" "}
+                                  {costedComponent?.baseQuantity ?? component.quantity} {component.unit}
+                                  {" "}· +{Math.round(component.wastePercent * 100)}% waste
+                                </div>
+
+                                <div className="mt-2 grid grid-cols-[1fr_92px] gap-2 items-center">
+                                  <div>
+                                    <div className="text-[10px] text-slate-500">
+                                      Quantity / takeoff override
+                                    </div>
+                                    <div className="text-[9px] text-slate-600">
+                                      {costedComponent?.quantityOverrideApplied
+                                        ? costedComponent.quantityOverrideSourceNote ??
+                                          "quantity override active"
+                                        : "library takeoff active"}
+                                    </div>
+                                  </div>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    step="0.01"
+                                    value={quantityOverride?.quantity ?? ""}
+                                    placeholder={String(component.quantity)}
+                                    onChange={(event) => {
+                                      const rawValue = event.target.value;
+                                      if (rawValue === "") {
+                                        updateQuantityOverride(
+                                          selectedAssembly.id,
+                                          componentIndex,
+                                          null
+                                        );
+                                        return;
+                                      }
+                                      const parsed = Number(rawValue);
+                                      if (Number.isFinite(parsed) && parsed >= 0) {
+                                        updateQuantityOverride(
+                                          selectedAssembly.id,
+                                          componentIndex,
+                                          parsed
+                                        );
+                                      }
+                                    }}
+                                    className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} text-xs p-1 text-right`}
+                                  />
                                 </div>
 
                                 <div className="mt-1.5 grid grid-cols-[1fr_92px] gap-2 items-center">
                                   <div>
-                                    <div className="text-[10px] text-slate-500">Local unit-rate override</div>
+                                    <div className="text-[10px] text-slate-500">
+                                      Local unit-rate override
+                                    </div>
                                     <div className="text-[9px] text-slate-600">
                                       {costedComponent?.rateType === "user_override"
-                                        ? "user override active"
+                                        ? "user price override active"
                                         : costedComponent?.sourceNote ?? "library rate"}
                                     </div>
                                   </div>
@@ -276,8 +349,10 @@ export default function RightPanel({
                                     type="number"
                                     min={0}
                                     step="0.01"
-                                    value={override?.unitRate ?? ""}
-                                    placeholder={costedComponent ? String(costedComponent.unitRate) : "rate"}
+                                    value={rateOverride?.unitRate ?? ""}
+                                    placeholder={
+                                      costedComponent ? String(costedComponent.unitRate) : "rate"
+                                    }
                                     onChange={(event) => {
                                       const rawValue = event.target.value;
                                       if (rawValue === "") {
@@ -292,15 +367,29 @@ export default function RightPanel({
                                     className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.data} text-xs p-1 text-right`}
                                   />
                                 </div>
+
+                                {costedComponent && (
+                                  <div className="mt-1.5 flex justify-between text-[10px] text-slate-500">
+                                    <span>
+                                      With waste: {costedComponent.quantityWithWaste}{" "}
+                                      {costedComponent.unit}
+                                    </span>
+                                    <span>{formatPhp(costedComponent.materialCost)}</span>
+                                  </div>
+                                )}
                               </div>
                             );
                           })
                         )}
 
                         {slotCost && (
-                          <div className={`flex justify-between text-[11px] pt-2 border-t ${rpeTokens.colors.borders.divider}`}>
+                          <div
+                            className={`flex justify-between text-[11px] pt-2 border-t ${rpeTokens.colors.borders.divider}`}
+                          >
                             <span className={rpeTokens.colors.text.muted}>Assembly total</span>
-                            <span className={rpeTokens.typography.data}>{formatPhp(slotCost.totalCost)}</span>
+                            <span className={rpeTokens.typography.data}>
+                              {formatPhp(slotCost.totalCost)}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -321,27 +410,33 @@ export default function RightPanel({
               {draftHasCostOverrides && (
                 <button
                   type="button"
-                  onClick={clearCostRateOverrides}
+                  onClick={clearCostContextOverrides}
                   className="text-[10px] text-amber-400 hover:text-amber-300"
                 >
-                  Clear price overrides
+                  Clear cost context
                 </button>
               )}
             </div>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between">
-                <span className={rpeTokens.colors.text.muted}>A0 library-rate baseline</span>
-                <span className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}>
+                <span className={rpeTokens.colors.text.muted}>A0 library baseline</span>
+                <span
+                  className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}
+                >
                   {formatPhp(baselineCost.totalCost)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className={rpeTokens.colors.text.muted}>Draft / local-rate total</span>
-                <span className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}>
+                <span className={rpeTokens.colors.text.muted}>Draft / local context</span>
+                <span
+                  className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}
+                >
                   {formatPhp(draftCost.totalCost)}
                 </span>
               </div>
-              <div className={`flex justify-between pt-1.5 border-t ${rpeTokens.colors.borders.divider}`}>
+              <div
+                className={`flex justify-between pt-1.5 border-t ${rpeTokens.colors.borders.divider}`}
+              >
                 <span className={rpeTokens.colors.text.muted}>Difference</span>
                 <span
                   className={`${rpeTokens.typography.data} ${
@@ -358,7 +453,9 @@ export default function RightPanel({
               </div>
             </div>
 
-            <div className={`mt-3 pt-3 border-t ${rpeTokens.colors.borders.divider} space-y-1 text-[11px]`}>
+            <div
+              className={`mt-3 pt-3 border-t ${rpeTokens.colors.borders.divider} space-y-1 text-[11px]`}
+            >
               <div className="flex justify-between">
                 <span className={rpeTokens.colors.text.muted}>Materials incl. waste</span>
                 <span>{formatPhp(draftCost.materialSubtotal)}</span>
@@ -378,7 +475,8 @@ export default function RightPanel({
             </div>
 
             <p className="text-[10px] text-amber-400/80 mt-3 leading-relaxed">
-              Sample rates and engineering properties marked unverified are not design or procurement truth.
+              Sample rates, takeoff quantities, and engineering properties marked unverified
+              are not design or procurement truth.
             </p>
           </div>
         )}
@@ -388,10 +486,13 @@ export default function RightPanel({
             <div
               className={`${rpeTokens.colors.background.surface} p-2 ${rpeTokens.layout.borderRadius} border ${rpeTokens.colors.borders.default}`}
             >
-              <div className={`${rpeTokens.typography.label} mb-1`}>Structural Draft Changes</div>
+              <div className={`${rpeTokens.typography.label} mb-1`}>
+                Structural Draft Changes
+              </div>
               {draftDiff.assemblyChanges.map((change) => (
                 <div key={change.slot} className="text-[11px] text-slate-400">
-                  {formatSlot(change.slot)}: {change.fromAssemblyId ?? "none"} → {change.toAssemblyId ?? "none"}
+                  {formatSlot(change.slot)}: {change.fromAssemblyId ?? "none"} →{" "}
+                  {change.toAssemblyId ?? "none"}
                 </div>
               ))}
             </div>
@@ -399,7 +500,10 @@ export default function RightPanel({
 
           {draftHasCostOverrides && (
             <div className="text-[10px] text-slate-500">
-              {costRateOverrides.length} local price override{costRateOverrides.length === 1 ? "" : "s"} active. Pricing does not alter specimen ancestry.
+              {costRateOverrides.length} price override
+              {costRateOverrides.length === 1 ? "" : "s"} and {quantityOverrides.length}{" "}
+              quantity override{quantityOverrides.length === 1 ? "" : "s"} active. Cost
+              context does not alter specimen ancestry.
             </div>
           )}
 
@@ -427,15 +531,20 @@ export default function RightPanel({
           </div>
 
           {createdCandidate && (
-            <div className={`${rpeTokens.colors.status.success} ${rpeTokens.layout.borderRadius} p-2 text-xs border`}>
-              <div className="font-semibold text-emerald-300">Candidate created in session</div>
+            <div
+              className={`${rpeTokens.colors.status.success} ${rpeTokens.layout.borderRadius} p-2 text-xs border`}
+            >
+              <div className="font-semibold text-emerald-300">
+                Candidate created in session
+              </div>
               <div className={rpeTokens.colors.text.secondary}>{createdCandidate.id}</div>
               <div className={rpeTokens.colors.text.muted}>
                 Parent: {createdCandidate.parentSpecimenId}. A0 remains unchanged.
               </div>
               {draftHasCostOverrides && (
                 <div className="text-[10px] text-slate-500 mt-1">
-                  Local price overrides remain separate from structural specimen identity.
+                  Local price/takeoff context remains separate from structural specimen
+                  identity.
                 </div>
               )}
             </div>
@@ -443,7 +552,9 @@ export default function RightPanel({
         </div>
 
         {simulationStatus === "complete" && (
-          <div className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}>
+          <div
+            className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}
+          >
             <h3 className={`${rpeTokens.typography.heading} !text-red-400 mb-2`}>
               Scripted MVP Summary
             </h3>
@@ -474,7 +585,8 @@ export default function RightPanel({
               <span className="text-[9px] text-amber-400">PLACEHOLDER</span>
             </div>
             <p className="text-[10px] text-slate-500 mb-3">
-              These fixed upgrade amounts are retained from Phase 1 and are not part of the traceable cost total above.
+              These fixed upgrade amounts are retained from Phase 1 and are not part of
+              the traceable cost total above.
             </p>
             <div className="space-y-3">
               {availableUpgrades.map((upgrade) => {
@@ -496,10 +608,14 @@ export default function RightPanel({
                         onChange={() => toggleUpgrade(upgrade.id)}
                       />
                       <div className="flex-1">
-                        <span className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}>
+                        <span
+                          className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}
+                        >
                           {upgrade.name}
                         </span>
-                        <p className={`text-xs ${rpeTokens.colors.text.muted} leading-tight mt-1`}>
+                        <p
+                          className={`text-xs ${rpeTokens.colors.text.muted} leading-tight mt-1`}
+                        >
                           {upgrade.expectedBenefit}
                         </p>
                       </div>
