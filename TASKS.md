@@ -35,10 +35,10 @@
 - [x] Mark unknown/unvalidated engineering properties as null/unverified rather than inventing values.
 - [x] Add runtime catalog/reference validation.
 - [x] Harden validation for order-independent references, parent specimens, unit compatibility, category-slot compatibility, dates, negative values, and allowances.
-- [x] Add GitHub Actions CI baseline: install, lint, TypeScript, build.
+- [x] Add GitHub Actions CI baseline: install, lint, strict TypeScript, tests, build.
 - [x] Wire Product / Assembly / CostRate loaders into the demo data layer.
 - [x] Fix Phase 2A A0 lookup regression (`specimen-a0-dignity-3x3` vs legacy `A0`).
-- [ ] Add automated catalog-validation test execution to CI.
+- [x] Add automated catalog-validation test execution to CI.
 - [ ] Add upgrade-reference validation after upgrade schema is migrated into the Phase 2 model.
 
 ## Phase 2B: Costing Engine
@@ -47,31 +47,42 @@
 - [x] Apply material waste exactly once and only to material quantity.
 - [x] Keep labor/equipment/installation separate and traceable.
 - [x] Support library/supplier rates plus explicit user overrides without overwriting source data.
-- [ ] Add deterministic costing tests.
-- [ ] Run costing against the curated A0 sample in automated validation.
-- [ ] Wire Phase 2B costing results into the UI after tests pass.
+- [x] Add deterministic costing tests.
+- [x] Run costing against the curated A0 sample in automated validation.
+- [x] Add explicit rounding policy for engineering quantities and currency totals.
+- [x] Separate wall backing and outer cladding into distinct specimen/cost layers.
+- [x] Add non-destructive local unit-rate overrides.
+- [x] Add non-destructive quantity/takeoff overrides in the costing core with validation.
+- [x] Reject missing rates, incompatible currencies, invalid quantities, duplicate quantity overrides, and overrides for unselected assemblies.
+- [x] Wire traceable Phase 2B costing results and local unit-rate overrides into the UI.
 
 ## Phase 2C: Prototype Derivation
-- [ ] Keep A0 immutable.
-- [ ] Add temporary draft configuration state.
-- [ ] Implement upgrade/substitution diff against A0.
-- [ ] Add explicit `Create Candidate` action to create A1.
-- [ ] Record `parentSpecimenId`, applied upgrades, and manifest differences.
-- [ ] Verify Reset restores original A0.
+- [x] Keep A0 immutable.
+- [x] Add temporary draft configuration state.
+- [x] Implement assembly/substitution diff against A0.
+- [x] Add explicit `Create Candidate` action to create A1.
+- [x] Record `parentSpecimenId`, applied upgrades, and manifest differences in candidate derivation data.
+- [x] Verify Reset restores original A0.
+- [x] Add automated immutability / derivation tests.
+- [x] Keep procurement price/quantity context separate from structural specimen ancestry.
 
 ## Phase 2D: Catalog / Cost UI
-- [ ] Replace legacy material manifest with Product/Assembly-driven controls.
-- [ ] Add approved alternative dropdowns.
-- [ ] Add quantity override controls.
-- [ ] Add unit-cost override controls with clear provenance labels.
-- [ ] Display unverified engineering properties visibly as `[Unverified]`.
-- [ ] Retire legacy `Material` and `CostItem` UI/data paths when migration is complete.
+- [x] Replace the primary legacy material/cost display with Product/Assembly-driven controls.
+- [x] Add assembly alternative dropdowns by compatible slot/category.
+- [ ] Add quantity override controls to the visible UI; backend support is complete and tested.
+- [x] Add unit-cost override controls with clear provenance behavior.
+- [x] Display unverified engineering/assembly properties visibly as `[Unverified]`.
+- [x] Display baseline vs draft/local-rate cost delta and itemized allowances.
+- [ ] Migrate legacy fixed UpgradeOption / UpgradeRule placeholders into the Phase 2 assembly/candidate model.
+- [ ] Retire legacy `Material`, `CostItem`, and fixed upgrade UI/data paths after migration is complete.
 
 ## Phase 2E: Phase 2 Verification
-- [ ] Add unit/reference/cost/derivation tests.
-- [ ] Confirm displayed totals equal itemized totals.
-- [ ] Run lint, strict TypeScript, tests, and production build in CI.
-- [ ] Update README/STATUS/ROADMAP and checkpoint Phase 2.
+- [x] Add unit/reference/cost/derivation tests to CI.
+- [x] Confirm deterministic calculated totals equal itemized totals for the curated A0 benchmark.
+- [x] Run lint, strict TypeScript, tests, and production build successfully in CI after the latest cost-context repair.
+- [ ] Add UI-level regression coverage for assembly selection, unit-rate override, quantity override, Reset, and Create Candidate interactions.
+- [ ] Update README and final Phase 2 checkpoint after legacy upgrade paths are retired.
+- [ ] Declare the Phase 2 exit gate passed only after the remaining UI migration and regression coverage are complete.
 
 ## Phase 3: Genesis Test Chamber — First Real Physics Milestone
 - [ ] Create semi-transparent Null House envelope as a volume/boundary reference only.
@@ -105,6 +116,7 @@
 - [ ] Preserve object identity, geometry, material assignment, and relationships where available.
 - [ ] Map missing simulation properties to explicit validation warnings rather than invented defaults.
 - [ ] Import and save one simple Studio or 2-storey frame as an RPE specimen.
+- [ ] Treat Blender/Bonsai as an optional authoring/inspection bridge, not an engineering-truth source.
 
 ## Phase 7: Structural Solver Coupling
 - [ ] Define solver-neutral structural result schema.
@@ -133,7 +145,7 @@
 
 ## Phase 11: Physical Validation and Calibration
 - [ ] Freeze manual, solver, and RPE predictions before physical testing.
-- [ ] Attach calibrated load/displacement/test evidence to selected benchmarks.
+- [ ] Attach calibrated load/displacement/test evidence to selected benchmarks when feasible.
 - [ ] Record discrepancies without overwriting original predictions.
 - [ ] Calibrate only through new model/version records.
 
@@ -147,7 +159,7 @@
 - [ ] One CFD workflow.
 - [ ] Wind and earthquake benchmark cases.
 - [ ] Result-report export with provenance and limitations.
-- [ ] Physical-calibration interface documented.
+- [ ] Physical-calibration interface documented and implemented.
 - [ ] Dignity Studio/1BR/2BR/3BR specimen family.
 - [ ] Declare RPE v1.0 complete and feature-freeze except defects.
 
