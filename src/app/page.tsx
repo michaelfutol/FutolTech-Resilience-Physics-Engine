@@ -12,11 +12,13 @@ export default function Home() {
   const modelData = useDemoModel();
 
   return (
-    <div className={`flex flex-col h-screen overflow-hidden ${rpeTokens.colors.background.main} ${rpeTokens.colors.text.primary}`}>
-      <TopBar 
-        specimen={modelData.specimen} 
-        activeHazard={modelData.activeHazard} 
-        hazards={modelData.hazards} 
+    <div
+      className={`flex flex-col h-screen overflow-hidden ${rpeTokens.colors.background.main} ${rpeTokens.colors.text.primary}`}
+    >
+      <TopBar
+        specimen={modelData.specimen}
+        activeHazard={modelData.activeHazard}
+        hazards={modelData.hazards}
         setActiveHazard={modelData.setActiveHazard}
         simulationStatus={modelData.simulationStatus}
         startSimulation={modelData.startSimulation}
@@ -24,13 +26,23 @@ export default function Home() {
       />
       <div className="flex flex-1 overflow-hidden">
         <LeftPanel specimen={modelData.specimen} />
-        <Viewport3D 
-          specimen={modelData.specimen} 
+        <Viewport3D
+          specimen={modelData.specimen}
           activeFailureEvent={modelData.activeFailureEvent}
         />
-        <RightPanel 
-          materials={modelData.materials} 
-          costItems={modelData.costItems} 
+        <RightPanel
+          products={modelData.products}
+          assemblies={modelData.assemblies}
+          catalogValidation={modelData.catalogValidation}
+          draft={modelData.draft}
+          draftDiff={modelData.draftDiff}
+          draftHasChanges={modelData.draftHasChanges}
+          baselineCost={modelData.baselineCost}
+          draftCost={modelData.draftCost}
+          updateDraftAssembly={modelData.updateDraftAssembly}
+          resetDraft={modelData.resetDraft}
+          createCandidate={modelData.createCandidate}
+          createdCandidate={modelData.createdCandidate}
           simulationStatus={modelData.simulationStatus}
           activeFailureEvent={modelData.activeFailureEvent}
           availableUpgrades={modelData.availableUpgrades}
@@ -42,8 +54,8 @@ export default function Home() {
           recommendation={modelData.recommendation}
         />
       </div>
-      <BottomTimeline 
-        events={modelData.failureEvents} 
+      <BottomTimeline
+        events={modelData.failureEvents}
         activeEventIndex={modelData.activeEventIndex}
         elapsedTime={modelData.elapsedTime}
         durationSeconds={modelData.runSettings.durationSeconds}
