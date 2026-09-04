@@ -59,16 +59,27 @@ test("user rate override is non-destructive and traceable", () => {
   assert.equal(originalRate.unitRate, 150);
 });
 
+test("A0 keeps wall backing and outer cladding as separate costed layers", () => {
+  const specimen = specimens[0];
+  assert.equal(specimen.assemblySelections.wall, "asm-wall-fcb-6mm");
+  assert.equal(specimen.assemblySelections.cladding, "asm-clad-sawali");
+
+  const result = calculateSpecimenCost(specimen, assemblies, products, rates);
+  const slots = result.assemblyCosts.map((item) => item.slot);
+  assert.ok(slots.includes("wall"));
+  assert.ok(slots.includes("cladding"));
+});
+
 test("curated A0 specimen total equals the sum of its traceable subtotals", () => {
   const specimen = specimens[0];
   const result = calculateSpecimenCost(specimen, assemblies, products, rates);
 
   assert.equal(result.specimenId, "specimen-a0-dignity-3x3");
-  assert.equal(result.materialSubtotal, 14926);
-  assert.equal(result.laborSubtotal, 3600);
-  assert.equal(result.equipmentSubtotal, 800);
-  assert.equal(result.installationSubtotal, 400);
-  assert.equal(result.totalCost, 19726);
+  assert.equal(result.materialSubtotal, 17410);
+  assert.equal(result.laborSubtotal, 4100);
+  assert.equal(result.equipmentSubtotal, 850);
+  assert.equal(result.installationSubtotal, 450);
+  assert.equal(result.totalCost, 22810);
 
   const itemizedTotal = result.assemblyCosts.reduce(
     (sum, item) => sum + item.assembly.totalCost,
