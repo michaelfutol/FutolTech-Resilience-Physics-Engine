@@ -21,10 +21,22 @@ export interface AssemblyComponent {
   installationNotes?: string;
 }
 
+export type AssemblyCategory =
+  | "frame"
+  | "wall"
+  | "cladding"
+  | "roof"
+  | "floor"
+  | "opening_protection"
+  | "vent"
+  | "connection"
+  | "restraint"
+  | "bracing";
+
 export interface Assembly {
   id: string;
   name: string;
-  category: "frame" | "wall" | "roof" | "floor" | "opening_protection" | "vent" | "connection" | "restraint" | "bracing";
+  category: AssemblyCategory;
   components: AssemblyComponent[];
   allowances: {
     labor: number;
