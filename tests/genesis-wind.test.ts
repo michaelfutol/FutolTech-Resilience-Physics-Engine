@@ -26,11 +26,12 @@ test("panel wind force keeps area and pressure coefficient explicit", () => {
   assert.equal(calculatePanelWindForceN(60, 2, -0.5), -60);
 });
 
-test("analytical result records the exact assumptions used", () => {
+test("analytical result records the exact assumptions used including wind direction", () => {
   const result = calculateAnalyticalPanelWind(
     {
       schemaVersion: GENESIS_SCHEMA_VERSION,
       speedKph: 36,
+      directionDegrees: 90,
       airDensityKgPerM3: 1.2,
       sourceNote: "test input only",
       verificationState: "unverified",
@@ -51,11 +52,36 @@ test("analytical result records the exact assumptions used", () => {
     dynamicPressurePa: 60,
     panelForceN: 180,
     assumptions: {
+      directionDegrees: 90,
       airDensityKgPerM3: 1.2,
       exposedAreaM2: 2,
       pressureCoefficient: 1.5,
     },
   });
+});
+
+test("analytical wind rejects a non-finite direction instead of silently normalizing it", () => {
+  assert.throws(
+    () =>
+      calculateAnalyticalPanelWind(
+        {
+          schemaVersion: GENESIS_SCHEMA_VERSION,
+          speedKph: 36,
+          directionDegrees: Number.NaN,
+          airDensityKgPerM3: 1.2,
+          sourceNote: "test input only",
+          verificationState: "unverified",
+        },
+        {
+          id: "panel-test",
+          exposedAreaM2: 2,
+          pressureCoefficient: 1.5,
+          sourceNote: "test input only",
+          verificationState: "unverified",
+        },
+      ),
+    /directionDegrees must be a finite number/,
+  );
 });
 
 test("unknown connection capacity remains unverified instead of becoming a false PASS", () => {
