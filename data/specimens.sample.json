@@ -7,6 +7,7 @@
     "assemblySelections": {
       "frame": "asm-frame-25",
       "wall": "asm-wall-fcb-6mm",
+      "cladding": "asm-clad-sawali",
       "roof": "asm-roof-cgi",
       "floor": "asm-floor-none",
       "opening_protection": "asm-opening-none",
@@ -16,7 +17,7 @@
       "bracing": "asm-brace-none"
     },
     "createdFromDraft": false,
-    "notes": "Baseline 3x3m test house without upgrades.",
+    "notes": "Baseline 3x3m test house with separate wall backing and sawali outer cladding; no resilience upgrades applied.",
     "verificationStatus": "unverified"
   }
 ]
