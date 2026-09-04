@@ -1,4 +1,4 @@
-import type { Specimen } from "../../types/rpe";
+import type { Specimen, UpgradeDefinition } from "../../types/rpe";
 
 export interface SpecimenDraft {
   baselineSpecimenId: string;
@@ -28,6 +28,11 @@ export interface CreateCandidateOptions {
 export interface CandidateDerivationResult {
   candidate: Specimen;
   diff: SpecimenDraftDiff;
+}
+
+export interface UpgradeApplicationResult {
+  draft: SpecimenDraft;
+  replacedUpgradeIds: string[];
 }
 
 export function createSpecimenDraft(baseline: Specimen): SpecimenDraft {
@@ -70,6 +75,67 @@ export function setDraftNotes(draft: SpecimenDraft, notes: string): SpecimenDraf
   return {
     ...draft,
     notes,
+  };
+}
+
+export function applyUpgradeDefinition(
+  baseline: Specimen,
+  draft: SpecimenDraft,
+  upgrade: UpgradeDefinition,
+  allUpgrades: UpgradeDefinition[]
+): UpgradeApplicationResult {
+  assertDraftMatchesBaseline(baseline, draft);
+
+  if (upgrade.status !== "ready") {
+    throw new Error(`Upgrade ${upgrade.id} is not ready for application`);
+  }
+  if (upgrade.assemblyChanges.length === 0) {
+    throw new Error(`Upgrade ${upgrade.id} has no assembly changes`);
+  }
+
+  const targetSlots = new Set(upgrade.assemblyChanges.map((change) => change.slot));
+  const definitionsById = new Map(allUpgrades.map((definition) => [definition.id, definition]));
+
+  const conflictingDefinitions = draft.appliedUpgradeIds
+    .filter((id) => id !== upgrade.id)
+    .map((id) => definitionsById.get(id))
+    .filter((definition): definition is UpgradeDefinition => Boolean(definition))
+    .filter((definition) =>
+      definition.assemblyChanges.some((change) => targetSlots.has(change.slot))
+    );
+
+  const nextSelections = { ...draft.assemblySelections };
+
+  // If a previously applied upgrade is being replaced, remove any of its other
+  // assembly effects that the new upgrade does not explicitly replace. This keeps
+  // the manifest and applied-upgrade ancestry consistent with one another.
+  for (const conflicting of conflictingDefinitions) {
+    for (const change of conflicting.assemblyChanges) {
+      if (targetSlots.has(change.slot)) continue;
+      if (nextSelections[change.slot] !== change.assemblyId) continue;
+
+      const baselineAssemblyId = baseline.assemblySelections[change.slot];
+      if (baselineAssemblyId) nextSelections[change.slot] = baselineAssemblyId;
+      else delete nextSelections[change.slot];
+    }
+  }
+
+  for (const change of upgrade.assemblyChanges) {
+    nextSelections[change.slot] = change.assemblyId;
+  }
+
+  const replacedUpgradeIds = conflictingDefinitions.map((definition) => definition.id).sort();
+  const replacedSet = new Set(replacedUpgradeIds);
+  const nextUpgradeIds = draft.appliedUpgradeIds.filter((id) => !replacedSet.has(id));
+  if (!nextUpgradeIds.includes(upgrade.id)) nextUpgradeIds.push(upgrade.id);
+
+  return {
+    draft: {
+      ...draft,
+      assemblySelections: nextSelections,
+      appliedUpgradeIds: nextUpgradeIds,
+    },
+    replacedUpgradeIds,
   };
 }
 
