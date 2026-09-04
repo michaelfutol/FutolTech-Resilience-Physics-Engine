@@ -97,6 +97,39 @@ export interface GenesisPanelExperimentResult {
   };
 }
 
+export interface GenesisPanelComparisonCaseInput {
+  label: string;
+  panel: GenesisRectangularPanelInput;
+  connection: GenesisConnectionInput;
+}
+
+export interface GenesisPanelABComparisonResult {
+  schemaVersion: typeof GENESIS_SCHEMA_VERSION;
+  evidenceLayer: "rpe_analytical";
+  sharedWind: {
+    speedKph: number;
+    speedMps: number;
+    directionDegrees: number;
+    airDensityKgPerM3: number;
+    sourceNote: string;
+  };
+  caseA: {
+    label: string;
+    experiment: GenesisPanelExperimentResult;
+  };
+  caseB: {
+    label: string;
+    experiment: GenesisPanelExperimentResult;
+  };
+  deltasBMinusA: {
+    exposedAreaM2: number;
+    pressureCoefficient: number;
+    panelForceN: number;
+    demandN: number;
+    capacityN: number | null;
+  };
+}
+
 export type GenesisEvidenceEventType =
   | "wind_input"
   | "dynamic_pressure"
