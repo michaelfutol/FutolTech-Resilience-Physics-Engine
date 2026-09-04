@@ -1,5 +1,21 @@
 # Worklog
 
+## [2026-09-04] - Phase 2 Costing, Prototype, and CI Repair Checkpoint
+- Completed automated catalog-validation execution in CI.
+- Implemented deterministic assembly/specimen costing with explicit currency and engineering-quantity rounding so floating-point residue does not leak into reconciled totals.
+- Added automated tests for material waste application, A0 itemized reconciliation, deterministic costing, missing rates, incompatible currency, local unit-rate overrides, and quantity/takeoff overrides.
+- Separated wall backing and outer cladding into distinct specimen/cost layers; the A0 benchmark now includes both instead of silently omitting sawali cladding.
+- Implemented immutable A0 → temporary draft → diff → explicit Create Candidate → A1 core and automated immutability/reset tests.
+- Wired Product/Assembly-driven prototype selectors, traceable A0-vs-draft cost comparison, local unit-rate overrides, and visible `[Unverified]` status into the right-side UI.
+- Added quantity/takeoff override support to the costing core. Quantity overrides preserve library quantity, effective quantity, waste basis and source note, and are intentionally treated as procurement/cost context rather than structural specimen ancestry.
+- Added validation that rejects invalid/duplicate quantity overrides and quantity overrides for assemblies not selected by the specimen.
+- Kept user price and quantity context separate from structural candidate identity; cost-context changes do not rewrite A0 or change candidate ancestry.
+- Detected CI failure at branch head `6f899b68460239c70ec1e66da7f4b09d60a36555`: `page.tsx` still referenced the pre-refactor `clearCostRateOverrides` hook name.
+- Repaired the prop contract without discarding the unified cost-context backend.
+- Verified checkpoint `45013897736cbab0164f20974f39a826e5f706ee` passed dependency install, lint, strict TypeScript, automated tests, and production build.
+- Synchronized `TASKS.md`, `STATUS_REPORT.md`, and `NEXT_STEPS.md` so remaining work is explicit rather than stale.
+- Remaining Phase 2 gate: expose quantity override controls in the UI, migrate legacy fixed upgrade rules/options into the Phase 2 assembly/candidate model, add UI/state regression coverage, retire legacy Material/CostItem paths, and run the final Phase 2 CI checkpoint.
+
 ## [2026-09-04] - Finite RPE v1.0 Roadmap Locked
 - Replaced the open-ended roadmap with a finite 12-phase build plan and explicit RPE v1.0 completion gates.
 - Locked the core doctrine: `CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY`.
