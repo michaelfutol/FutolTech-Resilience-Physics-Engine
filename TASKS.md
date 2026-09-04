@@ -6,6 +6,8 @@
 - [x] Set up sample JSON data files (`materials`, `specimens`, `hazards`).
 - [x] Add missing sample JSON data files (`failure-events`, `cost-items`).
 - [x] Establish agent instructions and reporting formats.
+- [x] Lock a finite RPE v1.0 roadmap with explicit completion gates.
+- [x] Mirror the finite roadmap to Google Drive for durable planning continuity.
 
 ## Phase 1: Visual MVP Shell
 - [x] Initialize React / Next.js project in root.
@@ -91,12 +93,63 @@
 - [ ] Add coastal storm-surge / buoyancy / hydrodynamic modules.
 - [ ] Add historical-event profiles distinct from code speeds and RPE stress-test indices.
 
-## Phase 5: Engineering Solver Coupling
-- [ ] Define manual-calculation trace format for every benchmark test.
-- [ ] Add conventional-solver comparison interface.
-- [ ] Plan OpenSees nonlinear structural coupling.
-- [ ] Plan OpenFOAM CFD coupling.
-- [ ] Plan CalculiX / other FEA integration where appropriate.
+## Phase 5: Dignity Housing Family
+- [ ] Lock Studio Core as the minimum model and first ₱50k research target.
+- [ ] Add 1BR, 2BR, and 3BR controlled variants.
+- [ ] Add elevated resilient base typology.
+- [ ] Add site-screened slab/raft base typology.
+- [ ] Preserve common resilience logic across all sizes.
+
+## Phase 6: BIM / IFC Import
+- [ ] Define supported IFC subset and import readiness report.
+- [ ] Preserve object identity, geometry, material assignment, and relationships where available.
+- [ ] Map missing simulation properties to explicit validation warnings rather than invented defaults.
+- [ ] Import and save one simple Studio or 2-storey frame as an RPE specimen.
+
+## Phase 7: Structural Solver Coupling
+- [ ] Define solver-neutral structural result schema.
+- [ ] Add OpenSees/OpenSeesPy workflow for one benchmark.
+- [ ] Add CalculiX path for selected detailed finite-element problems where appropriate.
+- [ ] Preserve solver version, idealization, boundary conditions, materials, damping, convergence, source inputs, and result hashes.
+
+## Phase 8: Wind CFD Coupling
+- [ ] Define CFD result mapping to RPE surfaces.
+- [ ] Add OpenFOAM workflow for one simple building.
+- [ ] Keep Fast Smoke Mode distinct from CFD Smoke Mode.
+- [ ] Compare simplified wind pressure and CFD pressure fields.
+
+## Phase 9: Multi-Hazard Layers
+- [ ] Add driven-rain ingress model.
+- [ ] Add debris impact model and secondary debris behavior.
+- [ ] Add flood/coastal hydrostatic, hydrodynamic, buoyancy, and saltwater-exposure layers.
+- [ ] Keep each hazard independently parameterized and traceable.
+
+## Phase 10: Engineering Benchmark Library
+- [ ] RPE-WIN-001 — Window Assembly Extreme Wind Test.
+- [ ] RPE-RC-001 — RC Column–Footing Lateral Pull.
+- [ ] RPE-MAS-001 — 4 m × 4 m CHB Wall Strengthening Comparison.
+- [ ] RPE-RC-002 — 2-Storey RC Earthquake Response.
+- [ ] Make benchmark runs versioned, repeatable, and comparable side by side.
+
+## Phase 11: Physical Validation and Calibration
+- [ ] Freeze manual, solver, and RPE predictions before physical testing.
+- [ ] Attach calibrated load/displacement/test evidence to selected benchmarks.
+- [ ] Record discrepancies without overwriting original predictions.
+- [ ] Calibrate only through new model/version records.
+
+## Phase 12: RPE v1.0 Release and Freeze
+- [ ] Reproducible deployment and passing CI/test suite.
+- [ ] Stable specimen schema and migrations.
+- [ ] Supported BIM/IFC import path.
+- [ ] Deterministic costing and candidate derivation.
+- [ ] Genesis/house wind mechanics.
+- [ ] One structural-solver workflow.
+- [ ] One CFD workflow.
+- [ ] Wind and earthquake benchmark cases.
+- [ ] Result-report export with provenance and limitations.
+- [ ] Physical-calibration interface documented.
+- [ ] Dignity Studio/1BR/2BR/3BR specimen family.
+- [ ] Declare RPE v1.0 complete and feature-freeze except defects.
 
 ## Permanent Validation Doctrine
 - [ ] For each serious benchmark: CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY.
