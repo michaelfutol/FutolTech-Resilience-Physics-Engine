@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Box, Grid, Html, Line } from "@react-three/drei";
-import { Physics, RigidBody } from "@react-three/rapier";
+import { Physics, RigidBody, type RapierRigidBody } from "@react-three/rapier";
 
 import { Specimen, FailureEvent } from "@/types/rpe";
 import {
@@ -131,31 +131,49 @@ function DynamicPanel({
   releaseGate: GenesisRigidBodyGateResult;
   dynamicsGate: GenesisDebrisDynamicsGateResult;
 }) {
+  const rigidBodyRef = useRef<RapierRigidBody>(null);
+
+  const ready =
+    releaseGate.state === "release_ready" &&
+    releaseGate.canRelease &&
+    dynamicsGate.state === "simulation_ready" &&
+    dynamicsGate.canSimulate &&
+    releaseGate.massKg !== null &&
+    dynamicsGate.gravityMps2 !== null &&
+    dynamicsGate.initialLinearVelocityMps !== null &&
+    dynamicsGate.initialAngularVelocityRadPerSec !== null;
+
+  useEffect(() => {
+    if (
+      !ready ||
+      !rigidBodyRef.current ||
+      dynamicsGate.initialLinearVelocityMps === null ||
+      dynamicsGate.initialAngularVelocityRadPerSec === null
+    ) {
+      return;
+    }
+
+    rigidBodyRef.current.setLinvel(dynamicsGate.initialLinearVelocityMps, true);
+    rigidBodyRef.current.setAngvel(dynamicsGate.initialAngularVelocityRadPerSec, true);
+  }, [ready, dynamicsGate.initialLinearVelocityMps, dynamicsGate.initialAngularVelocityRadPerSec]);
+
   if (
-    releaseGate.state !== "release_ready" ||
-    !releaseGate.canRelease ||
-    dynamicsGate.state !== "simulation_ready" ||
-    !dynamicsGate.canSimulate ||
+    !ready ||
     releaseGate.massKg === null ||
-    dynamicsGate.gravityMps2 === null ||
-    dynamicsGate.initialLinearVelocityMps === null ||
-    dynamicsGate.initialAngularVelocityRadPerSec === null
+    dynamicsGate.gravityMps2 === null
   ) {
     return <StaticPanel widthM={widthM} heightM={heightM} />;
   }
 
   const gravity = dynamicsGate.gravityMps2;
-  const linear = dynamicsGate.initialLinearVelocityMps;
-  const angular = dynamicsGate.initialAngularVelocityRadPerSec;
 
   return (
     <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
       <RigidBody
+        ref={rigidBodyRef}
         colliders="cuboid"
         mass={releaseGate.massKg}
         position={[0, heightM / 2, 0]}
-        linvel={[linear.x, linear.y, linear.z]}
-        angvel={[angular.x, angular.y, angular.z]}
       >
         <Box args={[0.08, heightM, widthM]}>
           <meshStandardMaterial color="#f59e0b" transparent opacity={0.8} />
