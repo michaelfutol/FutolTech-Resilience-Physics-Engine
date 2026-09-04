@@ -139,6 +139,22 @@ export interface Specimen {
   cladding?: string;
 }
 
+export interface UpgradeAssemblyChange {
+  slot: AssemblyCategory;
+  assemblyId: string;
+}
+
+export interface UpgradeDefinition {
+  id: string;
+  name: string;
+  targetFailureTypes: string[];
+  expectedBenefit: string;
+  priority: "low" | "medium" | "high";
+  status: "ready" | "needs_definition";
+  assemblyChanges: UpgradeAssemblyChange[];
+  notes: string[];
+}
+
 // Legacy Material (to be removed in Phase 2D)
 export interface Material {
   id: string;
@@ -165,6 +181,7 @@ export interface FailureEvent {
   target: string;
 }
 
+// Legacy fixed-cost Phase 1 upgrade types retained only until Phase 2 migration is complete.
 export interface CostItem {
   id: string;
   name: string;
