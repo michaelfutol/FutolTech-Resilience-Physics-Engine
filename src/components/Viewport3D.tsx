@@ -20,6 +20,12 @@ import {
 } from "@/lib/genesis/panelExperiment";
 import { assessGenesisRigidBodyReleaseGate } from "@/lib/genesis/rigidBodyGate";
 import { assessGenesisDebrisDynamicsGate } from "@/lib/genesis/debrisDynamicsGate";
+import {
+  createGenesisLiveSimulationEvidence,
+  recordGenesisRapierCollisionEnter,
+  type GenesisLiveSimulationEvidenceSnapshot,
+} from "@/lib/genesis/liveSimulationEvidence";
+import GenesisEventLedgerPanel from "@/components/GenesisEventLedgerPanel";
 import { rpeTokens } from "@/lib/ui/tokens";
 
 interface Viewport3DProps {
@@ -125,11 +131,13 @@ function DynamicPanel({
   heightM,
   releaseGate,
   dynamicsGate,
+  onCollisionEnter,
 }: {
   widthM: number;
   heightM: number;
   releaseGate: GenesisRigidBodyGateResult;
   dynamicsGate: GenesisDebrisDynamicsGateResult;
+  onCollisionEnter: () => void;
 }) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
 
@@ -174,6 +182,7 @@ function DynamicPanel({
         colliders="cuboid"
         mass={releaseGate.massKg}
         position={[0, heightM / 2, 0]}
+        onCollisionEnter={onCollisionEnter}
       >
         <Box args={[0.08, heightM, widthM]}>
           <meshStandardMaterial color="#f59e0b" transparent opacity={0.8} />
@@ -190,6 +199,7 @@ function GenesisPanelScene({
   experiment,
   releaseGate,
   dynamicsGate,
+  onCollisionEnter,
 }: {
   widthM: number;
   heightM: number;
@@ -197,6 +207,7 @@ function GenesisPanelScene({
   experiment: GenesisPanelExperimentResult | null;
   releaseGate: GenesisRigidBodyGateResult | null;
   dynamicsGate: GenesisDebrisDynamicsGateResult | null;
+  onCollisionEnter: () => void;
 }) {
   const halfWidth = widthM / 2;
   const halfHeight = heightM / 2;
@@ -233,6 +244,7 @@ function GenesisPanelScene({
           heightM={heightM}
           releaseGate={releaseGate}
           dynamicsGate={dynamicsGate}
+          onCollisionEnter={onCollisionEnter}
         />
       ) : (
         <StaticPanel widthM={widthM} heightM={heightM} />
@@ -321,6 +333,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const [angularXText, setAngularXText] = useState("");
   const [angularYText, setAngularYText] = useState("");
   const [angularZText, setAngularZText] = useState("");
+  const [liveEvidence, setLiveEvidence] = useState<GenesisLiveSimulationEvidenceSnapshot | null>(null);
 
   const speedKph = parseInputNumber(speedText);
   const directionDegrees = parseInputNumber(directionText);
@@ -410,6 +423,34 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const panelEvidenceLog = useMemo(() => (panelExperiment ? buildGenesisEvidenceLog(panelExperiment) : []), [panelExperiment]);
   const simulationReady = releaseGate?.state === "release_ready" && releaseGate.canRelease && dynamicsGate?.state === "simulation_ready" && dynamicsGate.canSimulate;
 
+  useEffect(() => {
+    if (!releaseGate || !dynamicsGate) {
+      setLiveEvidence(null);
+      return;
+    }
+
+    try {
+      setLiveEvidence(createGenesisLiveSimulationEvidence(panelEvidenceLog, releaseGate, dynamicsGate));
+    } catch {
+      setLiveEvidence(null);
+    }
+  }, [panelEvidenceLog, releaseGate, dynamicsGate]);
+
+  const handlePanelCollisionEnter = () => {
+    setLiveEvidence((current) => {
+      if (!current) return current;
+      try {
+        return recordGenesisRapierCollisionEnter(current, {
+          panelId: "genesis-panel-001",
+          otherObjectId: null,
+          sourceNote: "Live Rapier onCollisionEnter callback from Genesis Panel 001; the other collider has no explicitly modeled or caller-supplied RPE object identity.",
+        });
+      } catch {
+        return current;
+      }
+    });
+  };
+
   const getMarkerPosition = (target: string): [number, number, number] => {
     switch (target) {
       case "roof": return [0, 3, 0];
@@ -465,6 +506,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             experiment={panelExperiment}
             releaseGate={releaseGate}
             dynamicsGate={dynamicsGate}
+            onCollisionEnter={handlePanelCollisionEnter}
           />
         ) : viewMode === "genesis_panel" ? (
           <GenesisNullHouse directionDegrees={smokeEnabled ? directionDegrees : null} />
@@ -548,15 +590,21 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                 <div className="pt-1 text-[10px] text-slate-500">Analytical evidence remains {panelExperiment.evidenceLayer}. Rapier state is a separate rpe_simulation layer and is never treated as manual/code, solver, CFD, or physical-test evidence.</div>
 
                 <div className="mt-3 border-t border-slate-800 pt-2">
-                  <div className="font-semibold text-slate-300">Analytical evidence sequence</div>
-                  <ol className="mt-1 space-y-1.5">
-                    {panelEvidenceLog.map((event) => (
-                      <li key={`${event.sequence}-${event.eventType}`} className="rounded border border-slate-800 bg-slate-900/60 p-1.5">
-                        <div className="flex items-center justify-between gap-2 text-[10px]"><span>{event.sequence}. {event.eventType.replaceAll("_", " ")}</span><span className="text-slate-500">{event.status}</span></div>
-                        <div className="mt-0.5 text-[10px] text-slate-500">{event.message}</div>
-                      </li>
-                    ))}
-                  </ol>
+                  {liveEvidence ? (
+                    <GenesisEventLedgerPanel events={liveEvidence.ledger} />
+                  ) : (
+                    <>
+                      <div className="font-semibold text-slate-300">Analytical evidence sequence</div>
+                      <ol className="mt-1 space-y-1.5">
+                        {panelEvidenceLog.map((event) => (
+                          <li key={`${event.sequence}-${event.eventType}`} className="rounded border border-slate-800 bg-slate-900/60 p-1.5">
+                            <div className="flex items-center justify-between gap-2 text-[10px]"><span>{event.sequence}. {event.eventType.replaceAll("_", " ")}</span><span className="text-slate-500">{event.status}</span></div>
+                            <div className="mt-0.5 text-[10px] text-slate-500">{event.message}</div>
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
                 </div>
               </div>
             )}
