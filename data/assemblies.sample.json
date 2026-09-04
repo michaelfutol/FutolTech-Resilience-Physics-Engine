@@ -13,11 +13,7 @@
         "installationNotes": "Welded joints"
       }
     ],
-    "allowances": {
-      "labor": 1500,
-      "equipment": 500,
-      "installation": 200
-    },
+    "allowances": { "labor": 1500, "equipment": 500, "installation": 200 },
     "verificationStatus": "unverified"
   },
   {
@@ -34,11 +30,7 @@
         "installationNotes": "Welded joints"
       }
     ],
-    "allowances": {
-      "labor": 1800,
-      "equipment": 500,
-      "installation": 200
-    },
+    "allowances": { "labor": 1800, "equipment": 500, "installation": 200 },
     "verificationStatus": "unverified"
   },
   {
@@ -55,11 +47,7 @@
         "installationNotes": "Bolted connections"
       }
     ],
-    "allowances": {
-      "labor": 2000,
-      "equipment": 200,
-      "installation": 300
-    },
+    "allowances": { "labor": 2000, "equipment": 200, "installation": 300 },
     "verificationStatus": "unverified"
   },
   {
@@ -76,11 +64,7 @@
         "installationNotes": "Screwed to frame"
       }
     ],
-    "allowances": {
-      "labor": 800,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 800, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -97,11 +81,7 @@
         "installationNotes": "Screwed to frame"
       }
     ],
-    "allowances": {
-      "labor": 900,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 900, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -118,17 +98,13 @@
         "installationNotes": "Screwed to frame"
       }
     ],
-    "allowances": {
-      "labor": 800,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 800, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
     "id": "asm-clad-sawali",
     "name": "Sawali Outer Cladding",
-    "category": "wall",
+    "category": "cladding",
     "components": [
       {
         "productId": "prod-sawali",
@@ -139,17 +115,13 @@
         "installationNotes": "Nailed to backing"
       }
     ],
-    "allowances": {
-      "labor": 500,
-      "equipment": 50,
-      "installation": 50
-    },
+    "allowances": { "labor": 500, "equipment": 50, "installation": 50 },
     "verificationStatus": "unverified"
   },
   {
     "id": "asm-clad-bamboo-slat",
     "name": "Treated Bamboo Slats Cladding",
-    "category": "wall",
+    "category": "cladding",
     "components": [
       {
         "productId": "prod-bamboo-slats",
@@ -160,17 +132,13 @@
         "installationNotes": "Nailed/screwed to backing"
       }
     ],
-    "allowances": {
-      "labor": 700,
-      "equipment": 50,
-      "installation": 50
-    },
+    "allowances": { "labor": 700, "equipment": 50, "installation": 50 },
     "verificationStatus": "unverified"
   },
   {
     "id": "asm-clad-native-screen",
     "name": "Replaceable Native Screen Cladding",
-    "category": "wall",
+    "category": "cladding",
     "components": [
       {
         "productId": "prod-native-screen",
@@ -181,11 +149,7 @@
         "installationNotes": "Fastened to backing"
       }
     ],
-    "allowances": {
-      "labor": 400,
-      "equipment": 50,
-      "installation": 50
-    },
+    "allowances": { "labor": 400, "equipment": 50, "installation": 50 },
     "verificationStatus": "unverified"
   },
   {
@@ -202,11 +166,7 @@
         "installationNotes": "Umbrella nails"
       }
     ],
-    "allowances": {
-      "labor": 600,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 600, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -223,11 +183,7 @@
         "installationNotes": "Screwed with washers"
       }
     ],
-    "allowances": {
-      "labor": 600,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 600, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -244,11 +200,7 @@
         "installationNotes": "Tied to purlins"
       }
     ],
-    "allowances": {
-      "labor": 1000,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 1000, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -265,11 +217,7 @@
         "installationNotes": "Standard spacing"
       }
     ],
-    "allowances": {
-      "labor": 200,
-      "equipment": 50,
-      "installation": 0
-    },
+    "allowances": { "labor": 200, "equipment": 50, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -286,11 +234,7 @@
         "installationNotes": "Attached to frame and roof"
       }
     ],
-    "allowances": {
-      "labor": 300,
-      "equipment": 50,
-      "installation": 0
-    },
+    "allowances": { "labor": 300, "equipment": 50, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -307,11 +251,7 @@
         "installationNotes": "Draped and anchored"
       }
     ],
-    "allowances": {
-      "labor": 800,
-      "equipment": 100,
-      "installation": 100
-    },
+    "allowances": { "labor": 800, "equipment": 100, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -319,11 +259,7 @@
     "name": "No Diagonal Brace",
     "category": "bracing",
     "components": [],
-    "allowances": {
-      "labor": 0,
-      "equipment": 0,
-      "installation": 0
-    },
+    "allowances": { "labor": 0, "equipment": 0, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -340,11 +276,7 @@
         "installationNotes": "Welded to corners"
       }
     ],
-    "allowances": {
-      "labor": 600,
-      "equipment": 200,
-      "installation": 100
-    },
+    "allowances": { "labor": 600, "equipment": 200, "installation": 100 },
     "verificationStatus": "unverified"
   },
   {
@@ -361,11 +293,7 @@
         "installationNotes": "Tensioned via turnbuckle"
       }
     ],
-    "allowances": {
-      "labor": 400,
-      "equipment": 100,
-      "installation": 50
-    },
+    "allowances": { "labor": 400, "equipment": 100, "installation": 50 },
     "verificationStatus": "unverified"
   },
   {
@@ -373,11 +301,7 @@
     "name": "Slab-on-Grade (No Floor Assembly)",
     "category": "floor",
     "components": [],
-    "allowances": {
-      "labor": 0,
-      "equipment": 0,
-      "installation": 0
-    },
+    "allowances": { "labor": 0, "equipment": 0, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -385,11 +309,7 @@
     "name": "No Opening Protection",
     "category": "opening_protection",
     "components": [],
-    "allowances": {
-      "labor": 0,
-      "equipment": 0,
-      "installation": 0
-    },
+    "allowances": { "labor": 0, "equipment": 0, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -397,11 +317,7 @@
     "name": "No Baffled Vents",
     "category": "vent",
     "components": [],
-    "allowances": {
-      "labor": 0,
-      "equipment": 0,
-      "installation": 0
-    },
+    "allowances": { "labor": 0, "equipment": 0, "installation": 0 },
     "verificationStatus": "unverified"
   },
   {
@@ -418,11 +334,7 @@
         "installationNotes": "Standard framing connections"
       }
     ],
-    "allowances": {
-      "labor": 500,
-      "equipment": 50,
-      "installation": 0
-    },
+    "allowances": { "labor": 500, "equipment": 50, "installation": 0 },
     "verificationStatus": "unverified"
   }
 ]
