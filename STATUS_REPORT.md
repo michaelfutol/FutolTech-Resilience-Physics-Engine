@@ -28,8 +28,12 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - Equivalent connection demand/capacity state is calculated; unknown capacity remains unverified.
 - A/B analytical comparison support is implemented and tested.
 - A deterministic rigid-body release eligibility gate is implemented and tested: unknown capacity, within-capacity state, and missing mass all block release.
-- A debris-dynamics initial-condition gate now keeps Rapier simulation blocked until the analytical release gate is ready and gravity, initial linear velocity, and initial angular velocity are all explicit. Zero vectors are accepted only when explicitly supplied.
-- No post-release wind impulse, aerodynamic force, damping, gravity, or spin is silently invented.
+- A debris-dynamics initial-condition gate keeps simulation blocked until the analytical release gate is ready and gravity, initial linear velocity, and initial angular velocity are all explicit. Zero vectors are accepted only when explicitly supplied.
+- Genesis Panel 001 now exposes explicit panel mass, gravity vector, initial linear velocity, and initial angular velocity in the UI. Blank values remain missing; no rigid-body defaults are adopted.
+- Rapier activation is wired behind both gates. The panel becomes a Rapier rigid body only when analytical release is `release_ready` and debris dynamics are `simulation_ready`.
+- Rapier consumes only the explicitly supplied mass, gravity, initial linear velocity, and initial angular velocity. The analytical panel force is not converted into a launch impulse or post-release aerodynamic force.
+- Analytical wind/connection evidence remains `rpe_analytical`; detached-body motion remains a separate `rpe_simulation` layer.
+- Integration regression coverage now composes analytical threshold → release gate → debris-dynamics gate and verifies that missing mass/gravity block activation while explicit zero initial velocities are accepted.
 
 ## Engineering doctrine
 
@@ -39,4 +43,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Wire the existing rigid-body release gate and new debris-dynamics initial-condition gate into the Genesis Panel UI, require explicit panel mass/gravity/initial velocity inputs, then allow `simulation_ready` to instantiate the panel as a Rapier rigid body. Do not apply a post-release wind force or launch impulse until a separate explicit debris aerodynamic/loading contract is defined. Phase 2 browser acceptance remains an independent outstanding gate.
+Add collision/debris event logging to the Genesis Rapier path so analytical threshold, release eligibility, simulation activation, and collision events are preserved as distinct ordered evidence stages. Do not add post-release wind/aerodynamic loading until a separate explicit debris loading/time/aerodynamic contract is defined. Phase 2 browser acceptance remains an independent outstanding gate.

@@ -43,8 +43,8 @@
 - [x] Add deterministic rigid-body release eligibility gate and tests.
 - [x] Add explicit debris-dynamics initial-condition gate; no gravity/velocity/spin is silently invented.
 - [x] Install Rapier after dependency-audit gate.
-- [ ] Wire explicit panel mass plus gravity/initial velocity inputs into the Genesis UI.
-- [ ] On `release_ready` + `simulation_ready`, instantiate the panel as a Rapier rigid body.
+- [x] Wire explicit panel mass plus gravity/initial linear velocity/initial angular velocity inputs into the Genesis UI.
+- [x] On `release_ready` + `simulation_ready`, instantiate the panel as a Rapier rigid body using only explicit rigid-body inputs.
 - [ ] Add collision/debris event logging while keeping RPE simulation distinct from analytical evidence.
 - [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
 - [ ] Add synchronized A/B simulation/replay path.

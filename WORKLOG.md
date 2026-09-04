@@ -1,5 +1,17 @@
 # Worklog
 
+## [2026-09-05] - Genesis Explicit Rapier Activation Wiring
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `374f8bcdd632449f9e0353daef692c0b3c125747` had successful RPE CI run 118 before changing code.
+- Wired the already-tested rigid-body release gate and debris-dynamics gate into the actual Genesis Panel 001 viewport path.
+- Added explicit UI inputs for panel mass, gravity vector, initial linear velocity, and initial angular velocity. Every field starts blank; blank or partial vectors remain missing rather than receiving an engineering/physics default.
+- Explicit zero linear/angular velocity vectors remain valid only when all vector components are entered explicitly.
+- Added gated Rapier activation: the panel remains attached/static until the analytical connection state produces `release_ready` and the dynamics gate produces `simulation_ready`.
+- Rapier receives only the supplied panel mass, gravity vector, initial linear velocity, and initial angular velocity. Analytical panel force is not converted into a launch impulse, launch velocity, continuing wind force, aerodynamic torque, damping value, or other hidden motion input.
+- Kept evidence boundaries visible: wind/connection threshold calculation remains `rpe_analytical`; detached rigid-body motion is `rpe_simulation`; neither is promoted to manual/code, engineering-solver, CFD, or future physical-test evidence.
+- Added an integration regression test that composes analytical threshold → rigid-body release gate → debris-dynamics gate, verifies missing mass/gravity remain blocking states, and verifies explicitly supplied zero initial velocities are accepted. All numerical values in this test are synthetic arithmetic fixtures only and are not adopted engineering properties.
+- Updated `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` so the repository records the new gate state and exact next task.
+- Post-batch CI is required to pass before advancing to collision/debris event logging; no failed check may be skipped.
+
 ## [2026-09-05] - Explicit Debris Dynamics Gate + Canonical State Reconciliation
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and checked the latest branch/CI state before coding.
 - Found that canonical code/commit history had advanced beyond the written status documents: dependency remediation had already completed, Next.js and matching `eslint-config-next` were on 16.3.4, a clean dependency-audit gate had been recorded, `@react-three/rapier@2.2.0` had been installed, Panel 001/A-B comparison work had landed, and the rigid-body release eligibility gate was already implemented/tested.
