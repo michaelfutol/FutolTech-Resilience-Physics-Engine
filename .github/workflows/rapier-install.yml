@@ -1,0 +1,55 @@
+name: Rapier Install Gate
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/rapier-install.yml
+
+permissions:
+  contents: write
+
+jobs:
+  install-rapier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Add React Three Rapier with genuine lockfile regeneration
+        run: npm install --package-lock-only --ignore-scripts --save-exact @react-three/rapier@2.2.0
+
+      - name: Verify fresh npm audit stays clean
+        run: |
+          npm audit --json > rapier-audit.json || true
+          node - <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('rapier-audit.json', 'utf8'));
+          const counts = audit.metadata?.vulnerabilities ?? {};
+          console.log('RAPIER_AUDIT_COUNTS=' + JSON.stringify(counts));
+          if ((counts.total ?? 0) !== 0) {
+            console.error('Rapier install gate closed: audit is not clean.');
+            process.exit(1);
+          }
+          NODE
+
+      - name: Commit package metadata
+        run: |
+          git config user.name "RPE Physics Dependency Gate"
+          git config user.email "actions@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency metadata changes to commit."
+            exit 0
+          fi
+          git commit -m "Install React Three Rapier 2.2.0"
+          git push origin HEAD:lum-rpe-takeover
