@@ -59,6 +59,25 @@ test("user rate override is non-destructive and traceable", () => {
   assert.equal(originalRate.unitRate, 150);
 });
 
+test("user override can supply a local rate when no library rate is present", () => {
+  const ratesWithoutFrame = rates.filter((rate) => rate.referenceId !== "prod-tube-25");
+  const result = calculateAssemblyCost(
+    getAssembly("asm-frame-25"),
+    products,
+    ratesWithoutFrame,
+    {
+      overrides: [{ referenceId: "prod-tube-25", unitRate: 100 }],
+    }
+  );
+
+  const component = result.components[0];
+  assert.equal(component.unitRate, 100);
+  assert.equal(component.materialCost, 3780);
+  assert.equal(component.rateType, "user_override");
+  assert.equal(component.rateId, null);
+  assert.equal(component.sourceNote, "User override");
+});
+
 test("A0 keeps wall backing and outer cladding as separate costed layers", () => {
   const specimen = specimens[0];
   assert.equal(specimen.assemblySelections.wall, "asm-wall-fcb-6mm");
@@ -100,5 +119,15 @@ test("missing cost rates fail loudly instead of silently producing a partial tot
   assert.throws(
     () => calculateAssemblyCost(getAssembly("asm-frame-25"), products, ratesWithoutFrame),
     /No cost rate found for product prod-tube-25/
+  );
+});
+
+test("costing rejects a requested currency with no matching source rate", () => {
+  assert.throws(
+    () =>
+      calculateAssemblyCost(getAssembly("asm-frame-25"), products, rates, {
+        currency: "USD",
+      }),
+    /No cost rate found for product prod-tube-25 in currency USD/
   );
 });
