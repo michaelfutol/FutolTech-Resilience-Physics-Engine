@@ -1,10 +1,40 @@
-import { Material, CostItem, FailureEvent, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode, SimulationRunMode } from "@/types/rpe";
+import type {
+  Assembly,
+  FailureEvent,
+  Product,
+  PrototypeRecommendation,
+  RunMode,
+  RunSettings,
+  SimulationRunMode,
+  Specimen,
+  SpecimenCostResult,
+  UpgradeOption,
+} from "@/types/rpe";
+import type {
+  SpecimenDraft,
+  SpecimenDraftDiff,
+} from "@/lib/prototypes/specimenDraft";
 import ExportPanel from "./ExportPanel";
 import { rpeTokens } from "@/lib/ui/tokens";
 
+interface CatalogValidationState {
+  valid: boolean;
+  errors: string[];
+}
+
 interface RightPanelProps {
-  materials: Material[];
-  costItems: CostItem[];
+  products: Product[];
+  assemblies: Assembly[];
+  catalogValidation: CatalogValidationState;
+  draft: SpecimenDraft | null;
+  draftDiff: SpecimenDraftDiff | null;
+  draftHasChanges: boolean;
+  baselineCost: SpecimenCostResult | null;
+  draftCost: SpecimenCostResult | null;
+  updateDraftAssembly: (slot: string, assemblyId: string) => void;
+  resetDraft: () => void;
+  createCandidate: () => void;
+  createdCandidate: Specimen | null;
   simulationStatus: "idle" | "running" | "complete";
   activeFailureEvent: FailureEvent | null;
   availableUpgrades: UpgradeOption[];
@@ -16,39 +46,98 @@ interface RightPanelProps {
   recommendation: PrototypeRecommendation | null;
 }
 
-export default function RightPanel({ 
-  materials, costItems, simulationStatus,
-  availableUpgrades, selectedUpgradeIds, toggleUpgrade,
-  runModes, runSettings, setRunSettings, recommendation
+function formatSlot(slot: string): string {
+  return slot
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatPhp(value: number): string {
+  return `₱${value.toLocaleString("en-PH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function productHasUnverifiedProperties(product: Product): boolean {
+  return Object.values(product.engineeringProperties).some((value) => value === null);
+}
+
+export default function RightPanel({
+  products,
+  assemblies,
+  catalogValidation,
+  draft,
+  draftDiff,
+  draftHasChanges,
+  baselineCost,
+  draftCost,
+  updateDraftAssembly,
+  resetDraft,
+  createCandidate,
+  createdCandidate,
+  simulationStatus,
+  availableUpgrades,
+  selectedUpgradeIds,
+  toggleUpgrade,
+  runModes,
+  runSettings,
+  setRunSettings,
+  recommendation,
 }: RightPanelProps) {
-  const structureMaterials = materials.filter((m) => m.type !== "connection");
-  const connections = materials.filter((m) => m.type === "connection");
+  const productsById = new Map(products.map((product) => [product.id, product]));
+  const draftCostBySlot = new Map(
+    (draftCost?.assemblyCosts ?? []).map((item) => [item.slot, item.assembly])
+  );
+  const costDelta =
+    baselineCost && draftCost ? draftCost.totalCost - baselineCost.totalCost : 0;
 
   return (
-    <aside className={`w-80 ${rpeTokens.colors.background.panel} border-l ${rpeTokens.colors.borders.divider} flex flex-col h-full overflow-hidden shrink-0`}>
+    <aside
+      className={`w-80 ${rpeTokens.colors.background.panel} border-l ${rpeTokens.colors.borders.divider} flex flex-col h-full overflow-hidden shrink-0`}
+    >
       <div className={`p-4 border-b ${rpeTokens.colors.borders.divider} flex-none`}>
         <h2 className={`${rpeTokens.typography.heading} flex items-center justify-between`}>
-          Settings & Upgrades
+          Settings & Prototype
         </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        
-        {/* RUN SETTINGS PLACEHOLDER */}
-        <div className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border ${rpeTokens.colors.borders.default}`}>
+        {!catalogValidation.valid && (
+          <div className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}>
+            <h3 className={`${rpeTokens.typography.heading} !text-red-400 mb-2`}>
+              Catalog Validation Failed
+            </h3>
+            <ul className="list-disc pl-4 text-xs text-red-200 space-y-1">
+              {catalogValidation.errors.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div
+          className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border ${rpeTokens.colors.borders.default}`}
+        >
           <h3 className={`${rpeTokens.typography.heading} mb-3`}>Run Settings</h3>
-          
+
           <div className="space-y-3">
             <div>
               <label className={`${rpeTokens.typography.label} block mb-1`}>Run Mode:</label>
-              <select 
+              <select
                 className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.body} ${rpeTokens.colors.text.secondary} p-1.5 focus:border-emerald-500/50 outline-none`}
                 value={runSettings.mode}
-                onChange={(e) => setRunSettings({...runSettings, mode: e.target.value as SimulationRunMode})}
+                onChange={(event) =>
+                  setRunSettings({
+                    ...runSettings,
+                    mode: event.target.value as SimulationRunMode,
+                  })
+                }
               >
-                {runModes.map((rm) => (
-                  <option key={rm.id} value={rm.id} disabled={rm.future}>
-                    {rm.name} {rm.future && "(Future)"}
+                {runModes.map((runMode) => (
+                  <option key={runMode.id} value={runMode.id} disabled={runMode.future}>
+                    {runMode.name} {runMode.future && "(Future)"}
                   </option>
                 ))}
               </select>
@@ -56,24 +145,34 @@ export default function RightPanel({
 
             {runSettings.mode === "fixed_duration" && (
               <div>
-                <label className={`${rpeTokens.typography.label} block mb-1`}>Simulation Time:</label>
-                <select 
+                <label className={`${rpeTokens.typography.label} block mb-1`}>
+                  Simulation Time:
+                </label>
+                <select
                   className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.body} ${rpeTokens.colors.text.secondary} p-1.5 focus:border-emerald-500/50 outline-none`}
                   value={runSettings.durationSeconds}
-                  onChange={(e) => setRunSettings({...runSettings, durationSeconds: parseInt(e.target.value)})}
+                  onChange={(event) =>
+                    setRunSettings({
+                      ...runSettings,
+                      durationSeconds: parseInt(event.target.value, 10),
+                    })
+                  }
                 >
                   <option value={30}>30 sec default</option>
                   <option value={60}>1 min</option>
                   <option value={300}>5 min</option>
-                  <option value={-1}>custom input</option>
                 </select>
               </div>
             )}
-            
+
             {runSettings.mode === "until_breaking_point" && (
               <div>
-                <label className={`${rpeTokens.typography.label} block mb-1`}>Stop Condition:</label>
-                <div className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.body} ${rpeTokens.colors.text.secondary} p-1.5`}>
+                <label className={`${rpeTokens.typography.label} block mb-1`}>
+                  Stop Condition:
+                </label>
+                <div
+                  className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} ${rpeTokens.typography.body} ${rpeTokens.colors.text.secondary} p-1.5`}
+                >
                   first critical failure
                 </div>
               </div>
@@ -81,108 +180,268 @@ export default function RightPanel({
           </div>
         </div>
 
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className={rpeTokens.typography.heading}>Prototype Assemblies</h3>
+            <span className="text-[10px] text-slate-500">A0 → Draft</span>
+          </div>
+
+          {!draft ? (
+            <div className="text-xs text-red-300">No baseline specimen available.</div>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(draft.assemblySelections).map(([slot, assemblyId]) => {
+                const selectedAssembly = assemblies.find((assembly) => assembly.id === assemblyId);
+                const alternatives = assemblies.filter((assembly) => assembly.category === slot);
+                const slotCost = draftCostBySlot.get(slot);
+
+                return (
+                  <div
+                    key={slot}
+                    className={`${rpeTokens.colors.background.surface} p-3 ${rpeTokens.layout.borderRadius} border ${rpeTokens.colors.borders.default}`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <label className={`${rpeTokens.typography.label}`}>{formatSlot(slot)}</label>
+                      {selectedAssembly?.verificationStatus !== "verified" && (
+                        <span className="text-[10px] font-semibold text-amber-400">[Unverified]</span>
+                      )}
+                    </div>
+
+                    <select
+                      value={assemblyId}
+                      onChange={(event) => updateDraftAssembly(slot, event.target.value)}
+                      disabled={!catalogValidation.valid}
+                      className={`w-full ${rpeTokens.colors.background.input} border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius} text-xs ${rpeTokens.colors.text.secondary} p-1.5 outline-none`}
+                    >
+                      {alternatives.map((assembly) => (
+                        <option key={assembly.id} value={assembly.id}>
+                          {assembly.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedAssembly && (
+                      <div className="mt-2 space-y-1.5">
+                        {selectedAssembly.components.length === 0 ? (
+                          <div className={`text-[11px] ${rpeTokens.colors.text.muted}`}>
+                            No material line items in this assembly.
+                          </div>
+                        ) : (
+                          selectedAssembly.components.map((component) => {
+                            const product = productsById.get(component.productId);
+                            return (
+                              <div key={`${slot}-${component.productId}`} className="text-[11px]">
+                                <div className="flex justify-between gap-2">
+                                  <span className={rpeTokens.colors.text.secondary}>
+                                    {product?.name ?? component.productId}
+                                  </span>
+                                  {product && productHasUnverifiedProperties(product) && (
+                                    <span className="text-amber-400">[Unverified]</span>
+                                  )}
+                                </div>
+                                <div className={`${rpeTokens.colors.text.muted} flex justify-between gap-2`}>
+                                  <span>
+                                    {component.quantity} {component.unit} + {Math.round(component.wastePercent * 100)}% waste
+                                  </span>
+                                  {slotCost && (
+                                    <span className={rpeTokens.typography.data}>
+                                      {formatPhp(slotCost.totalCost)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {baselineCost && draftCost && (
+          <div
+            className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border ${rpeTokens.colors.borders.default}`}
+          >
+            <h3 className={`${rpeTokens.typography.heading} mb-3`}>Traceable Cost</h3>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>A0 baseline</span>
+                <span className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}>
+                  {formatPhp(baselineCost.totalCost)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>Draft total</span>
+                <span className={`${rpeTokens.typography.data} ${rpeTokens.colors.text.primary}`}>
+                  {formatPhp(draftCost.totalCost)}
+                </span>
+              </div>
+              <div className={`flex justify-between pt-1.5 border-t ${rpeTokens.colors.borders.divider}`}>
+                <span className={rpeTokens.colors.text.muted}>Difference</span>
+                <span
+                  className={`${rpeTokens.typography.data} ${
+                    costDelta > 0
+                      ? "text-amber-400"
+                      : costDelta < 0
+                        ? "text-emerald-400"
+                        : rpeTokens.colors.text.secondary
+                  }`}
+                >
+                  {costDelta > 0 ? "+" : ""}
+                  {formatPhp(costDelta)}
+                </span>
+              </div>
+            </div>
+
+            <div className={`mt-3 pt-3 border-t ${rpeTokens.colors.borders.divider} space-y-1 text-[11px]`}>
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>Materials incl. waste</span>
+                <span>{formatPhp(draftCost.materialSubtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>Labor allowance</span>
+                <span>{formatPhp(draftCost.laborSubtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>Equipment allowance</span>
+                <span>{formatPhp(draftCost.equipmentSubtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className={rpeTokens.colors.text.muted}>Installation allowance</span>
+                <span>{formatPhp(draftCost.installationSubtotal)}</span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-amber-400/80 mt-3 leading-relaxed">
+              Sample rates and engineering properties marked unverified are not design or procurement truth.
+            </p>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {draftDiff && draftDiff.assemblyChanges.length > 0 && (
+            <div className={`${rpeTokens.colors.background.surface} p-2 ${rpeTokens.layout.borderRadius} border ${rpeTokens.colors.borders.default}`}>
+              <div className={`${rpeTokens.typography.label} mb-1`}>Draft Changes</div>
+              {draftDiff.assemblyChanges.map((change) => (
+                <div key={change.slot} className="text-[11px] text-slate-400">
+                  {formatSlot(change.slot)}: {change.fromAssemblyId ?? "none"} → {change.toAssemblyId ?? "none"}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={resetDraft}
+              disabled={!draftHasChanges}
+              className={`px-2 py-2 text-xs border ${rpeTokens.layout.borderRadius} ${rpeTokens.colors.borders.default} disabled:opacity-40`}
+            >
+              Reset Draft
+            </button>
+            <button
+              type="button"
+              onClick={createCandidate}
+              disabled={!draftHasChanges || !catalogValidation.valid}
+              className={`px-2 py-2 text-xs border ${rpeTokens.layout.borderRadius} ${
+                draftHasChanges && catalogValidation.valid
+                  ? "border-emerald-600 text-emerald-300 bg-emerald-950/30"
+                  : `${rpeTokens.colors.borders.default} text-slate-500 opacity-50`
+              }`}
+            >
+              Create Candidate
+            </button>
+          </div>
+
+          {createdCandidate && (
+            <div className={`${rpeTokens.colors.status.success} ${rpeTokens.layout.borderRadius} p-2 text-xs border`}>
+              <div className="font-semibold text-emerald-300">Candidate created in session</div>
+              <div className={rpeTokens.colors.text.secondary}>{createdCandidate.id}</div>
+              <div className={rpeTokens.colors.text.muted}>
+                Parent: {createdCandidate.parentSpecimenId}. A0 remains unchanged.
+              </div>
+            </div>
+          )}
+        </div>
+
         {simulationStatus === "complete" && (
           <div className={`${rpeTokens.colors.status.failure} ${rpeTokens.layout.borderRadius} p-3 border`}>
-            <h3 className={`${rpeTokens.typography.heading} !text-red-400 mb-2`}>Simulation Summary</h3>
+            <h3 className={`${rpeTokens.typography.heading} !text-red-400 mb-2`}>
+              Scripted MVP Summary
+            </h3>
             <div className={`space-y-2 ${rpeTokens.typography.body}`}>
-              <p><span className={rpeTokens.colors.text.muted}>Baseline result:</span> <span className="font-medium">Likely fails / major damage</span></p>
-              <p><span className={rpeTokens.colors.text.muted}>First likely failure:</span> Sawali cladding vibration</p>
-              <p><span className={rpeTokens.colors.text.muted}>Primary weak points:</span> roof uplift, frame racking, cladding attachment</p>
-              <div className={`pt-2 mt-2 border-t ${rpeTokens.colors.borders.divider}`}>
-                <p className={`${rpeTokens.typography.label} mb-1`}>Suggested improvements:</p>
-                <ul className={`list-disc pl-4 ${rpeTokens.colors.text.secondary} text-xs`}>
-                  <li>Add diagonal bracing</li>
-                  <li>Add roof tie-down straps</li>
-                </ul>
-              </div>
+              <p className="text-xs text-amber-300">
+                Conceptual Phase 1 playback only — not force-based physics.
+              </p>
+              <p>
+                <span className={rpeTokens.colors.text.muted}>Baseline result:</span>{" "}
+                <span className="font-medium">Likely fails / major damage</span>
+              </p>
+              <p>
+                <span className={rpeTokens.colors.text.muted}>Primary weak points:</span>{" "}
+                roof uplift, frame racking, cladding attachment
+              </p>
             </div>
           </div>
         )}
 
         {simulationStatus === "complete" && (
-          <div className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border border-emerald-900/50 mt-4`}>
-            <h3 className={`${rpeTokens.typography.heading} !text-emerald-400 mb-3`}>Upgrade Options</h3>
+          <div
+            className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border border-emerald-900/50`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <h3 className={`${rpeTokens.typography.heading} !text-emerald-400`}>
+                Legacy Upgrade Options
+              </h3>
+              <span className="text-[9px] text-amber-400">PLACEHOLDER</span>
+            </div>
+            <p className="text-[10px] text-slate-500 mb-3">
+              These fixed upgrade amounts are retained from Phase 1 and are not part of the traceable cost total above.
+            </p>
             <div className="space-y-3">
-              {availableUpgrades.map(upgrade => {
+              {availableUpgrades.map((upgrade) => {
                 const isSelected = selectedUpgradeIds.includes(upgrade.id);
                 return (
-                  <label key={upgrade.id} className={`flex flex-col gap-1 p-2 ${rpeTokens.layout.borderRadius} border cursor-pointer transition-colors ${isSelected ? rpeTokens.colors.status.success : `${rpeTokens.colors.background.panel} ${rpeTokens.colors.borders.default} hover:border-slate-500`}`}>
+                  <label
+                    key={upgrade.id}
+                    className={`flex flex-col gap-1 p-2 ${rpeTokens.layout.borderRadius} border cursor-pointer transition-colors ${
+                      isSelected
+                        ? rpeTokens.colors.status.success
+                        : `${rpeTokens.colors.background.panel} ${rpeTokens.colors.borders.default} hover:border-slate-500`
+                    }`}
+                  >
                     <div className="flex items-start gap-2">
-                      <input 
-                        type="checkbox" 
-                        className={`mt-1 ${rpeTokens.layout.borderRadius} border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500`} 
+                      <input
+                        type="checkbox"
+                        className={`mt-1 ${rpeTokens.layout.borderRadius} border-slate-600 bg-slate-700 text-emerald-500`}
                         checked={isSelected}
                         onChange={() => toggleUpgrade(upgrade.id)}
                       />
                       <div className="flex-1">
-                        <div className="flex justify-between items-center">
-                          <span className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}>{upgrade.name}</span>
-                          <span className={`${rpeTokens.typography.data} text-emerald-400`}>+₱{upgrade.estimatedCostPhp.toLocaleString()}</span>
-                        </div>
-                        <p className={`text-xs ${rpeTokens.colors.text.muted} leading-tight mt-1`}>{upgrade.expectedBenefit}</p>
+                        <span className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}>
+                          {upgrade.name}
+                        </span>
+                        <p className={`text-xs ${rpeTokens.colors.text.muted} leading-tight mt-1`}>
+                          {upgrade.expectedBenefit}
+                        </p>
                       </div>
                     </div>
                   </label>
                 );
               })}
             </div>
-            
-            {selectedUpgradeIds.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-emerald-900/50">
-                <div className={`flex justify-between text-sm font-medium text-emerald-400 mb-3`}>
-                  <span>Added cost placeholder:</span>
-                  <span className={rpeTokens.typography.data}>₱{availableUpgrades.filter(u => selectedUpgradeIds.includes(u.id)).reduce((sum, u) => sum + u.estimatedCostPhp, 0).toLocaleString()}</span>
-                </div>
-                <div className={`${rpeTokens.colors.status.success} ${rpeTokens.layout.borderRadius} p-2 text-xs border`}>
-                  <span className={rpeTokens.colors.text.muted}>Next specimen: </span>
-                  <span className={`font-medium ${rpeTokens.colors.text.primary}`}>
-                    {recommendation ? `${recommendation.nextSpecimenId} (Recommended via Rebuilder)` : "A1 — Braced 3m x 3m Sawali Test House"}
-                  </span>
-                </div>
+
+            {selectedUpgradeIds.length > 0 && recommendation && (
+              <div className="mt-3 text-[11px] text-slate-400">
+                Legacy rebuilder recommendation: {recommendation.nextSpecimenId}
               </div>
             )}
           </div>
         )}
-
-        <div>
-          <h3 className={`${rpeTokens.typography.heading} mb-3`}>Materials</h3>
-          <div className="space-y-3">
-            {structureMaterials.map((mat) => (
-              <div key={mat.id} className={`${rpeTokens.colors.background.surface} p-3 ${rpeTokens.layout.borderRadius}`}>
-                <div className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}>{mat.name}</div>
-                <div className={`text-xs ${rpeTokens.colors.text.muted} mt-1 capitalize`}>{mat.type}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div>
-          <h3 className={`${rpeTokens.typography.heading} mb-3`}>Connectors</h3>
-          <div className="space-y-2">
-            {connections.map((conn) => (
-              <label key={conn.id} className={`flex items-center gap-2 text-sm ${rpeTokens.colors.text.secondary}`}>
-                <input type="checkbox" className={`${rpeTokens.layout.borderRadius} border-slate-600 bg-slate-700`} defaultChecked />
-                {conn.name}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className={`${rpeTokens.typography.heading} mb-3`}>Cost Estimate</h3>
-          <div className="space-y-2 text-sm">
-            {costItems.map((cost) => (
-              <div key={cost.id} className={`flex justify-between border-b ${rpeTokens.colors.borders.divider} pb-1 mb-1`}>
-                <span className={rpeTokens.colors.text.muted}>{cost.name}</span>
-                <span className={`${rpeTokens.colors.text.primary} ${rpeTokens.typography.data}`}>₱{cost.placeholderCost.toLocaleString()}</span>
-              </div>
-            ))}
-            <div className={`flex justify-between font-bold pt-2 ${rpeTokens.colors.text.primary}`}>
-              <span>Total Estimated</span>
-              <span className={rpeTokens.typography.data}>₱{costItems.reduce((acc, curr) => acc + curr.placeholderCost, 0).toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
 
         <ExportPanel simulationStatus={simulationStatus} />
       </div>
