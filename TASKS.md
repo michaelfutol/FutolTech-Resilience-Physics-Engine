@@ -17,12 +17,16 @@
 - [x] Retire legacy Material/CostItem/fixed UpgradeRule paths from active application code.
 - [x] Automated catalog/cost/derivation/persistence/workflow tests and CI.
 - [ ] Perform manual browser visual acceptance: selectors, quantity/rate overrides, upgrade Apply, Reset, Create Candidate, refresh persistence, lineage, validation warnings.
-- [ ] Record final Phase 2 exit checkpoint after browser acceptance and dependency classification.
+- [ ] Record final Phase 2 exit checkpoint after browser acceptance and dependency classification/remediation.
 
 ## Cross-Cutting Dependency Hygiene
-- [ ] Investigate current npm advisories deliberately and classify direct/transitive/reachability/relevance.
+- [x] Classify the direct Next.js advisory gate and record it in `docs/DEPENDENCY_ADVISORY_CLASSIFICATION.md`.
+- [ ] Upgrade `next` + matching `eslint-config-next` from vulnerable 16.2.10 to a compatible patched release (minimum identified fix 16.2.11).
+- [ ] Regenerate `package-lock.json`; do not hand-edit integrity data.
+- [ ] Run a fresh `npm audit` and classify any remaining direct/transitive advisories.
+- [ ] Run full CI after the dependency patch.
 - [ ] Do not use `npm audit fix --force` blindly.
-- [ ] Resolve or explicitly risk-document relevant advisories before adding the first new physics dependency.
+- [ ] Keep Rapier blocked until the dependency gate is green.
 
 ## Phase 3 — Genesis Test Chamber
 - [x] Define versioned Genesis wind, panel, connection, evidence-layer and result types.
@@ -31,8 +35,8 @@
 - [x] Add panel action `F = qAC` with caller-supplied area and coefficient.
 - [x] Add deterministic connection demand/capacity assessment; unknown capacity remains `unverified`.
 - [x] Lock Null House result type to `N/A / no_physical_specimen`.
-- [ ] Create semi-transparent Null House envelope in the viewport and expose the `N/A` result contract.
-- [ ] Add Fast Smoke / streamline visualization explicitly labeled non-CFD.
+- [x] Create semi-transparent Null House envelope in the viewport and expose the `N/A` result contract.
+- [x] Add Fast Smoke / streamline visualization explicitly labeled non-CFD and disabled until explicit speed/direction input is supplied.
 - [ ] Add one panel wired to the analytical wind-action result.
 - [ ] Add explicit connection object/event state in the scene.
 - [ ] Install/integrate Rapier only after dependency-audit gate.

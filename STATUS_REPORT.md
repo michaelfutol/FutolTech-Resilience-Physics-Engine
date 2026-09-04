@@ -2,37 +2,30 @@
 
 **Repository:** `michaelfutol/FutolTech-Resilience-Physics-Engine`  
 **Active branch:** `lum-rpe-takeover`  
-**Roadmap:** locked in `ROADMAP.md`  
-**Latest implemented code checkpoint:** `effa98b6f4b40199737c148c0fbc83b62dfd2ad0` — CI green.
+**Roadmap:** locked in `ROADMAP.md`
 
 ## Current truth
 
-RPE remains a Phase 2 prototype/costing workspace on top of a scripted visual shell, but Phase 3 now has its first real **pure analytical mechanics foundation**. The existing Typhoon playback is still conceptual/scripted and must not be confused with this new analytical calculation layer.
+RPE remains a Phase 2 prototype/costing workspace on top of a scripted visual shell, with Phase 3 Genesis now containing a separate analytical mechanics foundation plus a Null House/Fast Smoke scene path. Scripted Typhoon playback remains conceptual and is not promoted to calculated physics.
 
 ### Phase 2
 - Data spine, deterministic costing, immutable A0→draft→candidate derivation, catalog/upgrade UI migration, persistence, and automated verification are implemented.
 - Manual browser visual acceptance is still required before recording the final Phase 2 exit checkpoint.
-- Dependency advisories still require deliberate classification before introducing Rapier or another new physics dependency.
 
-### Phase 3 Genesis foundation now implemented
-- `src/types/genesis.ts` defines versioned Genesis wind/panel/connection/result types.
-- Evidence layers explicitly distinguish `manual_code`, `solver`, `rpe_analytical`, `rpe_simulation`, and `physical_test`.
-- `src/lib/genesis/wind.ts` implements kph→m/s, `q = 0.5ρV²`, `F = qAC`, and deterministic connection demand/capacity assessment.
-- No air density, pressure coefficient, exposed area, or connection capacity is invented by the engine.
-- Missing capacity stays `null` and produces `unverified`.
-- Null House structural result is typed as `N/A / no_physical_specimen`, never PASS.
-- Automated Genesis arithmetic/provenance behavior is covered by `tests/genesis-wind.test.ts`.
+### Dependency gate
+- The direct application dependency `next@16.2.10` is within multiple July 2026 advisory ranges fixed in 16.2.11.
+- The repository must upgrade Next.js and matching `eslint-config-next`, regenerate the lockfile, run a fresh package audit, and pass full CI before Rapier is introduced.
+- No forced dependency rewrite or manual lockfile-integrity edit is allowed.
+- See `docs/DEPENDENCY_ADVISORY_CLASSIFICATION.md`.
 
-## Verification
-
-Checkpoint `effa98b6f4b40199737c148c0fbc83b62dfd2ad0` passed the existing GitHub Actions gate: dependency install, lint, strict TypeScript/test compilation, automated tests including Genesis, and production build.
-
-## Known blockers / gates
-
-1. Manual browser visual acceptance of the completed Phase 2 interactions is still not recorded.
-2. Current npm advisories must be deliberately classified; do not run `npm audit fix --force` blindly.
-3. Rapier remains gated behind that dependency review.
-4. The Genesis analytical formula is not a code-specific wind design procedure and is not CFD.
+### Phase 3 Genesis
+- Versioned Genesis wind/panel/connection/result types remain the evidence contract.
+- Pure analytical wind helpers remain separate from visualization.
+- The viewport now has an explicit **Genesis Null House** mode: a semi-transparent empty envelope only, with structural result `N/A / no_physical_specimen`.
+- Fast Smoke uses browser-drawn streamlines and is labeled **NON-CFD**.
+- Wind speed and direction have no hidden defaults; the smoke view remains disabled until the user supplies both values.
+- Smoke speed is currently visualization metadata only; it does not create pressure, force, capacity, PASS/FAIL, CFD, or solver evidence.
+- Rapier remains gated.
 
 ## Engineering doctrine
 
@@ -42,4 +35,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Perform the dependency-advisory classification and Phase 2 browser acceptance if an executable deployment/browser target is available; then implement the Genesis **Null House scene/result contract and Fast Smoke visualization** without introducing structural PASS logic or CFD claims. Rapier installation remains blocked until dependency review is complete.
+Patch Next.js to a compatible fixed release (minimum identified fix: 16.2.11), regenerate the lockfile in a network-enabled environment, run fresh package audit + full CI, and complete Phase 2 browser acceptance. Only after that gate may Rapier be added. In parallel with no new dependency, the next Genesis code batch is one physical panel wired to the existing tested analytical `q = 0.5ρV²` and `F = qAC` path using caller-supplied/provenanced inputs.

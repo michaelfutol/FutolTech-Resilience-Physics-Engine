@@ -1,5 +1,18 @@
 # Worklog
 
+## [2026-09-05] - Genesis Null House / Fast Smoke + Dependency Gate Classification
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and confirmed branch head `edab3d686351b519f8fe7d9d04dfff0c5fb1e236` had successful RPE CI run 86 before coding.
+- Classified a concrete direct dependency blocker: `next@16.2.10` is within multiple July 2026 advisory ranges; public advisories identify 16.2.11 as the minimum fixed release for the reviewed issues. Recorded the gate in `docs/DEPENDENCY_ADVISORY_CLASSIFICATION.md`.
+- Did not use `npm audit fix --force`, did not hand-edit lockfile integrity data, and did not install Rapier.
+- Added a self-contained Genesis Null House mode to `Viewport3D` using only existing React Three Fiber / Drei dependencies.
+- Null House renders as a semi-transparent wireframe envelope only; no walls, roof, frame, mass, stiffness, connections, or structural capacity are assigned.
+- Exposed the typed Null House result contract in the viewport: `N/A / no_physical_specimen`, evidence layer `rpe_simulation`.
+- Added Fast Smoke as browser-drawn streamlines explicitly labeled `NON-CFD`.
+- Fast Smoke requires user-entered wind speed and direction; both fields start blank so no hidden wind input is adopted.
+- The current speed input is visualization metadata only; it does not generate pressure, force, PASS/FAIL, solver output, CFD output, or physical-test evidence.
+- Existing conceptual scripted viewport remains available as a separate mode so prior Phase 1 playback is not silently reclassified as mechanics.
+- Updated `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` to preserve the dependency and evidence gates.
+
 ## [2026-09-04] - Genesis Analytical Wind Foundation
 - Re-read the locked roadmap, status, tasks, next steps, worklog, active branch, and latest CI before coding.
 - Confirmed canonical active branch `lum-rpe-takeover` at `bd45e6bb4e8d485a0d14b776d38af78a3221151f`; its latest CI run was green before this batch.
