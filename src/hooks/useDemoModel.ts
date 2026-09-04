@@ -1,20 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   getAssemblies,
-  getCostItems,
   getCostRates,
   getDemoSpecimen,
   getFailureEvents,
   getHazards,
-  getMaterials,
   getProducts,
   getRunModes,
-  getUpgradeRules,
-  getUpgrades,
+  getUpgradeDefinitions,
   validateDemoCatalog,
 } from "@/lib/demo-data";
 import { calculateSpecimenCost } from "@/lib/costing/calculateSpecimenCost";
 import {
+  applyUpgradeDefinition,
   createCandidateFromDraft,
   createSpecimenDraft,
   diffSpecimenDraft,
@@ -24,28 +22,25 @@ import {
 import type {
   Assembly,
   AssemblyQuantityOverride,
-  CostItem,
   CostRate,
   CostRateOverride,
   FailureEvent,
   Hazards,
-  Material,
   Product,
-  PrototypeRecommendation,
   RunMode,
   RunSettings,
   Specimen,
-  UpgradeOption,
-  UpgradeRule,
+  UpgradeDefinition,
 } from "@/types/rpe";
 
 export function useDemoModel() {
   const [specimen] = useState<Specimen | null>(() => getDemoSpecimen() || null);
 
-  // Phase 2 catalog/data spine. These source-library records remain immutable in UI state.
+  // Phase 2 source libraries remain immutable in UI state.
   const [products] = useState<Product[]>(getProducts());
   const [assemblies] = useState<Assembly[]>(getAssemblies());
   const [costRates] = useState<CostRate[]>(getCostRates());
+  const [upgradeDefinitions] = useState<UpgradeDefinition[]>(getUpgradeDefinitions());
   const [catalogValidation] = useState(() => validateDemoCatalog());
 
   // Temporary structural draft. The baseline specimen above is never mutated.
@@ -56,18 +51,13 @@ export function useDemoModel() {
   const [createdCandidate, setCreatedCandidate] = useState<Specimen | null>(null);
   const [candidateSequence, setCandidateSequence] = useState(1);
 
-  // Cost/procurement context overrides are intentionally separate from specimen ancestry.
+  // Cost/procurement context is intentionally separate from specimen ancestry.
   const [costRateOverrides, setCostRateOverrides] = useState<CostRateOverride[]>([]);
   const [quantityOverrides, setQuantityOverrides] = useState<AssemblyQuantityOverride[]>([]);
 
-  // Legacy Phase 1 data retained until Phase 2D migration is complete.
-  const [materials] = useState<Material[]>(getMaterials());
   const [hazards] = useState<Hazards>(getHazards());
   const [activeHazard, setActiveHazard] = useState<string>("typhoon_index_300");
   const [failureEvents] = useState<FailureEvent[]>(getFailureEvents());
-  const [costItems] = useState<CostItem[]>(getCostItems());
-  const [availableUpgrades] = useState<UpgradeOption[]>(getUpgrades());
-  const [selectedUpgradeIds, setSelectedUpgradeIds] = useState<string[]>([]);
 
   const baselineCost = useMemo(() => {
     if (!specimen || !catalogValidation.valid) return null;
@@ -116,9 +106,7 @@ export function useDemoModel() {
 
   const updateDraftAssembly = (slot: string, assemblyId: string) => {
     const assembly = assemblies.find((item) => item.id === assemblyId);
-    if (!assembly) {
-      throw new Error(`Cannot select missing assembly ${assemblyId}`);
-    }
+    if (!assembly) throw new Error(`Cannot select missing assembly ${assemblyId}`);
     if (assembly.category !== slot) {
       throw new Error(
         `Cannot assign ${assembly.id} category ${assembly.category} to draft slot ${slot}`
@@ -126,21 +114,49 @@ export function useDemoModel() {
     }
 
     const previousAssemblyId = draft?.assemblySelections[slot];
-    setDraft((previous) =>
-      previous ? setDraftAssembly(previous, slot, assemblyId) : previous
-    );
+    setDraft((previous) => {
+      if (!previous) return previous;
+      const manuallyEdited = setDraftAssembly(previous, slot, assemblyId);
+      const invalidatedUpgradeIds = new Set(
+        upgradeDefinitions
+          .filter((definition) =>
+            definition.assemblyChanges.some((change) => change.slot === slot)
+          )
+          .map((definition) => definition.id)
+      );
+      return {
+        ...manuallyEdited,
+        appliedUpgradeIds: manuallyEdited.appliedUpgradeIds.filter(
+          (id) => !invalidatedUpgradeIds.has(id)
+        ),
+      };
+    });
 
-    // Quantity overrides belong to a specific assembly/component. Discard only
-    // overrides for the assembly leaving this slot so stale takeoff values cannot
-    // silently follow a different product system.
     if (previousAssemblyId && previousAssemblyId !== assemblyId) {
       setQuantityOverrides((previous) =>
         previous.filter((override) => override.assemblyId !== previousAssemblyId)
       );
     }
+    setCreatedCandidate(null);
+  };
 
-    // A structural edit means a previously created session candidate no longer
-    // represents the current structural draft.
+  const applyUpgrade = (upgradeId: string) => {
+    if (!specimen || !draft) return;
+    const upgrade = upgradeDefinitions.find((item) => item.id === upgradeId);
+    if (!upgrade) throw new Error(`Cannot apply missing upgrade ${upgradeId}`);
+
+    const result = applyUpgradeDefinition(
+      specimen,
+      draft,
+      upgrade,
+      upgradeDefinitions
+    );
+    const selectedAssemblyIds = new Set(Object.values(result.draft.assemblySelections));
+
+    setDraft(result.draft);
+    setQuantityOverrides((previous) =>
+      previous.filter((override) => selectedAssemblyIds.has(override.assemblyId))
+    );
     setCreatedCandidate(null);
   };
 
@@ -185,7 +201,9 @@ export function useDemoModel() {
     quantity: number | null
   ) => {
     const assembly = assemblies.find((item) => item.id === assemblyId);
-    if (!assembly) throw new Error(`Cannot override quantity for missing assembly ${assemblyId}`);
+    if (!assembly) {
+      throw new Error(`Cannot override quantity for missing assembly ${assemblyId}`);
+    }
     if (
       !Number.isInteger(componentIndex) ||
       componentIndex < 0 ||
@@ -271,7 +289,9 @@ export function useDemoModel() {
   });
 
   // Simulation State — still scripted Phase 1 playback, not calculated mechanics.
-  const [simulationStatus, setSimulationStatus] = useState<"idle" | "running" | "complete">("idle");
+  const [simulationStatus, setSimulationStatus] = useState<
+    "idle" | "running" | "complete"
+  >("idle");
   const [activeEventIndex, setActiveEventIndex] = useState<number>(-1);
   const [elapsedTime, setElapsedTime] = useState<string>("00:00");
   const [activeFailureEvent, setActiveFailureEvent] = useState<FailureEvent | null>(null);
@@ -290,14 +310,20 @@ export function useDemoModel() {
 
       setActiveEventIndex((prevIndex) => {
         const nextIndex = prevIndex + 1;
-        if (nextIndex < failureEvents.length && timeString >= failureEvents[nextIndex].time) {
+        if (
+          nextIndex < failureEvents.length &&
+          timeString >= failureEvents[nextIndex].time
+        ) {
           setActiveFailureEvent(failureEvents[nextIndex]);
           return nextIndex;
         }
         return prevIndex;
       });
 
-      if (runSettings.mode === "fixed_duration" && currentSeconds >= runSettings.durationSeconds) {
+      if (
+        runSettings.mode === "fixed_duration" &&
+        currentSeconds >= runSettings.durationSeconds
+      ) {
         clearInterval(interval);
         setSimulationStatus("complete");
       } else if (currentSeconds >= 300) {
@@ -323,39 +349,20 @@ export function useDemoModel() {
     setElapsedTime("00:00");
   };
 
-  const toggleUpgrade = (id: string) => {
-    setSelectedUpgradeIds((prev) =>
-      prev.includes(id) ? prev.filter((upgradeId) => upgradeId !== id) : [...prev, id]
+  const recommendedUpgradeDefinitions = useMemo(() => {
+    if (!activeFailureEvent) return [];
+    return upgradeDefinitions.filter((definition) =>
+      definition.targetFailureTypes.includes(activeFailureEvent.type)
     );
-  };
-
-  const getRecommendation = (): PrototypeRecommendation | null => {
-    if (simulationStatus !== "complete" || !activeFailureEvent || !specimen) return null;
-
-    const rules = getUpgradeRules();
-    const matchedRule = rules.find(
-      (rule: UpgradeRule) => rule.failureType === activeFailureEvent.type
-    );
-
-    if (matchedRule) {
-      return {
-        currentSpecimenId: specimen.id,
-        nextSpecimenId: matchedRule.nextSpecimenId,
-        reason: `Rule match for ${activeFailureEvent.type}`,
-        recommendedUpgrades: matchedRule.recommendedUpgrades,
-        estimatedAddedCostPhp: 0,
-        notes: [],
-      };
-    }
-
-    return null;
-  };
+  }, [activeFailureEvent, upgradeDefinitions]);
 
   return {
     specimen,
     products,
     assemblies,
     costRates,
+    upgradeDefinitions,
+    recommendedUpgradeDefinitions,
     catalogValidation,
     draft,
     draftSpecimen,
@@ -367,25 +374,20 @@ export function useDemoModel() {
     baselineCost,
     draftCost,
     updateDraftAssembly,
+    applyUpgrade,
     updateCostRateOverride,
     updateQuantityOverride,
     clearCostContextOverrides,
     resetDraft,
     createCandidate,
     createdCandidate,
-    materials,
     hazards,
     activeHazard,
     setActiveHazard,
     failureEvents,
-    costItems,
-    availableUpgrades,
-    selectedUpgradeIds,
-    toggleUpgrade,
     runModes,
     runSettings,
     setRunSettings,
-    recommendation: getRecommendation(),
     simulationStatus,
     activeEventIndex,
     elapsedTime,
