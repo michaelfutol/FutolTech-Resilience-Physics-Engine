@@ -47,6 +47,56 @@ export interface CostRate {
   verificationStatus: "unverified" | "verified";
 }
 
+export interface CostRateOverride {
+  referenceId: string;
+  unitRate: number;
+  sourceNote?: string;
+}
+
+export interface CostedComponent {
+  productId: string;
+  productName: string;
+  role: string;
+  unit: string;
+  baseQuantity: number;
+  wastePercent: number;
+  quantityWithWaste: number;
+  unitRate: number;
+  currency: string;
+  materialCost: number;
+  rateType: CostRate["rateType"];
+  rateId: string | null;
+  sourceNote: string;
+}
+
+export interface AssemblyCostResult {
+  assemblyId: string;
+  assemblyName: string;
+  components: CostedComponent[];
+  materialSubtotal: number;
+  laborCost: number;
+  equipmentCost: number;
+  installationCost: number;
+  totalCost: number;
+  currency: string;
+}
+
+export interface SpecimenAssemblyCost {
+  slot: string;
+  assembly: AssemblyCostResult;
+}
+
+export interface SpecimenCostResult {
+  specimenId: string;
+  assemblyCosts: SpecimenAssemblyCost[];
+  materialSubtotal: number;
+  laborSubtotal: number;
+  equipmentSubtotal: number;
+  installationSubtotal: number;
+  totalCost: number;
+  currency: string;
+}
+
 export interface Specimen {
   id: string;
   name: string;
