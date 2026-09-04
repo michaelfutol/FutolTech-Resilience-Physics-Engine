@@ -10,7 +10,14 @@ import {
   getUpgradeDefinitions,
   validateDemoCatalog,
 } from "@/lib/demo-data";
+import { validateCatalog } from "@/lib/catalog/validateReferences";
 import { calculateSpecimenCost } from "@/lib/costing/calculateSpecimenCost";
+import {
+  CANDIDATE_WORKSPACE_STORAGE_KEY,
+  nextCandidateSequence,
+  parseCandidateWorkspace,
+  serializeCandidateWorkspace,
+} from "@/lib/prototypes/candidateWorkspace";
 import {
   applyUpgradeDefinition,
   createCandidateFromDraft,
@@ -49,7 +56,10 @@ export function useDemoModel() {
     return baseline ? createSpecimenDraft(baseline) : null;
   });
   const [createdCandidate, setCreatedCandidate] = useState<Specimen | null>(null);
+  const [savedCandidates, setSavedCandidates] = useState<Specimen[]>([]);
   const [candidateSequence, setCandidateSequence] = useState(1);
+  const [candidateWorkspaceReady, setCandidateWorkspaceReady] = useState(false);
+  const [candidateWorkspaceWarnings, setCandidateWorkspaceWarnings] = useState<string[]>([]);
 
   // Cost/procurement context is intentionally separate from specimen ancestry.
   const [costRateOverrides, setCostRateOverrides] = useState<CostRateOverride[]>([]);
@@ -58,6 +68,44 @@ export function useDemoModel() {
   const [hazards] = useState<Hazards>(getHazards());
   const [activeHazard, setActiveHazard] = useState<string>("typhoon_index_300");
   const [failureEvents] = useState<FailureEvent[]>(getFailureEvents());
+
+  // Browser-local workspace persistence is a convenience layer only. Every loaded
+  // candidate is revalidated against the current immutable catalog before use.
+  useEffect(() => {
+    if (!specimen) {
+      setCandidateWorkspaceReady(true);
+      return;
+    }
+
+    const parsed = parseCandidateWorkspace(
+      window.localStorage.getItem(CANDIDATE_WORKSPACE_STORAGE_KEY),
+      specimen.id
+    );
+    const warnings = [...parsed.errors];
+    const validCandidates: Specimen[] = [];
+
+    for (const candidate of parsed.candidates) {
+      const validation = validateCatalog(
+        products,
+        assemblies,
+        costRates,
+        [specimen, candidate],
+        upgradeDefinitions
+      );
+      if (validation.valid) {
+        validCandidates.push(candidate);
+      } else {
+        warnings.push(
+          `Saved candidate ${candidate.id} rejected by current catalog: ${validation.errors.join(" | ")}`
+        );
+      }
+    }
+
+    setSavedCandidates(validCandidates);
+    setCandidateSequence(nextCandidateSequence(validCandidates));
+    setCandidateWorkspaceWarnings(warnings);
+    setCandidateWorkspaceReady(true);
+  }, [specimen, products, assemblies, costRates, upgradeDefinitions]);
 
   const baselineCost = useMemo(() => {
     if (!specimen || !catalogValidation.valid) return null;
@@ -267,17 +315,45 @@ export function useDemoModel() {
   };
 
   const createCandidate = () => {
-    if (!specimen || !draft || !draftHasChanges || createdCandidate) return;
+    if (
+      !specimen ||
+      !draft ||
+      !draftHasChanges ||
+      createdCandidate ||
+      !candidateWorkspaceReady
+    ) {
+      return;
+    }
 
-    const candidateId = `specimen-a${candidateSequence}-dignity-3x3`;
+    let sequence = candidateSequence;
+    let candidateId = `specimen-a${sequence}-dignity-3x3`;
+    while (savedCandidates.some((candidate) => candidate.id === candidateId)) {
+      sequence += 1;
+      candidateId = `specimen-a${sequence}-dignity-3x3`;
+    }
+
     const result = createCandidateFromDraft(specimen, draft, {
       candidateId,
-      candidateName: `Dignity Native Homes (A${candidateSequence} Candidate)`,
+      candidateName: `Dignity Native Homes (A${sequence} Candidate)`,
       verificationStatus: "unverified",
     });
 
+    const nextCandidates = [...savedCandidates, result.candidate];
+    try {
+      window.localStorage.setItem(
+        CANDIDATE_WORKSPACE_STORAGE_KEY,
+        serializeCandidateWorkspace(specimen.id, nextCandidates)
+      );
+      setCandidateWorkspaceWarnings([]);
+    } catch {
+      setCandidateWorkspaceWarnings([
+        "Candidate was created in this session but could not be persisted to browser storage.",
+      ]);
+    }
+
+    setSavedCandidates(nextCandidates);
     setCreatedCandidate(result.candidate);
-    setCandidateSequence((previous) => previous + 1);
+    setCandidateSequence(sequence + 1);
   };
 
   // Simulation Settings
@@ -381,6 +457,9 @@ export function useDemoModel() {
     resetDraft,
     createCandidate,
     createdCandidate,
+    savedCandidates,
+    candidateWorkspaceReady,
+    candidateWorkspaceWarnings,
     hazards,
     activeHazard,
     setActiveHazard,
