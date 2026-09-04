@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { validateGenesisCollisionTargetInput } from "../src/lib/genesis/collisionTarget";
+import {
+  createGenesisCollisionTargetUserData,
+  resolveGenesisCollisionTargetObjectId,
+  validateGenesisCollisionTargetInput,
+} from "../src/lib/genesis/collisionTarget";
 import type { GenesisCollisionTargetInput } from "../src/types/genesisCollisionTarget";
 
 const explicitBox: GenesisCollisionTargetInput = {
@@ -75,4 +79,27 @@ test("collision-target contract rejects unsupported runtime schema/shape values"
       }),
     /Unsupported collision target shape/,
   );
+});
+
+test("collision-target runtime identity resolves only the explicitly validated target", () => {
+  const target = validateGenesisCollisionTargetInput(explicitBox);
+  const userData = createGenesisCollisionTargetUserData(target);
+
+  assert.equal(resolveGenesisCollisionTargetObjectId(userData, target), "target-fixture");
+  assert.equal(
+    resolveGenesisCollisionTargetObjectId(
+      { ...userData, rpeObjectId: "different-target" },
+      target,
+    ),
+    null,
+  );
+  assert.equal(
+    resolveGenesisCollisionTargetObjectId(
+      { ...userData, rpeRole: "unrelated_object" },
+      target,
+    ),
+    null,
+  );
+  assert.equal(resolveGenesisCollisionTargetObjectId(null, target), null);
+  assert.equal(resolveGenesisCollisionTargetObjectId(userData, null), null);
 });

@@ -4,6 +4,13 @@ import type {
   GenesisCollisionTargetInput,
 } from "../../types/genesisCollisionTarget";
 
+export const GENESIS_COLLISION_TARGET_USER_DATA_ROLE = "genesis_collision_target" as const;
+
+export interface GenesisCollisionTargetUserData {
+  rpeRole: typeof GENESIS_COLLISION_TARGET_USER_DATA_ROLE;
+  rpeObjectId: string;
+}
+
 function assertFiniteVector(
   label: string,
   vector: { x: number; y: number; z: number },
@@ -55,4 +62,32 @@ export function validateGenesisCollisionTargetInput(
       verificationState: input.verificationState,
     },
   };
+}
+
+export function createGenesisCollisionTargetUserData(
+  target: GenesisCollisionTargetContract,
+): GenesisCollisionTargetUserData {
+  return {
+    rpeRole: GENESIS_COLLISION_TARGET_USER_DATA_ROLE,
+    rpeObjectId: target.objectId,
+  };
+}
+
+export function resolveGenesisCollisionTargetObjectId(
+  userData: unknown,
+  expectedTarget: GenesisCollisionTargetContract | null,
+): string | null {
+  if (!expectedTarget || typeof userData !== "object" || userData === null) {
+    return null;
+  }
+
+  const candidate = userData as Partial<GenesisCollisionTargetUserData>;
+  if (
+    candidate.rpeRole !== GENESIS_COLLISION_TARGET_USER_DATA_ROLE ||
+    candidate.rpeObjectId !== expectedTarget.objectId
+  ) {
+    return null;
+  }
+
+  return expectedTarget.objectId;
 }

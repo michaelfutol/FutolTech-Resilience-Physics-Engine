@@ -14,12 +14,18 @@ import {
   type GenesisRigidBodyGateResult,
   type GenesisVector3,
 } from "@/types/genesis";
+import type { GenesisCollisionTargetContract } from "@/types/genesisCollisionTarget";
 import {
   buildGenesisEvidenceLog,
   calculateGenesisPanelExperiment,
 } from "@/lib/genesis/panelExperiment";
 import { assessGenesisRigidBodyReleaseGate } from "@/lib/genesis/rigidBodyGate";
 import { assessGenesisDebrisDynamicsGate } from "@/lib/genesis/debrisDynamicsGate";
+import {
+  createGenesisCollisionTargetUserData,
+  resolveGenesisCollisionTargetObjectId,
+  validateGenesisCollisionTargetInput,
+} from "@/lib/genesis/collisionTarget";
 import {
   createGenesisLiveSimulationEvidence,
   recordGenesisRapierCollisionEnter,
@@ -34,6 +40,7 @@ interface Viewport3DProps {
 }
 
 type ViewMode = "conceptual" | "genesis_null" | "genesis_panel";
+type TargetVerificationText = "" | "verified" | "provisional" | "unverified";
 
 type CollisionEvidenceState = {
   inputKey: string;
@@ -131,18 +138,31 @@ function StaticPanel({ widthM, heightM }: { widthM: number; heightM: number }) {
   );
 }
 
+function CollisionTargetVisual({ target }: { target: GenesisCollisionTargetContract }) {
+  return (
+    <Box
+      args={[target.sizeM.x, target.sizeM.y, target.sizeM.z]}
+      position={[target.centerM.x, target.centerM.y, target.centerM.z]}
+    >
+      <meshStandardMaterial color="#a855f7" transparent opacity={0.58} />
+    </Box>
+  );
+}
+
 function DynamicPanel({
   widthM,
   heightM,
   releaseGate,
   dynamicsGate,
+  collisionTarget,
   onCollisionEnter,
 }: {
   widthM: number;
   heightM: number;
   releaseGate: GenesisRigidBodyGateResult;
   dynamicsGate: GenesisDebrisDynamicsGateResult;
-  onCollisionEnter: () => void;
+  collisionTarget: GenesisCollisionTargetContract | null;
+  onCollisionEnter: (otherUserData: unknown) => void;
 }) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
 
@@ -187,12 +207,29 @@ function DynamicPanel({
         colliders="cuboid"
         mass={releaseGate.massKg}
         position={[0, heightM / 2, 0]}
-        onCollisionEnter={onCollisionEnter}
+        onCollisionEnter={(event) => onCollisionEnter(event.other.rigidBody?.userData)}
       >
         <Box args={[0.08, heightM, widthM]}>
           <meshStandardMaterial color="#f59e0b" transparent opacity={0.8} />
         </Box>
       </RigidBody>
+
+      {collisionTarget && (
+        <RigidBody
+          type="fixed"
+          colliders="cuboid"
+          position={[
+            collisionTarget.centerM.x,
+            collisionTarget.centerM.y,
+            collisionTarget.centerM.z,
+          ]}
+          userData={createGenesisCollisionTargetUserData(collisionTarget)}
+        >
+          <Box args={[collisionTarget.sizeM.x, collisionTarget.sizeM.y, collisionTarget.sizeM.z]}>
+            <meshStandardMaterial color="#a855f7" transparent opacity={0.72} />
+          </Box>
+        </RigidBody>
+      )}
     </Physics>
   );
 }
@@ -204,6 +241,7 @@ function GenesisPanelScene({
   experiment,
   releaseGate,
   dynamicsGate,
+  collisionTarget,
   onCollisionEnter,
 }: {
   widthM: number;
@@ -212,7 +250,8 @@ function GenesisPanelScene({
   experiment: GenesisPanelExperimentResult | null;
   releaseGate: GenesisRigidBodyGateResult | null;
   dynamicsGate: GenesisDebrisDynamicsGateResult | null;
-  onCollisionEnter: () => void;
+  collisionTarget: GenesisCollisionTargetContract | null;
+  onCollisionEnter: (otherUserData: unknown) => void;
 }) {
   const halfWidth = widthM / 2;
   const halfHeight = heightM / 2;
@@ -249,10 +288,14 @@ function GenesisPanelScene({
           heightM={heightM}
           releaseGate={releaseGate}
           dynamicsGate={dynamicsGate}
+          collisionTarget={collisionTarget}
           onCollisionEnter={onCollisionEnter}
         />
       ) : (
-        <StaticPanel widthM={widthM} heightM={heightM} />
+        <>
+          <StaticPanel widthM={widthM} heightM={heightM} />
+          {collisionTarget && <CollisionTargetVisual target={collisionTarget} />}
+        </>
       )}
 
       {connectionPositions.map((position, index) => (
@@ -276,6 +319,21 @@ function GenesisPanelScene({
           Panel 001 · {simulationReady ? "Rapier rigid body · explicit initial conditions" : "attached analytical state"}
         </div>
       </Html>
+
+      {collisionTarget && (
+        <Html
+          position={[
+            collisionTarget.centerM.x,
+            collisionTarget.centerM.y + collisionTarget.sizeM.y / 2 + 0.2,
+            collisionTarget.centerM.z,
+          ]}
+          center
+        >
+          <div className="rounded border border-purple-700 bg-slate-950/90 px-2 py-1 text-[10px] text-purple-200 whitespace-nowrap">
+            Target · {collisionTarget.objectId} · geometry/provenance only
+          </div>
+        </Html>
+      )}
 
       {experiment && (
         <Html position={[0.2, halfHeight, halfWidth + 0.35]} center>
@@ -338,6 +396,15 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const [angularXText, setAngularXText] = useState("");
   const [angularYText, setAngularYText] = useState("");
   const [angularZText, setAngularZText] = useState("");
+  const [targetIdText, setTargetIdText] = useState("");
+  const [targetCenterXText, setTargetCenterXText] = useState("");
+  const [targetCenterYText, setTargetCenterYText] = useState("");
+  const [targetCenterZText, setTargetCenterZText] = useState("");
+  const [targetSizeXText, setTargetSizeXText] = useState("");
+  const [targetSizeYText, setTargetSizeYText] = useState("");
+  const [targetSizeZText, setTargetSizeZText] = useState("");
+  const [targetSourceNoteText, setTargetSourceNoteText] = useState("");
+  const [targetVerificationText, setTargetVerificationText] = useState<TargetVerificationText>("");
   const [collisionEvidenceState, setCollisionEvidenceState] = useState<CollisionEvidenceState>({
     inputKey: "",
     snapshot: null,
@@ -354,6 +421,8 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const gravityMps2 = parseVector3(gravityXText, gravityYText, gravityZText);
   const initialLinearVelocityMps = parseVector3(linearXText, linearYText, linearZText);
   const initialAngularVelocityRadPerSec = parseVector3(angularXText, angularYText, angularZText);
+  const targetCenterM = parseVector3(targetCenterXText, targetCenterYText, targetCenterZText);
+  const targetSizeM = parseVector3(targetSizeXText, targetSizeYText, targetSizeZText);
 
   const validSpeed = speedKph !== null && speedKph >= 0;
   const validDirection = directionDegrees !== null;
@@ -428,6 +497,32 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     }
   }, [releaseGate, gravityMps2, initialLinearVelocityMps, initialAngularVelocityRadPerSec]);
 
+  const collisionTarget = useMemo<GenesisCollisionTargetContract | null>(() => {
+    if (
+      targetIdText.trim() === "" ||
+      targetSourceNoteText.trim() === "" ||
+      targetVerificationText === "" ||
+      targetCenterM === null ||
+      targetSizeM === null
+    ) {
+      return null;
+    }
+
+    try {
+      return validateGenesisCollisionTargetInput({
+        schemaVersion: GENESIS_SCHEMA_VERSION,
+        id: targetIdText,
+        shape: "box",
+        centerM: targetCenterM,
+        sizeM: targetSizeM,
+        sourceNote: targetSourceNoteText,
+        verificationState: targetVerificationText,
+      });
+    } catch {
+      return null;
+    }
+  }, [targetIdText, targetSourceNoteText, targetVerificationText, targetCenterM, targetSizeM]);
+
   const panelEvidenceLog = useMemo(() => (panelExperiment ? buildGenesisEvidenceLog(panelExperiment) : []), [panelExperiment]);
   const simulationReady = releaseGate?.state === "release_ready" && releaseGate.canRelease && dynamicsGate?.state === "simulation_ready" && dynamicsGate.canSimulate;
 
@@ -449,6 +544,15 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     angularXText,
     angularYText,
     angularZText,
+    targetIdText,
+    targetCenterXText,
+    targetCenterYText,
+    targetCenterZText,
+    targetSizeXText,
+    targetSizeYText,
+    targetSizeZText,
+    targetSourceNoteText,
+    targetVerificationText,
   ].join("|");
 
   const baseLiveEvidence = useMemo<GenesisLiveSimulationEvidenceSnapshot | null>(() => {
@@ -465,8 +569,13 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
       ? collisionEvidenceState.snapshot
       : baseLiveEvidence;
 
-  const handlePanelCollisionEnter = () => {
+  const handlePanelCollisionEnter = (otherUserData: unknown) => {
     if (!baseLiveEvidence) return;
+
+    const otherObjectId = resolveGenesisCollisionTargetObjectId(otherUserData, collisionTarget);
+    const sourceNote = otherObjectId
+      ? `Live Rapier onCollisionEnter callback from Genesis Panel 001 against declared collision target ${otherObjectId}. Collision observation only; no impact force, energy, damage, or contact-property claim.`
+      : "Live Rapier onCollisionEnter callback from Genesis Panel 001; the other collider was not resolved as the currently validated explicit Genesis collision target.";
 
     setCollisionEvidenceState((current) => {
       const startingSnapshot =
@@ -479,8 +588,8 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           inputKey: liveEvidenceInputKey,
           snapshot: recordGenesisRapierCollisionEnter(startingSnapshot, {
             panelId: "genesis-panel-001",
-            otherObjectId: null,
-            sourceNote: "Live Rapier onCollisionEnter callback from Genesis Panel 001; the other collider has no explicitly modeled or caller-supplied RPE object identity.",
+            otherObjectId,
+            sourceNote,
           }),
         };
       } catch {
@@ -544,6 +653,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             experiment={panelExperiment}
             releaseGate={releaseGate}
             dynamicsGate={dynamicsGate}
+            collisionTarget={collisionTarget}
             onCollisionEnter={handlePanelCollisionEnter}
           />
         ) : viewMode === "genesis_panel" ? (
@@ -607,6 +717,24 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             <p className="mt-2 text-[10px] text-slate-500">Zero vectors are accepted only when all three zero components are explicitly entered. Panel force is not converted into an impulse or continuing aerodynamic force.</p>
           </div>
 
+          <div className="mt-3 border-t border-slate-800 pt-2">
+            <div className="font-semibold text-purple-200">Collision target — explicit geometry/provenance only</div>
+            <p className="mt-1 text-[10px] text-slate-500">No target exists until every field validates. Geometry does not define material, friction, restitution, stiffness, impact force/energy, or damage.</p>
+            <label className="mt-2 block text-slate-300">Target object ID<input className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={targetIdText} onChange={(event) => setTargetIdText(event.target.value)} placeholder="required; no default" /></label>
+            <VectorInputs label="Target center" unit="m" values={[targetCenterXText, targetCenterYText, targetCenterZText]} setters={[setTargetCenterXText, setTargetCenterYText, setTargetCenterZText]} />
+            <VectorInputs label="Target box size" unit="m" values={[targetSizeXText, targetSizeYText, targetSizeZText]} setters={[setTargetSizeXText, setTargetSizeYText, setTargetSizeZText]} />
+            <label className="mt-2 block text-slate-300">Source note<input className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={targetSourceNoteText} onChange={(event) => setTargetSourceNoteText(event.target.value)} placeholder="required provenance" /></label>
+            <label className="mt-2 block text-slate-300">Verification state
+              <select className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={targetVerificationText} onChange={(event) => setTargetVerificationText(event.target.value as TargetVerificationText)}>
+                <option value="">required; no default</option>
+                <option value="verified">verified</option>
+                <option value="provisional">provisional</option>
+                <option value="unverified">unverified</option>
+              </select>
+            </label>
+            <div className="mt-2 text-[10px] text-slate-500">Target contract: <strong>{collisionTarget ? `VALID — ${collisionTarget.objectId}` : "ABSENT / INVALID"}</strong></div>
+          </div>
+
           <div className="mt-3 border-t border-slate-800 pt-2 text-slate-300">
             {!panelExperiment && <div className="text-slate-500">Enter valid wind, density, geometry, and coefficient inputs. Capacity may remain blank, which keeps release blocked as unverified.</div>}
             {panelExperiment && (
@@ -622,6 +750,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                   <div>Release gate: <strong>{releaseGate?.state ?? (validMass ? "not evaluated" : "invalid mass input")}</strong></div>
                   <div className="mt-1">Dynamics gate: <strong>{dynamicsGate?.state ?? "not evaluated"}</strong></div>
                   <div className="mt-1">Rapier: <strong>{simulationReady ? "ACTIVE — RPE SIMULATION" : "BLOCKED"}</strong></div>
+                  <div className="mt-1">Collision target: <strong>{collisionTarget ? `${collisionTarget.objectId} — DECLARED` : "NONE"}</strong></div>
                   {releaseGate && <div className="mt-1 text-[10px] text-slate-500">{releaseGate.reason}</div>}
                   {dynamicsGate && <div className="mt-1 text-[10px] text-slate-500">{dynamicsGate.reason}</div>}
                 </div>
