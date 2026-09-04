@@ -4,13 +4,12 @@ import type {
   CostRateOverride,
   FailureEvent,
   Product,
-  PrototypeRecommendation,
   RunMode,
   RunSettings,
   SimulationRunMode,
   Specimen,
   SpecimenCostResult,
-  UpgradeOption,
+  UpgradeDefinition,
 } from "@/types/rpe";
 import type {
   SpecimenDraft,
@@ -27,6 +26,8 @@ interface CatalogValidationState {
 interface RightPanelProps {
   products: Product[];
   assemblies: Assembly[];
+  upgradeDefinitions: UpgradeDefinition[];
+  recommendedUpgradeDefinitions: UpgradeDefinition[];
   catalogValidation: CatalogValidationState;
   draft: SpecimenDraft | null;
   draftDiff: SpecimenDraftDiff | null;
@@ -37,6 +38,7 @@ interface RightPanelProps {
   baselineCost: SpecimenCostResult | null;
   draftCost: SpecimenCostResult | null;
   updateDraftAssembly: (slot: string, assemblyId: string) => void;
+  applyUpgrade: (upgradeId: string) => void;
   updateCostRateOverride: (referenceId: string, unitRate: number | null) => void;
   updateQuantityOverride: (
     assemblyId: string,
@@ -49,13 +51,9 @@ interface RightPanelProps {
   createdCandidate: Specimen | null;
   simulationStatus: "idle" | "running" | "complete";
   activeFailureEvent: FailureEvent | null;
-  availableUpgrades: UpgradeOption[];
-  selectedUpgradeIds: string[];
-  toggleUpgrade: (id: string) => void;
   runModes: RunMode[];
   runSettings: RunSettings;
   setRunSettings: (settings: RunSettings) => void;
-  recommendation: PrototypeRecommendation | null;
 }
 
 function formatSlot(slot: string): string {
@@ -83,6 +81,8 @@ function quantityOverrideKey(assemblyId: string, componentIndex: number): string
 export default function RightPanel({
   products,
   assemblies,
+  upgradeDefinitions,
+  recommendedUpgradeDefinitions,
   catalogValidation,
   draft,
   draftDiff,
@@ -93,6 +93,7 @@ export default function RightPanel({
   baselineCost,
   draftCost,
   updateDraftAssembly,
+  applyUpgrade,
   updateCostRateOverride,
   updateQuantityOverride,
   clearCostContextOverrides,
@@ -100,13 +101,10 @@ export default function RightPanel({
   createCandidate,
   createdCandidate,
   simulationStatus,
-  availableUpgrades,
-  selectedUpgradeIds,
-  toggleUpgrade,
+  activeFailureEvent,
   runModes,
   runSettings,
   setRunSettings,
-  recommendation,
 }: RightPanelProps) {
   const productsById = new Map(products.map((product) => [product.id, product]));
   const rateOverridesByReference = new Map(
@@ -118,6 +116,10 @@ export default function RightPanel({
       override,
     ])
   );
+  const recommendedUpgradeIds = new Set(
+    recommendedUpgradeDefinitions.map((upgrade) => upgrade.id)
+  );
+  const appliedUpgradeIds = new Set(draft?.appliedUpgradeIds ?? []);
   const draftCostBySlot = new Map(
     (draftCost?.assemblyCosts ?? []).map((item) => [item.slot, item.assembly])
   );
@@ -289,8 +291,8 @@ export default function RightPanel({
                                 </div>
                                 <div className={rpeTokens.colors.text.muted}>
                                   Library: {component.quantity} {component.unit} · effective:{" "}
-                                  {costedComponent?.baseQuantity ?? component.quantity} {component.unit}
-                                  {" "}· +{Math.round(component.wastePercent * 100)}% waste
+                                  {costedComponent?.baseQuantity ?? component.quantity} {component.unit}{" "}
+                                  · +{Math.round(component.wastePercent * 100)}% waste
                                 </div>
 
                                 <div className="mt-2 grid grid-cols-[1fr_92px] gap-2 items-center">
@@ -481,6 +483,102 @@ export default function RightPanel({
           </div>
         )}
 
+        <div
+          className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border ${rpeTokens.colors.borders.default}`}
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h3 className={rpeTokens.typography.heading}>Assembly Upgrade Paths</h3>
+            <span className="text-[9px] text-emerald-400">PHASE 2</span>
+          </div>
+          <p className="text-[10px] text-slate-500 mb-3 leading-relaxed">
+            Applying a ready upgrade changes actual draft assemblies. Cost impact is derived
+            from the resulting BOM; no fixed upgrade peso modifier is used.
+          </p>
+          <div className="space-y-2">
+            {upgradeDefinitions.map((upgrade) => {
+              const isApplied = appliedUpgradeIds.has(upgrade.id);
+              const isRecommended = recommendedUpgradeIds.has(upgrade.id);
+              const isReady = upgrade.status === "ready";
+
+              return (
+                <div
+                  key={upgrade.id}
+                  className={`p-2 ${rpeTokens.layout.borderRadius} border ${
+                    isApplied
+                      ? "border-emerald-700/70 bg-emerald-950/20"
+                      : rpeTokens.colors.borders.default
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={`text-xs font-medium ${rpeTokens.colors.text.primary}`}>
+                          {upgrade.name}
+                        </span>
+                        {isRecommended && activeFailureEvent && (
+                          <span className="text-[9px] text-amber-300 border border-amber-800/60 px-1 rounded">
+                            scripted recommendation
+                          </span>
+                        )}
+                        {!isReady && (
+                          <span className="text-[9px] text-slate-400 border border-slate-700 px-1 rounded">
+                            needs definition
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[10px] ${rpeTokens.colors.text.muted} mt-1 leading-relaxed`}>
+                        {upgrade.expectedBenefit}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!isReady || isApplied || !catalogValidation.valid}
+                      onClick={() => applyUpgrade(upgrade.id)}
+                      className={`shrink-0 px-2 py-1 text-[10px] border ${rpeTokens.layout.borderRadius} ${
+                        isReady && !isApplied && catalogValidation.valid
+                          ? "border-emerald-700 text-emerald-300 hover:bg-emerald-950/40"
+                          : "border-slate-700 text-slate-500 opacity-60"
+                      }`}
+                    >
+                      {isApplied ? "Applied" : isReady ? "Apply" : "Blocked"}
+                    </button>
+                  </div>
+
+                  {upgrade.assemblyChanges.length > 0 && (
+                    <div className="mt-1.5 space-y-0.5">
+                      {upgrade.assemblyChanges.map((change) => {
+                        const targetAssembly = assemblies.find(
+                          (assembly) => assembly.id === change.assemblyId
+                        );
+                        return (
+                          <div
+                            key={`${upgrade.id}-${change.slot}`}
+                            className="text-[9px] text-slate-500"
+                          >
+                            {formatSlot(change.slot)} → {targetAssembly?.name ?? change.assemblyId}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {!isReady && upgrade.notes[0] && (
+                    <div className="mt-1.5 text-[9px] text-amber-400/80 leading-relaxed">
+                      {upgrade.notes[0]}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {activeFailureEvent && recommendedUpgradeDefinitions.length === 0 && (
+            <div className="mt-2 text-[9px] text-slate-500">
+              No Phase 2 upgrade definition is mapped to scripted failure type{" "}
+              <span className="font-mono">{activeFailureEvent.type}</span>.
+            </div>
+          )}
+        </div>
+
         <div className="space-y-2">
           {draftDiff && draftDiff.assemblyChanges.length > 0 && (
             <div
@@ -495,6 +593,11 @@ export default function RightPanel({
                   {change.toAssemblyId ?? "none"}
                 </div>
               ))}
+              {draftDiff.addedUpgradeIds.length > 0 && (
+                <div className="mt-1.5 text-[10px] text-emerald-400/80">
+                  Applied upgrade IDs: {draftDiff.addedUpgradeIds.join(", ")}
+                </div>
+              )}
             </div>
           )}
 
@@ -563,73 +666,16 @@ export default function RightPanel({
                 Conceptual Phase 1 playback only — not force-based physics.
               </p>
               <p>
-                <span className={rpeTokens.colors.text.muted}>Baseline result:</span>{" "}
-                <span className="font-medium">Likely fails / major damage</span>
+                <span className={rpeTokens.colors.text.muted}>Current event:</span>{" "}
+                <span className="font-medium">
+                  {activeFailureEvent?.name ?? "No scripted failure event reached"}
+                </span>
               </p>
               <p>
-                <span className={rpeTokens.colors.text.muted}>Primary weak points:</span>{" "}
-                roof uplift, frame racking, cladding attachment
+                <span className={rpeTokens.colors.text.muted}>Primary limitation:</span>{" "}
+                event timing and failure state are predefined rather than calculated.
               </p>
             </div>
-          </div>
-        )}
-
-        {simulationStatus === "complete" && (
-          <div
-            className={`${rpeTokens.colors.background.surface} ${rpeTokens.layout.borderRadius} p-3 border border-emerald-900/50`}
-          >
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <h3 className={`${rpeTokens.typography.heading} !text-emerald-400`}>
-                Legacy Upgrade Options
-              </h3>
-              <span className="text-[9px] text-amber-400">PLACEHOLDER</span>
-            </div>
-            <p className="text-[10px] text-slate-500 mb-3">
-              These fixed upgrade amounts are retained from Phase 1 and are not part of
-              the traceable cost total above.
-            </p>
-            <div className="space-y-3">
-              {availableUpgrades.map((upgrade) => {
-                const isSelected = selectedUpgradeIds.includes(upgrade.id);
-                return (
-                  <label
-                    key={upgrade.id}
-                    className={`flex flex-col gap-1 p-2 ${rpeTokens.layout.borderRadius} border cursor-pointer transition-colors ${
-                      isSelected
-                        ? rpeTokens.colors.status.success
-                        : `${rpeTokens.colors.background.panel} ${rpeTokens.colors.borders.default} hover:border-slate-500`
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        className={`mt-1 ${rpeTokens.layout.borderRadius} border-slate-600 bg-slate-700 text-emerald-500`}
-                        checked={isSelected}
-                        onChange={() => toggleUpgrade(upgrade.id)}
-                      />
-                      <div className="flex-1">
-                        <span
-                          className={`text-sm font-medium ${rpeTokens.colors.text.primary}`}
-                        >
-                          {upgrade.name}
-                        </span>
-                        <p
-                          className={`text-xs ${rpeTokens.colors.text.muted} leading-tight mt-1`}
-                        >
-                          {upgrade.expectedBenefit}
-                        </p>
-                      </div>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-
-            {selectedUpgradeIds.length > 0 && recommendation && (
-              <div className="mt-3 text-[11px] text-slate-400">
-                Legacy rebuilder recommendation: {recommendation.nextSpecimenId}
-              </div>
-            )}
           </div>
         )}
 
