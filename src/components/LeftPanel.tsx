@@ -5,6 +5,9 @@ interface LeftPanelProps {
   specimen: Specimen | null;
   draftSpecimen: Specimen | null;
   assemblies: Assembly[];
+  savedCandidates: Specimen[];
+  candidateWorkspaceReady: boolean;
+  candidateWorkspaceWarnings: string[];
 }
 
 function formatSlot(slot: string): string {
@@ -14,7 +17,14 @@ function formatSlot(slot: string): string {
     .join(" ");
 }
 
-export default function LeftPanel({ specimen, draftSpecimen, assemblies }: LeftPanelProps) {
+export default function LeftPanel({
+  specimen,
+  draftSpecimen,
+  assemblies,
+  savedCandidates,
+  candidateWorkspaceReady,
+  candidateWorkspaceWarnings,
+}: LeftPanelProps) {
   if (!specimen) {
     return (
       <aside
@@ -64,6 +74,49 @@ export default function LeftPanel({ specimen, draftSpecimen, assemblies }: LeftP
           {isDraftChanged && (
             <div className="mt-2 text-[10px] text-emerald-400">
               Viewing structural draft; A0 remains unchanged.
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <div className={`${rpeTokens.typography.heading} mb-2`}>Candidate Lineage</div>
+          {!candidateWorkspaceReady ? (
+            <div className={`text-[10px] ${rpeTokens.colors.text.muted}`}>
+              Loading local candidate workspace…
+            </div>
+          ) : savedCandidates.length === 0 ? (
+            <div className={`text-[10px] ${rpeTokens.colors.text.muted}`}>
+              No persisted A1/A2 candidates yet.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {savedCandidates.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className={`p-2 border ${rpeTokens.colors.borders.default} ${rpeTokens.layout.borderRadius}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-medium text-emerald-300">
+                      {candidate.name}
+                    </span>
+                    <span className="text-[9px] text-slate-500">LOCAL</span>
+                  </div>
+                  <div className="mt-1 text-[9px] text-slate-500 break-all">
+                    {candidate.id}
+                  </div>
+                  <div className="mt-1 text-[9px] text-slate-600 break-all">
+                    parent: {candidate.parentSpecimenId}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {candidateWorkspaceWarnings.length > 0 && (
+            <div className="mt-2 p-2 border border-amber-900/60 bg-amber-950/20 rounded text-[9px] text-amber-300 space-y-1">
+              {candidateWorkspaceWarnings.map((warning) => (
+                <div key={warning}>{warning}</div>
+              ))}
             </div>
           )}
         </div>
