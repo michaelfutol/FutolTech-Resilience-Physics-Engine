@@ -1,0 +1,53 @@
+name: Dependency Lock Refresh
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/dependency-lock-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-next-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Regenerate lockfile with patched Next.js
+        run: |
+          npm install --package-lock-only --ignore-scripts --save-exact next@16.2.11
+          npm install --package-lock-only --ignore-scripts --save-dev --save-exact eslint-config-next@16.2.11
+
+      - name: Fresh npm audit summary
+        run: |
+          npm audit --json > dependency-audit.json || true
+          node - <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('dependency-audit.json', 'utf8'));
+          console.log('AUDIT_VULNERABILITY_COUNTS=' + JSON.stringify(audit.metadata?.vulnerabilities ?? {}));
+          console.log('AUDIT_DEPENDENCY_COUNTS=' + JSON.stringify(audit.metadata?.dependencies ?? {}));
+          NODE
+
+      - name: Commit regenerated package metadata
+        run: |
+          git config user.name "RPE Dependency Maintenance"
+          git config user.email "actions@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency metadata changes to commit."
+            exit 0
+          fi
+          git commit -m "Patch Next.js dependency gate to 16.2.11"
+          git push origin HEAD:lum-rpe-takeover
