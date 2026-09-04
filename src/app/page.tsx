@@ -29,6 +29,9 @@ export default function Home() {
           specimen={modelData.specimen}
           draftSpecimen={modelData.draftSpecimen}
           assemblies={modelData.assemblies}
+          savedCandidates={modelData.savedCandidates}
+          candidateWorkspaceReady={modelData.candidateWorkspaceReady}
+          candidateWorkspaceWarnings={modelData.candidateWorkspaceWarnings}
         />
         <Viewport3D
           specimen={modelData.specimen}
