@@ -25,6 +25,7 @@ import type {
   Assembly,
   CostItem,
   CostRate,
+  CostRateOverride,
   FailureEvent,
   Hazards,
   Material,
@@ -53,6 +54,7 @@ export function useDemoModel() {
   });
   const [createdCandidate, setCreatedCandidate] = useState<Specimen | null>(null);
   const [candidateSequence, setCandidateSequence] = useState(1);
+  const [costRateOverrides, setCostRateOverrides] = useState<CostRateOverride[]>([]);
 
   // Legacy Phase 1 data retained until Phase 2D UI migration is complete.
   const [materials] = useState<Material[]>(getMaterials());
@@ -80,8 +82,17 @@ export function useDemoModel() {
 
   const draftCost = useMemo(() => {
     if (!draftSpecimen || !catalogValidation.valid) return null;
-    return calculateSpecimenCost(draftSpecimen, assemblies, products, costRates);
-  }, [draftSpecimen, assemblies, products, costRates, catalogValidation.valid]);
+    return calculateSpecimenCost(draftSpecimen, assemblies, products, costRates, {
+      overrides: costRateOverrides,
+    });
+  }, [
+    draftSpecimen,
+    assemblies,
+    products,
+    costRates,
+    costRateOverrides,
+    catalogValidation.valid,
+  ]);
 
   const draftDiff = useMemo(() => {
     if (!specimen || !draft) return null;
@@ -94,6 +105,7 @@ export function useDemoModel() {
         draftDiff.addedUpgradeIds.length > 0 ||
         draftDiff.removedUpgradeIds.length > 0)
   );
+  const draftHasCostOverrides = costRateOverrides.length > 0;
 
   const updateDraftAssembly = (slot: string, assemblyId: string) => {
     const assembly = assemblies.find((item) => item.id === assemblyId);
@@ -109,16 +121,57 @@ export function useDemoModel() {
     setDraft((previous) =>
       previous ? setDraftAssembly(previous, slot, assemblyId) : previous
     );
+    // The previously created session candidate remains historically valid, but
+    // a new edit means the current draft is no longer represented by it.
+    setCreatedCandidate(null);
+  };
+
+  const updateCostRateOverride = (referenceId: string, unitRate: number | null) => {
+    if (!referenceId.trim()) throw new Error("Cost-rate override reference cannot be empty");
+
+    if (unitRate === null) {
+      setCostRateOverrides((previous) =>
+        previous.filter((override) => override.referenceId !== referenceId)
+      );
+      return;
+    }
+
+    if (!Number.isFinite(unitRate) || unitRate < 0) {
+      throw new Error(`Cost-rate override for ${referenceId} must be a finite non-negative number`);
+    }
+
+    setCostRateOverrides((previous) => {
+      const nextOverride: CostRateOverride = {
+        referenceId,
+        unitRate,
+        sourceNote: "User local override",
+      };
+      const existingIndex = previous.findIndex(
+        (override) => override.referenceId === referenceId
+      );
+      if (existingIndex === -1) return [...previous, nextOverride];
+
+      return previous.map((override, index) =>
+        index === existingIndex ? nextOverride : override
+      );
+    });
+    setCreatedCandidate(null);
+  };
+
+  const clearCostRateOverrides = () => {
+    setCostRateOverrides([]);
+    setCreatedCandidate(null);
   };
 
   const resetDraft = () => {
     if (!specimen) return;
     setDraft(createSpecimenDraft(specimen));
+    setCostRateOverrides([]);
     setCreatedCandidate(null);
   };
 
   const createCandidate = () => {
-    if (!specimen || !draft || !draftHasChanges) return;
+    if (!specimen || !draft || !draftHasChanges || createdCandidate) return;
 
     const candidateId = `specimen-a${candidateSequence}-dignity-3x3`;
     const result = createCandidateFromDraft(specimen, draft, {
@@ -231,9 +284,13 @@ export function useDemoModel() {
     draftSpecimen,
     draftDiff,
     draftHasChanges,
+    draftHasCostOverrides,
+    costRateOverrides,
     baselineCost,
     draftCost,
     updateDraftAssembly,
+    updateCostRateOverride,
+    clearCostRateOverrides,
     resetDraft,
     createCandidate,
     createdCandidate,
