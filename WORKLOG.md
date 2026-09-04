@@ -1,5 +1,17 @@
 # Worklog
 
+## [2026-09-04] - Finite RPE v1.0 Roadmap Locked
+- Replaced the open-ended roadmap with a finite 12-phase build plan and explicit RPE v1.0 completion gates.
+- Locked the core doctrine: `CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY`.
+- Defined the first real mechanics milestone as the Genesis Test Chamber: Null House, smoke/wind visualization, one-panel wind loading, breakable connection, and detached debris.
+- Defined the Dignity housing family as Studio Core, 1BR, 2BR, and 3BR maximum standard model.
+- Defined two base typologies: elevated resilient base and site-screened slab/raft base.
+- Added BIM/IFC import, OpenSees/CalculiX structural coupling, OpenFOAM CFD coupling, multi-hazard layers, and permanent engineering benchmark families as gated later phases.
+- Added explicit benchmark targets: window extreme-wind test, RC column-footing lateral pull, 4×4 m CHB strengthening comparison, and 2-storey RC earthquake response.
+- Defined RPE v1.0 release/freeze criteria and explicitly deferred nonessential v2.0 features so the build has a real finish line.
+- Created Google Drive folder `FutolTech Resilience Physics Engine (RPE)` and mirrored the roadmap into `RPE v1.0 Finite Build Roadmap`.
+- Repo remains the code/source-of-truth record; Drive is the durable planning mirror.
+
 ## [2026-07-14] - Phase 1.5: Checkpoint, Audit, and Final Warning Cleanups
 - Spawned 2 audit agents: Codebase Health Auditor and Build & Lint Validator.
 - **Found and fixed 3 critical bugs:**
