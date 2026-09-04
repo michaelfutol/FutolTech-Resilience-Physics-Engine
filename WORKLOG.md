@@ -1,5 +1,19 @@
 # Worklog
 
+## [2026-09-04] - Genesis Analytical Wind Foundation
+- Re-read the locked roadmap, status, tasks, next steps, worklog, active branch, and latest CI before coding.
+- Confirmed canonical active branch `lum-rpe-takeover` at `bd45e6bb4e8d485a0d14b776d38af78a3221151f`; its latest CI run was green before this batch.
+- Added versioned Genesis evidence/input/result types separating manual/code, solver, RPE analytical, RPE simulation, and physical-test layers.
+- Added pure kph→m/s conversion and simplified analytical dynamic-pressure calculation `q = 0.5ρV²`.
+- Added pure panel action `F = qAC` with exposed area and pressure coefficient supplied explicitly by the caller.
+- Added deterministic connection demand/capacity assessment; missing capacity remains `null` and returns `unverified` rather than PASS.
+- Locked Null House structural result type to `N/A / no_physical_specimen`.
+- Added automated tests using synthetic arithmetic fixtures only; no test number is adopted as a real material, site, code, or connection property.
+- Updated `package.json` and `tsconfig.tests.json` so Genesis tests run in the normal CI gate.
+- Code checkpoint `effa98b6f4b40199737c148c0fbc83b62dfd2ad0` passed dependency install, lint, strict TypeScript/test compilation, automated tests, and production build in GitHub Actions run 85.
+- Rapier was intentionally not installed. Dependency-advisory classification remains a gate.
+- Manual Phase 2 browser acceptance remains outstanding and was not falsely marked complete.
+
 ## [2026-09-04] - Phase 2 Costing, Prototype, and CI Repair Checkpoint
 - Completed automated catalog-validation execution in CI.
 - Implemented deterministic assembly/specimen costing with explicit currency and engineering-quantity rounding so floating-point residue does not leak into reconciled totals.
@@ -14,73 +28,14 @@
 - Repaired the prop contract without discarding the unified cost-context backend.
 - Verified checkpoint `45013897736cbab0164f20974f39a826e5f706ee` passed dependency install, lint, strict TypeScript, automated tests, and production build.
 - Synchronized `TASKS.md`, `STATUS_REPORT.md`, and `NEXT_STEPS.md` so remaining work is explicit rather than stale.
-- Remaining Phase 2 gate: expose quantity override controls in the UI, migrate legacy fixed upgrade rules/options into the Phase 2 assembly/candidate model, add UI/state regression coverage, retire legacy Material/CostItem paths, and run the final Phase 2 CI checkpoint.
 
 ## [2026-09-04] - Finite RPE v1.0 Roadmap Locked
 - Replaced the open-ended roadmap with a finite 12-phase build plan and explicit RPE v1.0 completion gates.
 - Locked the core doctrine: `CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY`.
 - Defined the first real mechanics milestone as the Genesis Test Chamber: Null House, smoke/wind visualization, one-panel wind loading, breakable connection, and detached debris.
 - Defined the Dignity housing family as Studio Core, 1BR, 2BR, and 3BR maximum standard model.
-- Defined two base typologies: elevated resilient base and site-screened slab/raft base.
 - Added BIM/IFC import, OpenSees/CalculiX structural coupling, OpenFOAM CFD coupling, multi-hazard layers, and permanent engineering benchmark families as gated later phases.
-- Added explicit benchmark targets: window extreme-wind test, RC column-footing lateral pull, 4×4 m CHB strengthening comparison, and 2-storey RC earthquake response.
 - Defined RPE v1.0 release/freeze criteria and explicitly deferred nonessential v2.0 features so the build has a real finish line.
-- Created Google Drive folder `FutolTech Resilience Physics Engine (RPE)` and mirrored the roadmap into `RPE v1.0 Finite Build Roadmap`.
-- Repo remains the code/source-of-truth record; Drive is the durable planning mirror.
 
-## [2026-07-14] - Phase 1.5: Checkpoint, Audit, and Final Warning Cleanups
-- Spawned 2 audit agents: Codebase Health Auditor and Build & Lint Validator.
-- **Found and fixed 3 critical bugs:**
-  - `LeftPanel.tsx` line 39: broken string interpolation.
-  - `TopBar.tsx` and `RightPanel.tsx`: dynamic `focus:` class pattern issues.
-- **Fixed 4 warnings:**
-  - `useDemoModel.ts`: wired `runSettings.durationSeconds` logic.
-  - `BottomTimeline.tsx`: dynamic time duration formatting.
-  - `globals.css`: stripped conflicting light-theme variables.
-  - `RightPanel.tsx`: fixed unused destructured props and inline imports.
-- Ran `npm run lint` (0 errors) and `npm run build` (compiled successfully).
-- Committed checkpoint: `Kira Report #10: full audit, clean checkpoint`.
-
-## [2026-07-08] - Phase 1.5: UI Token Refactor
-- Created `src/lib/ui/tokens.ts` defining the RPE visual language (dark cockpit aesthetic).
-- Refactored all 6 components (`TopBar`, `LeftPanel`, `RightPanel`, `BottomTimeline`, `Viewport3D`, `ExportPanel`) to use `rpeTokens`.
-- Updated `page.tsx` root wrapper to use token-based styling.
-- Updated design docs with implementation notes distinguishing built vs. future features.
-
-## [2026-07-08] - Phase 1.5: UI Refinement Direction
-- Documented RPE Test Bench layout strategy and target visual aesthetics (`docs/ui-direction.md`, `docs/rpe-test-bench-layout.md`).
-- Prepared design templates and generated prompt assets for external tools like Stitch (`design/rpe-test-bench/*`).
-
-## [2026-07-08] - Phase 1: Export Placeholders
-- Drafted `docs/export-plan.md` defining future export targets.
-- Built and integrated `ExportPanel` into the right sidebar.
-- Wired export buttons to become active only post-simulation and connected them to placeholder alerts.
-- Confirmed full completion of Phase 1 MVP Shell.
-
-## [2026-07-08] - Phase 1: Interactive Simulation Playback
-- Updated `failure-events.sample.json` with event timings and visual marker targets.
-- Implemented `startSimulation`, `resetSimulation` handlers in `useDemoModel` with `setInterval` tracking elapsed time.
-- Wired `TopBar` buttons to simulation state.
-- Formatted `BottomTimeline` to visually track simulation progress and highlight active event.
-- Built a visual marker system in `Viewport3D` using `@react-three/drei` `Html` markers mapping to failure targets.
-- Added simulation completion report dynamically rendering in `RightPanel`.
-
-## [2026-07-08] - Phase 1: Data Wiring
-- Created TypeScript interfaces (`src/types/rpe.ts`).
-- Implemented static data loading from JSON files (`src/lib/demo-data.ts`).
-- Created custom React hook `useDemoModel` to serve data.
-- Refactored `LeftPanel`, `RightPanel`, `BottomTimeline`, `Viewport3D`, and `TopBar` to display dynamic data.
-- Verified compilation with zero linting errors (`npm run lint` & `npm run build`).
-
-## [2026-07-08] - Phase 1: Next.js Initialization
-- Initialized Next.js in the repository root (TypeScript, App Router, Tailwind CSS).
-- Added `three`, `@react-three/fiber`, and `@react-three/drei` packages.
-- Added missing `failure-events.sample.json` and `cost-items.sample.json`.
-- Built the Visual MVP Shell layout comprising `TopBar`, `LeftPanel`, `RightPanel`, `Viewport3D`, and `BottomTimeline`.
-- Verified layout structure and updated tracking documents (`STATUS_REPORT.md`, `WORKLOG.md`, `TASKS.md`, `NEXT_STEPS.md`).
-
-## [2026-07-08] - Kira Takeover
-- Inspected repository structure (`docs/`, `data/`, `src/`).
-- Created `TAKEOVER_REPORT.md` summarizing existing work, missing files, and current MVP status.
-- Created `AGENT.md` with explicit instructions and hard rules for development.
-- Updated `AGENTS.md`, `TASKS.md`, `STATUS_REPORT.md`, and `NEXT_STEPS.md` to align with the Visual MVP Shell requirements.
+## Earlier work
+Historical Phase 0/1/1.5 implementation and UI-refinement entries remain preserved in Git history. No engineering evidence from those scripted visual stages is promoted to calculated physics by this checkpoint.
