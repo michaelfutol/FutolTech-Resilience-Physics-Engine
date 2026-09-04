@@ -123,6 +123,7 @@ export function buildGenesisEvidenceLog(
       message: "Explicit wind and panel assumptions accepted for analytical evaluation.",
       values: {
         speedMps: experiment.wind.speedMps,
+        directionDegrees: experiment.wind.assumptions.directionDegrees,
         airDensityKgPerM3: experiment.wind.assumptions.airDensityKgPerM3,
         exposedAreaM2: experiment.panel.exposedAreaM2,
         pressureCoefficient: experiment.panel.pressureCoefficient,
