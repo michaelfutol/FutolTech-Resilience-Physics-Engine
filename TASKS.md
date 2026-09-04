@@ -45,7 +45,9 @@
 - [x] Install Rapier after dependency-audit gate.
 - [x] Wire explicit panel mass plus gravity/initial linear velocity/initial angular velocity inputs into the Genesis UI.
 - [x] On `release_ready` + `simulation_ready`, instantiate the panel as a Rapier rigid body using only explicit rigid-body inputs.
-- [ ] Add collision/debris event logging while keeping RPE simulation distinct from analytical evidence.
+- [x] Add deterministic ordered simulation-event ledger for release gate → dynamics gate → activation → optional collision-enter records, preserving `rpe_simulation` evidence boundaries.
+- [x] Ensure release-to-simulation integration regression is actually included in the CI `npm test` command.
+- [ ] Wire the event ledger into the live Rapier collision callback and expose it in the Genesis UI without inventing collision mechanics.
 - [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
 - [ ] Add synchronized A/B simulation/replay path.
 
