@@ -30,12 +30,13 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - Genesis Panel 001 exposes explicit mass, gravity, initial linear velocity, and initial angular velocity. Rapier activates only when both gates are ready.
 - Analytical panel force is not converted into a launch impulse or post-release aerodynamic force.
 - The deterministic ordered simulation-event ledger preserves analytical events first, then release gate, dynamics gate, simulation activation, and optional collision-enter records as `rpe_simulation` evidence.
-- The live evidence bridge is now wired into the actual Genesis Rapier `onCollisionEnter` path. The Genesis UI renders the combined ordered analytical→simulation ledger using `GenesisEventLedgerPanel`.
+- The live evidence bridge is wired into the actual Genesis Rapier `onCollisionEnter` path. The Genesis UI renders the combined ordered analytical→simulation ledger using `GenesisEventLedgerPanel`.
 - Live collision observations use `otherObjectId: null` when Rapier provides no explicitly modeled/caller-supplied RPE object identity; no object identity is manufactured.
 - Collision observations are reset by input-context identity when the explicit Genesis inputs change, so stale collision records are not carried into a changed run context.
-- No collision target, floor, obstacle, friction, restitution, impact mechanics, or post-release aerodynamic loading was added merely to force an event.
-- Implementation commit `97a9a07c755c7d9f8a1ed700143e124c49708d0e` failed RPE CI run 128 at lint because live-evidence state was synchronously initialized inside a React effect; TypeScript/tests/build were correctly skipped.
-- Repair commit `808b55747359aa73011c8b18c6e62e218f08f749` replaced that effect-driven state initialization with derived base evidence plus state only for genuine collision observations. RPE CI run 129 passed install, lint, strict TypeScript, automated tests, and production build.
+- A typed Genesis collision-target contract is now implemented and tested. It accepts only explicit box identity, center position, dimensions, source note, and verification state, and validates finite coordinates plus positive dimensions.
+- Collision-target geometry does not imply material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or any other contact/engineering property.
+- Contract implementation commit `bc24311d9decfe580074c49581e565d52e7e02fb` passed RPE CI run 131: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
+- No visible/physical collision target has yet been instantiated in the Genesis scene; that remains the next gate.
 
 ## Engineering doctrine
 
@@ -45,4 +46,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Define an explicit, provenance-bearing Genesis collision-target contract and add one visible caller-declared collision object only after its geometry/identity inputs are explicit. Then verify in-browser that a genuine Rapier `onCollisionEnter` observation is appended to the ledger and that changing the run inputs clears stale collision context. Do not assign hidden contact properties, friction, restitution, impact force/energy, damage, or post-release aerodynamic forcing. Phase 2 browser acceptance remains an independent outstanding gate.
+Wire the validated Genesis collision-target contract into `Viewport3D`: expose explicit target ID, center, box dimensions, source note, and verification state; render/instantiate the target only when the contract validates; place it in the same Rapier world as released Panel 001; and pass its declared object ID into a genuine collision-enter record only when that explicit target is the collider. Then perform browser acceptance that a genuine collision is recorded and that changing explicit run/target inputs clears stale collision context. Do not assign hidden contact properties, friction, restitution, impact force/energy, damage, material response, or post-release aerodynamic forcing. Phase 2 browser acceptance remains an independent outstanding gate.

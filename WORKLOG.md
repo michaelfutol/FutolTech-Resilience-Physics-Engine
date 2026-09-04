@@ -1,5 +1,15 @@
 # Worklog
 
+## [2026-09-05] - Genesis Collision-Target Contract Gate
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `f2808fad10f77db24ca59b00a28a588b58e18b7e` had successful RPE CI run 130 before changing code.
+- Added `src/types/genesisCollisionTarget.ts` with a narrow explicit box-target contract: schema version, object identity, center coordinates, box dimensions, source note, and verification state only.
+- Added `src/lib/genesis/collisionTarget.ts` runtime validation requiring non-empty identity/provenance, finite center coordinates, positive finite dimensions, supported schema, supported shape, and valid verification state.
+- The target contract is explicitly `rpe_simulation` input/evidence context only and does not infer material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or other contact/engineering properties from geometry.
+- Added `tests/genesis-collision-target.test.ts` covering explicit-value preservation, missing identity/provenance rejection, non-finite center rejection, non-positive dimensions, unsupported runtime schema/shape, and absence of hidden contact/property fields.
+- Added the collision-target regression suite to the explicit `npm test` command.
+- Implementation checkpoint `bc24311d9decfe580074c49581e565d52e7e02fb` passed RPE CI run 131: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
+- No visible/physical collision target was instantiated in this batch. Exact next gate: wire caller-entered target ID/center/dimensions/source/verification into `Viewport3D`, validate before rendering, place the validated fixed target in the same Rapier world as released Panel 001, then browser-verify a genuine collision and stale-context reset.
+
 ## [2026-09-05] - Genesis Live Rapier Evidence Wiring
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `172b9c014f55acf62471756f3913a816ddc504c7` had successful RPE CI run 127 before changing code.
 - Wired the existing `createGenesisLiveSimulationEvidence` / `recordGenesisRapierCollisionEnter` bridge into the actual Genesis Panel 001 Rapier path.
