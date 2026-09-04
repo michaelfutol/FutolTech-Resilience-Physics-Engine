@@ -1,4 +1,10 @@
-import type { Product, Assembly, CostRate, Specimen } from "../../types/rpe";
+import type {
+  Product,
+  Assembly,
+  CostRate,
+  Specimen,
+  UpgradeDefinition,
+} from "../../types/rpe";
 
 export interface ValidationResult {
   valid: boolean;
@@ -25,7 +31,8 @@ export function validateCatalog(
   products: Product[],
   assemblies: Assembly[],
   rates: CostRate[],
-  specimens: Specimen[]
+  specimens: Specimen[],
+  upgrades: UpgradeDefinition[] = []
 ): ValidationResult {
   const errors: string[] = [];
 
@@ -33,6 +40,7 @@ export function validateCatalog(
   const assemblyIds = new Set<string>();
   const specimenIds = new Set<string>();
   const rateIds = new Set<string>();
+  const upgradeIds = new Set<string>();
 
   // Collect IDs first so reference checks are not order-dependent.
   for (const product of products) {
@@ -57,6 +65,15 @@ export function validateCatalog(
     if (!specimen.id) errors.push(`Specimen missing ID: ${JSON.stringify(specimen)}`);
     else if (specimenIds.has(specimen.id)) errors.push(`Duplicate Specimen ID: ${specimen.id}`);
     else specimenIds.add(specimen.id);
+  }
+
+  for (const upgrade of upgrades) {
+    if (!upgrade.id) errors.push(`UpgradeDefinition missing ID: ${JSON.stringify(upgrade)}`);
+    else if (upgradeIds.has(upgrade.id)) {
+      errors.push(`Duplicate UpgradeDefinition ID: ${upgrade.id}`);
+    } else {
+      upgradeIds.add(upgrade.id);
+    }
   }
 
   const productsById = new Map(products.filter((p) => p.id).map((p) => [p.id, p] as const));
@@ -145,6 +162,39 @@ export function validateCatalog(
         );
       }
     });
+  }
+
+  for (const upgrade of upgrades) {
+    if (!upgrade.name?.trim()) {
+      errors.push(`UpgradeDefinition ${upgrade.id || "<missing>"} missing name`);
+    }
+    if (upgrade.targetFailureTypes.length === 0) {
+      errors.push(`UpgradeDefinition ${upgrade.id} has no target failure types`);
+    }
+    if (upgrade.status === "ready" && upgrade.assemblyChanges.length === 0) {
+      errors.push(`Ready UpgradeDefinition ${upgrade.id} has no assembly changes`);
+    }
+
+    const seenSlots = new Set<string>();
+    for (const change of upgrade.assemblyChanges) {
+      if (seenSlots.has(change.slot)) {
+        errors.push(`UpgradeDefinition ${upgrade.id} changes slot ${change.slot} more than once`);
+      }
+      seenSlots.add(change.slot);
+
+      const assembly = assembliesById.get(change.assemblyId);
+      if (!assembly) {
+        errors.push(
+          `UpgradeDefinition ${upgrade.id} references missing Assembly ID: ${change.assemblyId}`
+        );
+        continue;
+      }
+      if (assembly.category !== change.slot) {
+        errors.push(
+          `UpgradeDefinition ${upgrade.id} assigns Assembly ${change.assemblyId} category ${assembly.category} to incompatible slot ${change.slot}`
+        );
+      }
+    }
   }
 
   return {
