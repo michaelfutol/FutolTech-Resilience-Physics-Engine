@@ -10,7 +10,10 @@ import {
   type GenesisNullHouseResult,
   type GenesisPanelExperimentResult,
 } from "@/types/genesis";
-import { calculateGenesisPanelExperiment } from "@/lib/genesis/panelExperiment";
+import {
+  buildGenesisEvidenceLog,
+  calculateGenesisPanelExperiment,
+} from "@/lib/genesis/panelExperiment";
 import { rpeTokens } from "@/lib/ui/tokens";
 
 interface Viewport3DProps {
@@ -259,6 +262,11 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     connectionCapacityText,
     connectionCapacityN,
   ]);
+
+  const panelEvidenceLog = useMemo(
+    () => (panelExperiment ? buildGenesisEvidenceLog(panelExperiment) : []),
+    [panelExperiment],
+  );
 
   const getMarkerPosition = (target: string): [number, number, number] => {
     switch (target) {
@@ -540,6 +548,25 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                 </div>
                 <div className="pt-1 text-[10px] text-slate-500">
                   Evidence layer: {panelExperiment.evidenceLayer}. Threshold exceedance does not detach the panel yet; Rapier integration remains gated.
+                </div>
+
+                <div className="mt-3 border-t border-slate-800 pt-2">
+                  <div className="font-semibold text-slate-300">Evidence sequence</div>
+                  <ol className="mt-1 space-y-1.5">
+                    {panelEvidenceLog.map((event) => (
+                      <li key={`${event.sequence}-${event.eventType}`} className="rounded border border-slate-800 bg-slate-900/60 p-1.5">
+                        <div className="flex items-center justify-between gap-2 text-[10px]">
+                          <span>
+                            {event.sequence}. {event.eventType.replaceAll("_", " ")}
+                          </span>
+                          <span className="text-slate-500">{event.status}</span>
+                        </div>
+                        <div className="mt-0.5 text-[10px] text-slate-500">
+                          {event.message}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               </div>
             )}
