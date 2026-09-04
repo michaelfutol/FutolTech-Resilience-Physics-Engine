@@ -1,9 +1,60 @@
-import { useState, useEffect } from "react";
-import { getDemoSpecimen, getMaterials, getHazards, getFailureEvents, getCostItems, getUpgrades, getRunModes, getUpgradeRules } from "@/lib/demo-data";
-import { Specimen, Material, Hazards, FailureEvent, CostItem, UpgradeOption, RunSettings, PrototypeRecommendation, RunMode, UpgradeRule } from "@/types/rpe";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getAssemblies,
+  getCostItems,
+  getCostRates,
+  getDemoSpecimen,
+  getFailureEvents,
+  getHazards,
+  getMaterials,
+  getProducts,
+  getRunModes,
+  getUpgradeRules,
+  getUpgrades,
+  validateDemoCatalog,
+} from "@/lib/demo-data";
+import { calculateSpecimenCost } from "@/lib/costing/calculateSpecimenCost";
+import {
+  createCandidateFromDraft,
+  createSpecimenDraft,
+  diffSpecimenDraft,
+  setDraftAssembly,
+  type SpecimenDraft,
+} from "@/lib/prototypes/specimenDraft";
+import type {
+  Assembly,
+  CostItem,
+  CostRate,
+  FailureEvent,
+  Hazards,
+  Material,
+  Product,
+  PrototypeRecommendation,
+  RunMode,
+  RunSettings,
+  Specimen,
+  UpgradeOption,
+  UpgradeRule,
+} from "@/types/rpe";
 
 export function useDemoModel() {
-  const [specimen] = useState<Specimen | null>(getDemoSpecimen() || null);
+  const [specimen] = useState<Specimen | null>(() => getDemoSpecimen() || null);
+
+  // Phase 2 catalog/data spine. These are source-library records and remain immutable in UI state.
+  const [products] = useState<Product[]>(getProducts());
+  const [assemblies] = useState<Assembly[]>(getAssemblies());
+  const [costRates] = useState<CostRate[]>(getCostRates());
+  const [catalogValidation] = useState(() => validateDemoCatalog());
+
+  // Temporary editable draft. The baseline specimen above is never mutated.
+  const [draft, setDraft] = useState<SpecimenDraft | null>(() => {
+    const baseline = getDemoSpecimen();
+    return baseline ? createSpecimenDraft(baseline) : null;
+  });
+  const [createdCandidate, setCreatedCandidate] = useState<Specimen | null>(null);
+  const [candidateSequence, setCandidateSequence] = useState(1);
+
+  // Legacy Phase 1 data retained until Phase 2D UI migration is complete.
   const [materials] = useState<Material[]>(getMaterials());
   const [hazards] = useState<Hazards>(getHazards());
   const [activeHazard, setActiveHazard] = useState<string>("typhoon_index_300");
@@ -12,12 +63,80 @@ export function useDemoModel() {
   const [availableUpgrades] = useState<UpgradeOption[]>(getUpgrades());
   const [selectedUpgradeIds, setSelectedUpgradeIds] = useState<string[]>([]);
 
+  const baselineCost = useMemo(() => {
+    if (!specimen || !catalogValidation.valid) return null;
+    return calculateSpecimenCost(specimen, assemblies, products, costRates);
+  }, [specimen, assemblies, products, costRates, catalogValidation.valid]);
+
+  const draftSpecimen = useMemo<Specimen | null>(() => {
+    if (!specimen || !draft) return null;
+    return {
+      ...specimen,
+      assemblySelections: { ...draft.assemblySelections },
+      appliedUpgradeIds: [...draft.appliedUpgradeIds],
+      notes: draft.notes,
+    };
+  }, [specimen, draft]);
+
+  const draftCost = useMemo(() => {
+    if (!draftSpecimen || !catalogValidation.valid) return null;
+    return calculateSpecimenCost(draftSpecimen, assemblies, products, costRates);
+  }, [draftSpecimen, assemblies, products, costRates, catalogValidation.valid]);
+
+  const draftDiff = useMemo(() => {
+    if (!specimen || !draft) return null;
+    return diffSpecimenDraft(specimen, draft);
+  }, [specimen, draft]);
+
+  const draftHasChanges = Boolean(
+    draftDiff &&
+      (draftDiff.assemblyChanges.length > 0 ||
+        draftDiff.addedUpgradeIds.length > 0 ||
+        draftDiff.removedUpgradeIds.length > 0)
+  );
+
+  const updateDraftAssembly = (slot: string, assemblyId: string) => {
+    const assembly = assemblies.find((item) => item.id === assemblyId);
+    if (!assembly) {
+      throw new Error(`Cannot select missing assembly ${assemblyId}`);
+    }
+    if (assembly.category !== slot) {
+      throw new Error(
+        `Cannot assign ${assembly.id} category ${assembly.category} to draft slot ${slot}`
+      );
+    }
+
+    setDraft((previous) =>
+      previous ? setDraftAssembly(previous, slot, assemblyId) : previous
+    );
+  };
+
+  const resetDraft = () => {
+    if (!specimen) return;
+    setDraft(createSpecimenDraft(specimen));
+    setCreatedCandidate(null);
+  };
+
+  const createCandidate = () => {
+    if (!specimen || !draft || !draftHasChanges) return;
+
+    const candidateId = `specimen-a${candidateSequence}-dignity-3x3`;
+    const result = createCandidateFromDraft(specimen, draft, {
+      candidateId,
+      candidateName: `Dignity Native Homes (A${candidateSequence} Candidate)`,
+      verificationStatus: "unverified",
+    });
+
+    setCreatedCandidate(result.candidate);
+    setCandidateSequence((previous) => previous + 1);
+  };
+
   // Simulation Settings
   const [runModes] = useState<RunMode[]>(getRunModes());
   const [runSettings, setRunSettings] = useState<RunSettings>({
     mode: "fixed_duration",
     durationSeconds: 30,
-    stopAtFirstCriticalFailure: false
+    stopAtFirstCriticalFailure: false,
   });
 
   // Simulation State
@@ -28,11 +147,11 @@ export function useDemoModel() {
 
   useEffect(() => {
     if (simulationStatus !== "running") return;
-    
+
     let currentSeconds = 0;
     const interval = setInterval(() => {
       currentSeconds++;
-      
+
       const mm = String(Math.floor(currentSeconds / 60)).padStart(2, "0");
       const ss = String(currentSeconds % 60).padStart(2, "0");
       const timeString = `${mm}:${ss}`;
@@ -50,11 +169,12 @@ export function useDemoModel() {
       if (runSettings.mode === "fixed_duration" && currentSeconds >= runSettings.durationSeconds) {
         clearInterval(interval);
         setSimulationStatus("complete");
-      } else if (currentSeconds >= 300) { // Safety fallback for long or infinite modes
+      } else if (currentSeconds >= 300) {
+        // Safety fallback for long or infinite placeholder modes.
         clearInterval(interval);
         setSimulationStatus("complete");
       }
-    }, 150); // Fast-forward time (150ms real = 1s simulation)
+    }, 150); // Fast-forward scripted Phase 1 playback (150ms real = 1s simulation)
 
     return () => clearInterval(interval);
   }, [simulationStatus, failureEvents, runSettings]);
@@ -74,8 +194,8 @@ export function useDemoModel() {
   };
 
   const toggleUpgrade = (id: string) => {
-    setSelectedUpgradeIds(prev => 
-      prev.includes(id) ? prev.filter(u => u !== id) : [...prev, id]
+    setSelectedUpgradeIds((prev) =>
+      prev.includes(id) ? prev.filter((upgradeId) => upgradeId !== id) : [...prev, id]
     );
   };
 
@@ -83,7 +203,9 @@ export function useDemoModel() {
     if (simulationStatus !== "complete" || !activeFailureEvent || !specimen) return null;
 
     const rules = getUpgradeRules();
-    const matchedRule = rules.find((r: UpgradeRule) => r.failureType === activeFailureEvent.type);
+    const matchedRule = rules.find(
+      (rule: UpgradeRule) => rule.failureType === activeFailureEvent.type
+    );
 
     if (matchedRule) {
       return {
@@ -92,7 +214,7 @@ export function useDemoModel() {
         reason: `Rule match for ${activeFailureEvent.type}`,
         recommendedUpgrades: matchedRule.recommendedUpgrades,
         estimatedAddedCostPhp: 0,
-        notes: []
+        notes: [],
       };
     }
 
@@ -101,6 +223,20 @@ export function useDemoModel() {
 
   return {
     specimen,
+    products,
+    assemblies,
+    costRates,
+    catalogValidation,
+    draft,
+    draftSpecimen,
+    draftDiff,
+    draftHasChanges,
+    baselineCost,
+    draftCost,
+    updateDraftAssembly,
+    resetDraft,
+    createCandidate,
+    createdCandidate,
     materials,
     hazards,
     activeHazard,
@@ -119,6 +255,6 @@ export function useDemoModel() {
     elapsedTime,
     activeFailureEvent,
     startSimulation,
-    resetSimulation
+    resetSimulation,
   };
 }
