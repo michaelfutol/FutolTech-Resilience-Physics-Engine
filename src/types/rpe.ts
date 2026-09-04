@@ -65,12 +65,23 @@ export interface CostRateOverride {
   sourceNote?: string;
 }
 
+export interface AssemblyQuantityOverride {
+  assemblyId: string;
+  componentIndex: number;
+  quantity: number;
+  sourceNote?: string;
+}
+
 export interface CostedComponent {
+  componentIndex: number;
   productId: string;
   productName: string;
   role: string;
   unit: string;
+  libraryQuantity: number;
   baseQuantity: number;
+  quantityOverrideApplied: boolean;
+  quantityOverrideSourceNote: string | null;
   wastePercent: number;
   quantityWithWaste: number;
   unitRate: number;
