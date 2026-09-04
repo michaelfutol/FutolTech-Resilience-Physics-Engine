@@ -12,6 +12,7 @@ export type GenesisVerificationState = "verified" | "provisional" | "unverified"
 export interface GenesisWindInput {
   schemaVersion: typeof GENESIS_SCHEMA_VERSION;
   speedKph: number;
+  directionDegrees: number;
   airDensityKgPerM3: number;
   sourceNote: string;
   verificationState: GenesisVerificationState;
@@ -48,6 +49,7 @@ export interface GenesisAnalyticalWindResult {
   dynamicPressurePa: number;
   panelForceN: number;
   assumptions: {
+    directionDegrees: number;
     airDensityKgPerM3: number;
     exposedAreaM2: number;
     pressureCoefficient: number;
