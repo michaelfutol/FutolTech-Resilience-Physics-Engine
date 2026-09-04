@@ -4,21 +4,22 @@ The finite RPE v1.0 roadmap remains locked in `ROADMAP.md`. GitHub is the implem
 
 ## Current checkpoint
 
-The canonical branch is past the dependency gate. Next.js and matching ESLint configuration are on 16.3.4, a clean audit gate was recorded, and `@react-three/rapier@2.2.0` is installed. Genesis includes Null House, NON-CFD Fast Smoke, Panel 001 analytical wind action, equivalent connection assessment, A/B comparison, a rigid-body release eligibility gate, an explicit debris-dynamics initial-condition gate, explicit rigid-body UI inputs, gated Rapier activation, and a tested deterministic ordered simulation-event ledger.
+The canonical branch is past the dependency gate and active in Phase 3 Genesis. Null House, NON-CFD Fast Smoke, Panel 001 analytical wind action, equivalent connection assessment, A/B comparison, rigid-body release gating, explicit debris initial-condition gating, gated Rapier activation, and the deterministic ordered simulation-event ledger are implemented.
 
-The ledger preserves analytical events separately from `rpe_simulation` events and orders rigid-body release gate → debris-dynamics gate → simulation activation → optional collision-enter records. It rejects collision records before activation and does not infer impact force, energy, damage, friction, restitution, material response, solver evidence, or physical-test evidence.
+The repository now also has `liveSimulationEvidence.ts`, a pure immutable bridge intended for the actual Rapier callback path. It creates a reviewable activation snapshot and appends explicit collision-enter observations only through the existing ordered ledger contract. It cannot bypass blocked release/dynamics gates. `GenesisEventLedgerPanel.tsx` is ready to display the ordered analytical→simulation sequence and explicitly states that collision events do not establish impact mechanics or engineering authority.
 
-CI test execution now explicitly includes the pre-existing release-to-simulation integration regression in addition to the new ledger tests.
+Implementation checkpoint `d9a5f3f3f92a30dd85e4aa62577ed2102f6188ed` passed RPE CI run 126: install, lint, strict TypeScript, automated tests, and build all succeeded.
 
 ## Immediate execution order
 
-1. **Live collision/evidence wiring:** connect the ordered event ledger to the Genesis Rapier path and collision-enter callback; expose the ordered sequence in the UI.
-2. **No invented collision target:** do not add hidden geometry, contact properties, or arbitrary launch conditions merely to manufacture a collision event. Record only collisions Rapier actually reports against explicitly modeled objects.
-3. **No invented post-release wind model:** define a separate time/load/aerodynamic contract before applying any continuing wind force or aerodynamic torque to debris.
-4. **Simulation observability:** preserve event identity/provenance without promoting Rapier motion to manual/code, solver, CFD, or physical-test evidence.
-5. **Phase 2 browser acceptance:** independently verify assembly alternatives, quantity override, unit-rate override, derived cost, upgrade Apply, Reset, Create Candidate, refresh persistence, saved lineage, invalid-workspace warnings, and Genesis mode switching; then record the Phase 2 exit SHA.
-6. **Genesis acceptance:** demonstrate `Null House → Fast Smoke → panel → calculated action → connection demand/capacity → gated release → explicit rigid-body simulation → recorded collision/debris events`, preserving provenance and limitations.
-7. **Later simulation comparison:** add synchronized A/B simulation/replay only after the single-panel event record is deterministic and reviewable.
+1. **Actual callback wiring:** in the Genesis `Viewport3D` dynamic-panel path, initialize live evidence when both gates are ready and append only Rapier `onCollisionEnter` callbacks using `recordGenesisRapierCollisionEnter`.
+2. **Explicit object identity only:** populate `otherObjectId` only from explicitly modeled/caller-known scene objects. `null` is acceptable when identity is unavailable; do not manufacture an object identity.
+3. **Mount evidence UI:** render `GenesisEventLedgerPanel` from the current immutable ledger snapshot so analytical and simulation stages are visibly ordered.
+4. **No invented collision target:** do not add hidden geometry, contact properties, friction, restitution, or arbitrary launch conditions merely to manufacture a collision.
+5. **No invented post-release wind model:** define a separate time/load/aerodynamic contract before applying continuing wind force or aerodynamic torque to debris.
+6. **Phase 2 browser acceptance:** independently verify the remaining manual UI acceptance path and record the Phase 2 exit SHA only after it actually passes.
+7. **Genesis acceptance:** demonstrate `Null House → Fast Smoke → panel → calculated action → connection demand/capacity → gated release → explicit rigid-body simulation → observed collision/debris event ledger`, preserving provenance and limitations.
+8. **Later simulation comparison:** add synchronized A/B simulation/replay only after the single-panel live event record is deterministic and reviewable.
 
 ## Evidence boundary
 

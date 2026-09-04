@@ -21,33 +21,31 @@
 
 ## Cross-Cutting Dependency Hygiene
 - [x] Classify the direct Next.js advisory gate.
-- [x] Upgrade `next` + matching `eslint-config-next`; canonical branch is now on `16.3.4`.
+- [x] Upgrade `next` + matching `eslint-config-next` to `16.3.4`.
 - [x] Regenerate `package-lock.json` without hand-editing integrity data.
-- [x] Run fresh dependency audit and remediate remaining advisories without force.
-- [x] Record clean dependency-audit gate.
-- [x] Install `@react-three/rapier@2.2.0` after the dependency gate became green.
-- [x] Remove one-shot dependency maintenance/install workflows after use.
+- [x] Run fresh dependency audit and record clean audit gate.
+- [x] Install `@react-three/rapier@2.2.0` only after the dependency gate became green.
 
 ## Phase 3 — Genesis Test Chamber
 - [x] Define versioned Genesis wind, panel, connection, evidence-layer and result types.
 - [x] Add tested kph↔m/s conversion.
-- [x] Add simplified analytical dynamic pressure `q = 0.5ρV²` with caller-supplied density and explicit units.
+- [x] Add simplified analytical dynamic pressure `q = 0.5ρV²` with caller-supplied density.
 - [x] Add panel action `F = qAC` with caller-supplied area and coefficient.
 - [x] Add deterministic connection demand/capacity assessment; unknown capacity remains `unverified`.
-- [x] Lock Null House result type to `N/A / no_physical_specimen`.
-- [x] Create semi-transparent Null House envelope in the viewport and expose the `N/A` result contract.
-- [x] Add Fast Smoke / streamline visualization explicitly labeled non-CFD and disabled until explicit speed/direction input is supplied.
-- [x] Add one panel wired to the analytical wind-action result.
-- [x] Add explicit equivalent connection state and provenance/evidence sequence.
+- [x] Lock Null House result to `N/A / no_physical_specimen`.
+- [x] Add Null House viewport and NON-CFD Fast Smoke requiring explicit wind input.
+- [x] Add one panel wired to analytical wind action and explicit equivalent connection state.
 - [x] Add deterministic A/B analytical comparison path and tests.
 - [x] Add deterministic rigid-body release eligibility gate and tests.
-- [x] Add explicit debris-dynamics initial-condition gate; no gravity/velocity/spin is silently invented.
-- [x] Install Rapier after dependency-audit gate.
-- [x] Wire explicit panel mass plus gravity/initial linear velocity/initial angular velocity inputs into the Genesis UI.
-- [x] On `release_ready` + `simulation_ready`, instantiate the panel as a Rapier rigid body using only explicit rigid-body inputs.
-- [x] Add deterministic ordered simulation-event ledger for release gate → dynamics gate → activation → optional collision-enter records, preserving `rpe_simulation` evidence boundaries.
-- [x] Ensure release-to-simulation integration regression is actually included in the CI `npm test` command.
-- [ ] Wire the event ledger into the live Rapier collision callback and expose it in the Genesis UI without inventing collision mechanics.
+- [x] Add explicit debris-dynamics gate; no gravity/velocity/spin is silently invented.
+- [x] Wire explicit mass/gravity/initial linear/angular velocity into Genesis UI.
+- [x] Instantiate a Rapier rigid body only on `release_ready` + `simulation_ready`.
+- [x] Add deterministic ordered simulation-event ledger for release gate → dynamics gate → activation → optional collision-enter records.
+- [x] Ensure release-to-simulation integration regression is executed by CI.
+- [x] Add immutable live-simulation evidence bridge for Rapier collision-enter observations with upstream activation enforcement.
+- [x] Add reusable ordered Genesis evidence-ledger UI component.
+- [x] Add and execute live-simulation-evidence regression tests in CI.
+- [ ] Wire the live evidence bridge into the actual Rapier `onCollisionEnter` callback and mount the ledger component in Genesis UI.
 - [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
 - [ ] Add synchronized A/B simulation/replay path.
 
