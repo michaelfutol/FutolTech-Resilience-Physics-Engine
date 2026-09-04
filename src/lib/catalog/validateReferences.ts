@@ -5,6 +5,22 @@ export interface ValidationResult {
   errors: string[];
 }
 
+const ALLOWED_UNITS = new Set([
+  "length_m",
+  "area_m2",
+  "volume_m3",
+  "mass_kg",
+  "piece",
+  "set",
+  "lot",
+]);
+
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export function validateCatalog(
   products: Product[],
   assemblies: Assembly[],
@@ -12,72 +28,127 @@ export function validateCatalog(
   specimens: Specimen[]
 ): ValidationResult {
   const errors: string[] = [];
-  
-  // 1. Check for duplicate IDs
+
   const productIds = new Set<string>();
-  products.forEach(p => {
-    if (!p.id) errors.push(`Product missing ID: ${JSON.stringify(p)}`);
-    else if (productIds.has(p.id)) errors.push(`Duplicate Product ID: ${p.id}`);
-    else productIds.add(p.id);
-
-    if (!p.name) errors.push(`Product ${p.id} missing name`);
-  });
-
   const assemblyIds = new Set<string>();
-  assemblies.forEach(a => {
-    if (!a.id) errors.push(`Assembly missing ID: ${JSON.stringify(a)}`);
-    else if (assemblyIds.has(a.id)) errors.push(`Duplicate Assembly ID: ${a.id}`);
-    else assemblyIds.add(a.id);
-
-    if (!a.name) errors.push(`Assembly ${a.id} missing name`);
-    
-    // 2. Check component references and negative values
-    a.components.forEach((c, idx) => {
-      if (!productIds.has(c.productId)) {
-        errors.push(`Assembly ${a.id} references missing Product ID: ${c.productId}`);
-      }
-      if (c.quantity < 0) errors.push(`Assembly ${a.id} has negative quantity for component ${idx}`);
-      if (c.wastePercent < 0 || c.wastePercent > 1) errors.push(`Assembly ${a.id} has invalid wastePercent ${c.wastePercent}`);
-    });
-  });
-
-  const rateIds = new Set<string>();
-  rates.forEach(r => {
-    if (!r.id) errors.push(`CostRate missing ID: ${JSON.stringify(r)}`);
-    else if (rateIds.has(r.id)) errors.push(`Duplicate CostRate ID: ${r.id}`);
-    else rateIds.add(r.id);
-
-    if (r.unitRate < 0) errors.push(`CostRate ${r.id} has negative unit rate`);
-    if (!productIds.has(r.referenceId)) {
-      errors.push(`CostRate ${r.id} references missing Product ID: ${r.referenceId}`);
-    }
-    
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(r.effectiveDate)) {
-      errors.push(`CostRate ${r.id} has malformed date: ${r.effectiveDate}`);
-    }
-  });
-
   const specimenIds = new Set<string>();
-  specimens.forEach(s => {
-    if (!s.id) errors.push(`Specimen missing ID: ${JSON.stringify(s)}`);
-    else if (specimenIds.has(s.id)) errors.push(`Duplicate Specimen ID: ${s.id}`);
-    else specimenIds.add(s.id);
+  const rateIds = new Set<string>();
 
-    if (s.parentSpecimenId && !specimenIds.has(s.parentSpecimenId) && s.parentSpecimenId !== "null") {
-      // It's possible the parent isn't loaded, but in a full validation it should be.
-      // For now, let's just log it if it doesn't match an existing or null
+  // Collect IDs first so reference checks are not order-dependent.
+  for (const product of products) {
+    if (!product.id) errors.push(`Product missing ID: ${JSON.stringify(product)}`);
+    else if (productIds.has(product.id)) errors.push(`Duplicate Product ID: ${product.id}`);
+    else productIds.add(product.id);
+  }
+
+  for (const assembly of assemblies) {
+    if (!assembly.id) errors.push(`Assembly missing ID: ${JSON.stringify(assembly)}`);
+    else if (assemblyIds.has(assembly.id)) errors.push(`Duplicate Assembly ID: ${assembly.id}`);
+    else assemblyIds.add(assembly.id);
+  }
+
+  for (const rate of rates) {
+    if (!rate.id) errors.push(`CostRate missing ID: ${JSON.stringify(rate)}`);
+    else if (rateIds.has(rate.id)) errors.push(`Duplicate CostRate ID: ${rate.id}`);
+    else rateIds.add(rate.id);
+  }
+
+  for (const specimen of specimens) {
+    if (!specimen.id) errors.push(`Specimen missing ID: ${JSON.stringify(specimen)}`);
+    else if (specimenIds.has(specimen.id)) errors.push(`Duplicate Specimen ID: ${specimen.id}`);
+    else specimenIds.add(specimen.id);
+  }
+
+  const productsById = new Map(products.filter((p) => p.id).map((p) => [p.id, p] as const));
+  const assembliesById = new Map(assemblies.filter((a) => a.id).map((a) => [a.id, a] as const));
+
+  for (const product of products) {
+    if (!product.name?.trim()) errors.push(`Product ${product.id || "<missing>"} missing name`);
+    if (!product.category?.trim()) errors.push(`Product ${product.id || "<missing>"} missing category`);
+    if (!ALLOWED_UNITS.has(product.unit)) {
+      errors.push(`Product ${product.id} uses unsupported unit: ${product.unit}`);
     }
 
-    Object.entries(s.assemblySelections).forEach(([category, asmId]) => {
-      if (!assemblyIds.has(asmId)) {
-        errors.push(`Specimen ${s.id} references missing Assembly ID: ${asmId} in category ${category}`);
+    for (const [propertyName, value] of Object.entries(product.engineeringProperties ?? {})) {
+      if (value !== null && value < 0) {
+        errors.push(`Product ${product.id} has negative engineering property ${propertyName}: ${value}`);
+      }
+    }
+  }
+
+  for (const assembly of assemblies) {
+    if (!assembly.name?.trim()) errors.push(`Assembly ${assembly.id || "<missing>"} missing name`);
+
+    const allowances = assembly.allowances;
+    if (allowances) {
+      if (allowances.labor < 0) errors.push(`Assembly ${assembly.id} has negative labor allowance`);
+      if (allowances.equipment < 0) errors.push(`Assembly ${assembly.id} has negative equipment allowance`);
+      if (allowances.installation < 0) errors.push(`Assembly ${assembly.id} has negative installation allowance`);
+    }
+
+    assembly.components.forEach((component, index) => {
+      const product = productsById.get(component.productId);
+      if (!product) {
+        errors.push(`Assembly ${assembly.id} references missing Product ID: ${component.productId}`);
+      }
+
+      if (component.quantity < 0) {
+        errors.push(`Assembly ${assembly.id} has negative quantity for component ${index}`);
+      }
+      if (component.wastePercent < 0 || component.wastePercent > 1) {
+        errors.push(`Assembly ${assembly.id} has invalid wastePercent ${component.wastePercent}`);
+      }
+      if (!ALLOWED_UNITS.has(component.unit)) {
+        errors.push(`Assembly ${assembly.id} component ${index} uses unsupported unit: ${component.unit}`);
+      }
+      if (product && product.unit !== component.unit) {
+        errors.push(
+          `Assembly ${assembly.id} component ${index} unit ${component.unit} does not match Product ${product.id} unit ${product.unit}`
+        );
       }
     });
-  });
+  }
+
+  for (const rate of rates) {
+    if (rate.unitRate < 0) errors.push(`CostRate ${rate.id} has negative unit rate`);
+    if (!productsById.has(rate.referenceId)) {
+      errors.push(`CostRate ${rate.id} references missing Product ID: ${rate.referenceId}`);
+    }
+    if (!rate.currency?.trim()) errors.push(`CostRate ${rate.id} missing currency`);
+    if (!rate.geographicArea?.trim()) errors.push(`CostRate ${rate.id} missing geographic area`);
+    if (!rate.sourceNote?.trim()) errors.push(`CostRate ${rate.id} missing source note`);
+    if (!isValidIsoDate(rate.effectiveDate)) {
+      errors.push(`CostRate ${rate.id} has invalid effective date: ${rate.effectiveDate}`);
+    }
+  }
+
+  for (const specimen of specimens) {
+    if (!specimen.name?.trim()) errors.push(`Specimen ${specimen.id || "<missing>"} missing name`);
+
+    if (specimen.parentSpecimenId) {
+      if (specimen.parentSpecimenId === specimen.id) {
+        errors.push(`Specimen ${specimen.id} cannot reference itself as parent`);
+      } else if (!specimenIds.has(specimen.parentSpecimenId)) {
+        errors.push(`Specimen ${specimen.id} references missing parent specimen: ${specimen.parentSpecimenId}`);
+      }
+    }
+
+    Object.entries(specimen.assemblySelections).forEach(([category, assemblyId]) => {
+      const assembly = assembliesById.get(assemblyId);
+      if (!assembly) {
+        errors.push(`Specimen ${specimen.id} references missing Assembly ID: ${assemblyId} in category ${category}`);
+        return;
+      }
+      if (assembly.category !== category) {
+        errors.push(
+          `Specimen ${specimen.id} assigns Assembly ${assemblyId} category ${assembly.category} to incompatible slot ${category}`
+        );
+      }
+    });
+  }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
