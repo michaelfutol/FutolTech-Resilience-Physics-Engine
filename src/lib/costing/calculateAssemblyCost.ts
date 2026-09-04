@@ -12,9 +12,18 @@ interface CalculateAssemblyCostOptions {
   currency?: string;
 }
 
-function selectRate(referenceId: string, rates: CostRate[]): CostRate | undefined {
+function selectRate(
+  referenceId: string,
+  rates: CostRate[],
+  currency: string
+): CostRate | undefined {
   return rates
-    .filter((rate) => rate.referenceId === referenceId && rate.rateType !== "user_override")
+    .filter(
+      (rate) =>
+        rate.referenceId === referenceId &&
+        rate.rateType !== "user_override" &&
+        rate.currency === currency
+    )
     .sort((a, b) => {
       const dateCompare = b.effectiveDate.localeCompare(a.effectiveDate);
       if (dateCompare !== 0) return dateCompare;
@@ -40,6 +49,7 @@ export function calculateAssemblyCost(
   );
 
   const currency = options.currency ?? "PHP";
+  if (!currency.trim()) throw new Error("Costing currency cannot be empty");
 
   const components = assembly.components.map((component) => {
     const product = productsById.get(component.productId);
@@ -54,14 +64,25 @@ export function calculateAssemblyCost(
     }
 
     const override = overridesByReference.get(component.productId);
-    const selectedRate = selectRate(component.productId, rates);
+    const selectedRate = selectRate(component.productId, rates, currency);
 
     if (!override && !selectedRate) {
-      throw new Error(`No cost rate found for product ${component.productId}`);
+      throw new Error(
+        `No cost rate found for product ${component.productId} in currency ${currency}`
+      );
     }
 
-    if (override && override.unitRate < 0) {
-      throw new Error(`User override for ${component.productId} cannot be negative`);
+    if (override && (!Number.isFinite(override.unitRate) || override.unitRate < 0)) {
+      throw new Error(
+        `User override for ${component.productId} must be a finite non-negative number`
+      );
+    }
+
+    if (
+      selectedRate &&
+      (!Number.isFinite(selectedRate.unitRate) || selectedRate.unitRate < 0)
+    ) {
+      throw new Error(`Selected cost rate ${selectedRate.id} has invalid unit rate`);
     }
 
     const unitRate = override?.unitRate ?? selectedRate!.unitRate;
@@ -83,7 +104,9 @@ export function calculateAssemblyCost(
       materialCost,
       rateType: override ? ("user_override" as const) : selectedRate!.rateType,
       rateId: override ? null : selectedRate!.id,
-      sourceNote: override?.sourceNote ?? selectedRate!.sourceNote,
+      sourceNote: override
+        ? override.sourceNote?.trim() || "User override"
+        : selectedRate!.sourceNote,
     };
   });
 
