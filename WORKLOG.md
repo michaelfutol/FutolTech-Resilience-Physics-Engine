@@ -1,5 +1,17 @@
 # Worklog
 
+## [2026-09-05] - Genesis Explicit Collision-Target Scene Wiring
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `dc9e5a5cc990de569bc51e971e50ac5fb3674b1c` had successful RPE CI run 132 before changing code.
+- Wired blank-by-default Genesis collision-target inputs into `Viewport3D`: explicit target object ID, center XYZ, box dimensions XYZ, source note, and verification state.
+- No target exists until the complete input set passes the existing typed/runtime collision-target validator. Invalid/partial inputs remain absent rather than producing fallback geometry.
+- Added a visible validated target. During active Panel 001 simulation, that same declared target is instantiated as a fixed Rapier rigid body in the same `Physics` world as the released panel. No hidden floor or obstacle was added.
+- Added narrow runtime target metadata helpers in `src/lib/genesis/collisionTarget.ts`. Collision evidence accepts the declared `objectId` only when callback user data matches the currently validated target; unrelated/mismatched/absent metadata resolves to `null` rather than receiving a manufactured identity.
+- Extended collision-target regression tests to cover runtime identity creation/resolution and mismatch rejection. The existing explicit `npm test` command already executes this suite.
+- Expanded the live evidence context key to include every explicit target field, so changed target inputs invalidate prior collision observations just like changed panel/dynamics inputs.
+- No material, mass, stiffness, friction, restitution, impact force/energy, damage, post-release aerodynamic force, solver result, CFD result, or physical-test evidence was introduced for the collision target.
+- Implementation checkpoint `78ccb43123c29aedff83b2e6145be96cbbd25c53` passed RPE CI run 133: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
+- Exact next gate: browser-verify a genuine panel↔declared-target Rapier collision records the declared target ID, then change one explicit run/target input and confirm the old collision observation does not survive into the changed context. This remains unclosed until actually verified in-browser.
+
 ## [2026-09-05] - Genesis Collision-Target Contract Gate
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `f2808fad10f77db24ca59b00a28a588b58e18b7e` had successful RPE CI run 130 before changing code.
 - Added `src/types/genesisCollisionTarget.ts` with a narrow explicit box-target contract: schema version, object identity, center coordinates, box dimensions, source note, and verification state only.

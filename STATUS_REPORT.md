@@ -31,12 +31,13 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - Analytical panel force is not converted into a launch impulse or post-release aerodynamic force.
 - The deterministic ordered simulation-event ledger preserves analytical events first, then release gate, dynamics gate, simulation activation, and optional collision-enter records as `rpe_simulation` evidence.
 - The live evidence bridge is wired into the actual Genesis Rapier `onCollisionEnter` path. The Genesis UI renders the combined ordered analytical→simulation ledger using `GenesisEventLedgerPanel`.
-- Live collision observations use `otherObjectId: null` when Rapier provides no explicitly modeled/caller-supplied RPE object identity; no object identity is manufactured.
-- Collision observations are reset by input-context identity when the explicit Genesis inputs change, so stale collision records are not carried into a changed run context.
-- A typed Genesis collision-target contract is now implemented and tested. It accepts only explicit box identity, center position, dimensions, source note, and verification state, and validates finite coordinates plus positive dimensions.
-- Collision-target geometry does not imply material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or any other contact/engineering property.
-- Contract implementation commit `bc24311d9decfe580074c49581e565d52e7e02fb` passed RPE CI run 131: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
-- No visible/physical collision target has yet been instantiated in the Genesis scene; that remains the next gate.
+- A typed Genesis collision-target contract accepts only explicit box identity, center position, dimensions, source note, and verification state. It does not infer material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or other contact/engineering properties.
+- Genesis Panel 001 now exposes blank-by-default collision-target ID, center, box dimensions, source note, and verification-state inputs. No target is created unless the complete contract validates.
+- A validated target is rendered visibly; during an active Rapier run it is instantiated as a fixed rigid body in the same physics world as the released panel. No hidden floor or obstacle is added.
+- Runtime target identity is carried through narrow RPE user-data metadata and is accepted into collision evidence only when it matches the currently validated explicit target. Any other collider remains unresolved rather than receiving a manufactured RPE identity.
+- Collision context identity now includes all explicit target inputs as well as panel/wind/dynamics inputs, so changing target or run inputs prevents stale collision observations from appearing in the changed context.
+- Implementation checkpoint `78ccb43123c29aedff83b2e6145be96cbbd25c53` passed RPE CI run 133: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
+- Browser acceptance of an actual panel↔declared-target collision and changed-input stale-context reset is still required; it has not been marked complete from code/CI alone.
 
 ## Engineering doctrine
 
@@ -46,4 +47,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Wire the validated Genesis collision-target contract into `Viewport3D`: expose explicit target ID, center, box dimensions, source note, and verification state; render/instantiate the target only when the contract validates; place it in the same Rapier world as released Panel 001; and pass its declared object ID into a genuine collision-enter record only when that explicit target is the collider. Then perform browser acceptance that a genuine collision is recorded and that changing explicit run/target inputs clears stale collision context. Do not assign hidden contact properties, friction, restitution, impact force/energy, damage, material response, or post-release aerodynamic forcing. Phase 2 browser acceptance remains an independent outstanding gate.
+Perform live browser acceptance of the new explicit collision-target path: enter a complete declared target plus explicit panel/release/dynamics inputs that produce a genuine Rapier panel↔target collision, verify the ordered ledger records exactly that declared target ID from the real callback, then change one explicit panel/dynamics/target input and verify the previous collision observation is absent from the new context. Do not treat Rapier contact response as impact-force, energy, damage, material, code, solver, CFD, or physical-test evidence. Phase 2 browser acceptance remains an independent outstanding gate.
