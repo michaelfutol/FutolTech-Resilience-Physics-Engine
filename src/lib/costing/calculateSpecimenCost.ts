@@ -1,5 +1,6 @@
 import type {
   Assembly,
+  AssemblyQuantityOverride,
   CostRate,
   CostRateOverride,
   Product,
@@ -11,6 +12,7 @@ import { roundMoney } from "./rounding";
 
 interface CalculateSpecimenCostOptions {
   overrides?: CostRateOverride[];
+  quantityOverrides?: AssemblyQuantityOverride[];
   currency?: string;
 }
 
@@ -22,6 +24,15 @@ export function calculateSpecimenCost(
   options: CalculateSpecimenCostOptions = {}
 ): SpecimenCostResult {
   const assembliesById = new Map(assemblies.map((assembly) => [assembly.id, assembly]));
+
+  const selectedAssemblyIds = new Set(Object.values(specimen.assemblySelections));
+  for (const override of options.quantityOverrides ?? []) {
+    if (!selectedAssemblyIds.has(override.assemblyId)) {
+      throw new Error(
+        `Quantity override references assembly ${override.assemblyId} that is not selected by specimen ${specimen.id}`
+      );
+    }
+  }
 
   const assemblyCosts = Object.entries(specimen.assemblySelections).map(([slot, assemblyId]) => {
     const assembly = assembliesById.get(assemblyId);
