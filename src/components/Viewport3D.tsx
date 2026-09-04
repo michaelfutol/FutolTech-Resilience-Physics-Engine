@@ -203,6 +203,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const panelGeometryReady = validPanelWidth && validPanelHeight;
   const panelExperimentReady =
     validSpeed &&
+    validDirection &&
     validDensity &&
     validPanelWidth &&
     validPanelHeight &&
@@ -213,6 +214,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     if (
       !panelExperimentReady ||
       speedKph === null ||
+      directionDegrees === null ||
       airDensityKgPerM3 === null ||
       panelWidthM === null ||
       panelHeightM === null ||
@@ -226,6 +228,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
         {
           schemaVersion: GENESIS_SCHEMA_VERSION,
           speedKph,
+          directionDegrees,
           airDensityKgPerM3,
           sourceNote: "Interactive Genesis Panel 001 input",
           verificationState: "unverified",
@@ -255,6 +258,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   }, [
     panelExperimentReady,
     speedKph,
+    directionDegrees,
     airDensityKgPerM3,
     panelWidthM,
     panelHeightM,
@@ -507,7 +511,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           <div className="mt-3 border-t border-slate-800 pt-2 text-slate-300">
             {!panelExperiment && (
               <div className="text-slate-500">
-                Enter valid wind, density, panel geometry, and coefficient inputs. Capacity may remain blank, in which case connection status stays UNVERIFIED.
+                Enter valid wind, direction, density, panel geometry, and coefficient inputs. Capacity may remain blank, in which case connection status stays UNVERIFIED.
               </div>
             )}
 
@@ -518,6 +522,9 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                 </div>
                 <div>
                   Wind speed: <strong>{panelExperiment.wind.speedMps.toFixed(4)} m/s</strong>
+                </div>
+                <div>
+                  Wind direction: <strong>{panelExperiment.wind.assumptions.directionDegrees}°</strong>
                 </div>
                 <div>
                   Dynamic pressure q: <strong>{panelExperiment.wind.dynamicPressurePa.toFixed(2)} Pa</strong>
