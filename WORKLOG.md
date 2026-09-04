@@ -1,5 +1,15 @@
 # Worklog
 
+## [2026-09-05] - Deterministic Genesis Simulation Event Ledger
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `123dd185b0ae4c1730c4fc99bacfc094ab81c5f8` had successful RPE CI run 120 before changing code.
+- Implemented a pure deterministic ordered Genesis simulation-event ledger in `src/lib/genesis/simulationEventLedger.ts`.
+- The ledger preserves existing analytical events first, then appends rigid-body release gate, debris-dynamics gate, simulation activation, and optional collision-enter records as separate `rpe_simulation` stages.
+- Collision records are rejected before simulation activation. A collision-enter record deliberately carries only event identity/provenance; it does not infer impact force, energy, damage, friction, restitution, material response, CFD/solver authority, or physical-test evidence.
+- Added regression tests for ordered sequence/evidence layers, collision-before-activation rejection, and reviewable blocked activation state. Numerical values are synthetic test fixtures only.
+- Found a CI coverage omission: `tests/genesis-release-to-simulation.test.ts` existed but was not listed in the explicit `npm test` command. Added that integration test plus the new event-ledger test to the executed suite.
+- Updated `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` so the canonical repository records the implemented ledger and the exact remaining live Rapier wiring gate.
+- No hidden collision target, contact property, aerodynamic load, launch impulse, or post-release wind model was introduced merely to create visible motion or collisions.
+
 ## [2026-09-05] - Genesis Explicit Rapier Activation Wiring
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `374f8bcdd632449f9e0353daef692c0b3c125747` had successful RPE CI run 118 before changing code.
 - Wired the already-tested rigid-body release gate and debris-dynamics gate into the actual Genesis Panel 001 viewport path.
