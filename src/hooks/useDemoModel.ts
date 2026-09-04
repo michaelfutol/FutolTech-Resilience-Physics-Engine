@@ -23,6 +23,7 @@ import {
 } from "@/lib/prototypes/specimenDraft";
 import type {
   Assembly,
+  AssemblyQuantityOverride,
   CostItem,
   CostRate,
   CostRateOverride,
@@ -41,22 +42,25 @@ import type {
 export function useDemoModel() {
   const [specimen] = useState<Specimen | null>(() => getDemoSpecimen() || null);
 
-  // Phase 2 catalog/data spine. These are source-library records and remain immutable in UI state.
+  // Phase 2 catalog/data spine. These source-library records remain immutable in UI state.
   const [products] = useState<Product[]>(getProducts());
   const [assemblies] = useState<Assembly[]>(getAssemblies());
   const [costRates] = useState<CostRate[]>(getCostRates());
   const [catalogValidation] = useState(() => validateDemoCatalog());
 
-  // Temporary editable draft. The baseline specimen above is never mutated.
+  // Temporary structural draft. The baseline specimen above is never mutated.
   const [draft, setDraft] = useState<SpecimenDraft | null>(() => {
     const baseline = getDemoSpecimen();
     return baseline ? createSpecimenDraft(baseline) : null;
   });
   const [createdCandidate, setCreatedCandidate] = useState<Specimen | null>(null);
   const [candidateSequence, setCandidateSequence] = useState(1);
-  const [costRateOverrides, setCostRateOverrides] = useState<CostRateOverride[]>([]);
 
-  // Legacy Phase 1 data retained until Phase 2D UI migration is complete.
+  // Cost/procurement context overrides are intentionally separate from specimen ancestry.
+  const [costRateOverrides, setCostRateOverrides] = useState<CostRateOverride[]>([]);
+  const [quantityOverrides, setQuantityOverrides] = useState<AssemblyQuantityOverride[]>([]);
+
+  // Legacy Phase 1 data retained until Phase 2D migration is complete.
   const [materials] = useState<Material[]>(getMaterials());
   const [hazards] = useState<Hazards>(getHazards());
   const [activeHazard, setActiveHazard] = useState<string>("typhoon_index_300");
@@ -84,6 +88,7 @@ export function useDemoModel() {
     if (!draftSpecimen || !catalogValidation.valid) return null;
     return calculateSpecimenCost(draftSpecimen, assemblies, products, costRates, {
       overrides: costRateOverrides,
+      quantityOverrides,
     });
   }, [
     draftSpecimen,
@@ -91,6 +96,7 @@ export function useDemoModel() {
     products,
     costRates,
     costRateOverrides,
+    quantityOverrides,
     catalogValidation.valid,
   ]);
 
@@ -105,7 +111,8 @@ export function useDemoModel() {
         draftDiff.addedUpgradeIds.length > 0 ||
         draftDiff.removedUpgradeIds.length > 0)
   );
-  const draftHasCostOverrides = costRateOverrides.length > 0;
+  const draftHasCostOverrides =
+    costRateOverrides.length > 0 || quantityOverrides.length > 0;
 
   const updateDraftAssembly = (slot: string, assemblyId: string) => {
     const assembly = assemblies.find((item) => item.id === assemblyId);
@@ -118,16 +125,29 @@ export function useDemoModel() {
       );
     }
 
+    const previousAssemblyId = draft?.assemblySelections[slot];
     setDraft((previous) =>
       previous ? setDraftAssembly(previous, slot, assemblyId) : previous
     );
-    // The previously created session candidate remains historically valid, but
-    // a new edit means the current draft is no longer represented by it.
+
+    // Quantity overrides belong to a specific assembly/component. Discard only
+    // overrides for the assembly leaving this slot so stale takeoff values cannot
+    // silently follow a different product system.
+    if (previousAssemblyId && previousAssemblyId !== assemblyId) {
+      setQuantityOverrides((previous) =>
+        previous.filter((override) => override.assemblyId !== previousAssemblyId)
+      );
+    }
+
+    // A structural edit means a previously created session candidate no longer
+    // represents the current structural draft.
     setCreatedCandidate(null);
   };
 
   const updateCostRateOverride = (referenceId: string, unitRate: number | null) => {
-    if (!referenceId.trim()) throw new Error("Cost-rate override reference cannot be empty");
+    if (!referenceId.trim()) {
+      throw new Error("Cost-rate override reference cannot be empty");
+    }
 
     if (unitRate === null) {
       setCostRateOverrides((previous) =>
@@ -137,7 +157,9 @@ export function useDemoModel() {
     }
 
     if (!Number.isFinite(unitRate) || unitRate < 0) {
-      throw new Error(`Cost-rate override for ${referenceId} must be a finite non-negative number`);
+      throw new Error(
+        `Cost-rate override for ${referenceId} must be a finite non-negative number`
+      );
     }
 
     setCostRateOverrides((previous) => {
@@ -155,18 +177,74 @@ export function useDemoModel() {
         index === existingIndex ? nextOverride : override
       );
     });
-    setCreatedCandidate(null);
   };
 
-  const clearCostRateOverrides = () => {
+  const updateQuantityOverride = (
+    assemblyId: string,
+    componentIndex: number,
+    quantity: number | null
+  ) => {
+    const assembly = assemblies.find((item) => item.id === assemblyId);
+    if (!assembly) throw new Error(`Cannot override quantity for missing assembly ${assemblyId}`);
+    if (
+      !Number.isInteger(componentIndex) ||
+      componentIndex < 0 ||
+      componentIndex >= assembly.components.length
+    ) {
+      throw new Error(
+        `Cannot override quantity for invalid component index ${componentIndex} in ${assemblyId}`
+      );
+    }
+
+    if (quantity === null) {
+      setQuantityOverrides((previous) =>
+        previous.filter(
+          (override) =>
+            !(
+              override.assemblyId === assemblyId &&
+              override.componentIndex === componentIndex
+            )
+        )
+      );
+      return;
+    }
+
+    if (!Number.isFinite(quantity) || quantity < 0) {
+      throw new Error(
+        `Quantity override for ${assemblyId} component ${componentIndex} must be a finite non-negative number`
+      );
+    }
+
+    setQuantityOverrides((previous) => {
+      const nextOverride: AssemblyQuantityOverride = {
+        assemblyId,
+        componentIndex,
+        quantity,
+        sourceNote: "User quantity override",
+      };
+      const existingIndex = previous.findIndex(
+        (override) =>
+          override.assemblyId === assemblyId &&
+          override.componentIndex === componentIndex
+      );
+      if (existingIndex === -1) return [...previous, nextOverride];
+
+      return previous.map((override, index) =>
+        index === existingIndex ? nextOverride : override
+      );
+    });
+  };
+
+  const clearCostContextOverrides = () => {
     setCostRateOverrides([]);
-    setCreatedCandidate(null);
+    setQuantityOverrides([]);
   };
 
   const resetDraft = () => {
     if (!specimen) return;
     setDraft(createSpecimenDraft(specimen));
     setCostRateOverrides([]);
+    setQuantityOverrides([]);
     setCreatedCandidate(null);
   };
 
@@ -192,7 +270,7 @@ export function useDemoModel() {
     stopAtFirstCriticalFailure: false,
   });
 
-  // Simulation State
+  // Simulation State — still scripted Phase 1 playback, not calculated mechanics.
   const [simulationStatus, setSimulationStatus] = useState<"idle" | "running" | "complete">("idle");
   const [activeEventIndex, setActiveEventIndex] = useState<number>(-1);
   const [elapsedTime, setElapsedTime] = useState<string>("00:00");
@@ -223,11 +301,10 @@ export function useDemoModel() {
         clearInterval(interval);
         setSimulationStatus("complete");
       } else if (currentSeconds >= 300) {
-        // Safety fallback for long or infinite placeholder modes.
         clearInterval(interval);
         setSimulationStatus("complete");
       }
-    }, 150); // Fast-forward scripted Phase 1 playback (150ms real = 1s simulation)
+    }, 150);
 
     return () => clearInterval(interval);
   }, [simulationStatus, failureEvents, runSettings]);
@@ -286,11 +363,13 @@ export function useDemoModel() {
     draftHasChanges,
     draftHasCostOverrides,
     costRateOverrides,
+    quantityOverrides,
     baselineCost,
     draftCost,
     updateDraftAssembly,
     updateCostRateOverride,
-    clearCostRateOverrides,
+    updateQuantityOverride,
+    clearCostContextOverrides,
     resetDraft,
     createCandidate,
     createdCandidate,
