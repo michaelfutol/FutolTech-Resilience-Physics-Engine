@@ -25,7 +25,11 @@ export default function Home() {
         resetSimulation={modelData.resetSimulation}
       />
       <div className="flex flex-1 overflow-hidden">
-        <LeftPanel specimen={modelData.specimen} />
+        <LeftPanel
+          specimen={modelData.specimen}
+          draftSpecimen={modelData.draftSpecimen}
+          assemblies={modelData.assemblies}
+        />
         <Viewport3D
           specimen={modelData.specimen}
           activeFailureEvent={modelData.activeFailureEvent}
