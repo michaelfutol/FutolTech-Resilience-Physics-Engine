@@ -30,7 +30,7 @@ jobs:
           npm install --package-lock-only --ignore-scripts --save-exact next@16.2.11
           npm install --package-lock-only --ignore-scripts --save-dev --save-exact eslint-config-next@16.2.11
 
-      - name: Fresh npm audit summary
+      - name: Fresh npm audit classification
         run: |
           npm audit --json > dependency-audit.json || true
           node - <<'NODE'
@@ -38,6 +38,24 @@ jobs:
           const audit = JSON.parse(fs.readFileSync('dependency-audit.json', 'utf8'));
           console.log('AUDIT_VULNERABILITY_COUNTS=' + JSON.stringify(audit.metadata?.vulnerabilities ?? {}));
           console.log('AUDIT_DEPENDENCY_COUNTS=' + JSON.stringify(audit.metadata?.dependencies ?? {}));
+          const vulnerabilities = audit.vulnerabilities ?? {};
+          for (const [name, item] of Object.entries(vulnerabilities)) {
+            const via = (item.via ?? []).map((entry) =>
+              typeof entry === 'string'
+                ? entry
+                : `${entry.source ?? 'advisory'}:${entry.title ?? 'untitled'}:${entry.range ?? ''}`
+            );
+            console.log('AUDIT_ITEM=' + JSON.stringify({
+              name,
+              severity: item.severity,
+              isDirect: item.isDirect,
+              range: item.range,
+              via,
+              effects: item.effects ?? [],
+              fixAvailable: item.fixAvailable ?? false,
+              nodes: item.nodes ?? [],
+            }));
+          }
           NODE
 
       - name: Commit regenerated package metadata
