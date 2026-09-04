@@ -39,13 +39,11 @@ export default function Home() {
           draftHasChanges={modelData.draftHasChanges}
           draftHasCostOverrides={modelData.draftHasCostOverrides}
           costRateOverrides={modelData.costRateOverrides}
-          quantityOverrides={modelData.quantityOverrides}
           baselineCost={modelData.baselineCost}
           draftCost={modelData.draftCost}
           updateDraftAssembly={modelData.updateDraftAssembly}
           updateCostRateOverride={modelData.updateCostRateOverride}
-          updateQuantityOverride={modelData.updateQuantityOverride}
-          clearCostContextOverrides={modelData.clearCostContextOverrides}
+          clearCostRateOverrides={modelData.clearCostContextOverrides}
           resetDraft={modelData.resetDraft}
           createCandidate={modelData.createCandidate}
           createdCandidate={modelData.createdCandidate}
