@@ -1,0 +1,96 @@
+[
+  {
+    "id": "add-diagonal-bracing",
+    "name": "Add diagonal bracing",
+    "targetFailureTypes": ["frame_racking"],
+    "expectedBenefit": "Reduces lateral sway and improves frame stability by replacing the no-brace assembly with a defined diagonal-bracing assembly.",
+    "priority": "high",
+    "status": "ready",
+    "assemblyChanges": [
+      {
+        "slot": "bracing",
+        "assemblyId": "asm-brace-steel"
+      }
+    ],
+    "notes": [
+      "Engineering capacity remains unverified until member and connection properties are validated."
+    ]
+  },
+  {
+    "id": "roof-tie-down-straps",
+    "name": "Add roof tie-down straps",
+    "targetFailureTypes": ["roof_uplift"],
+    "expectedBenefit": "Improves the roof-to-frame restraint path by replacing the standard restraint assembly with the defined tie-down strap assembly.",
+    "priority": "high",
+    "status": "ready",
+    "assemblyChanges": [
+      {
+        "slot": "restraint",
+        "assemblyId": "asm-restraint-strap"
+      }
+    ],
+    "notes": [
+      "Uplift capacity is unverified and must not be inferred from the assembly name."
+    ]
+  },
+  {
+    "id": "upgrade-frame-size",
+    "name": "Upgrade frame size",
+    "targetFailureTypes": ["frame_racking"],
+    "expectedBenefit": "Changes the frame assembly from the A0 25x25 mm tube option to the defined 38x38 mm tube option for controlled comparison.",
+    "priority": "medium",
+    "status": "ready",
+    "assemblyChanges": [
+      {
+        "slot": "frame",
+        "assemblyId": "asm-frame-38"
+      }
+    ],
+    "notes": [
+      "Section thickness and engineering properties remain subject to verification in the product library."
+    ]
+  },
+  {
+    "id": "stronger-cladding-backing",
+    "name": "Use thicker wall backing",
+    "targetFailureTypes": ["cladding_vibration"],
+    "expectedBenefit": "Changes the wall-backing assembly from 6 mm FCB to the defined 9 mm FCB alternative without changing the separate outer cladding layer.",
+    "priority": "medium",
+    "status": "ready",
+    "assemblyChanges": [
+      {
+        "slot": "wall",
+        "assemblyId": "asm-wall-fcb-9mm"
+      }
+    ],
+    "notes": [
+      "This is an assembly substitution for comparison, not a verified claim that 9 mm backing resolves the failure mode."
+    ]
+  },
+  {
+    "id": "improve-screw-spacing",
+    "name": "Improve screw spacing",
+    "targetFailureTypes": ["screw_stress"],
+    "expectedBenefit": "Intended to improve load distribution at panel connections.",
+    "priority": "medium",
+    "status": "needs_definition",
+    "assemblyChanges": [],
+    "notes": [
+      "Blocked until panel-connection geometry, fastener count/spacing, and connection capacities are represented explicitly.",
+      "The legacy Phase 1 fixed peso modifier is not accepted as a Phase 2 engineering/cost definition."
+    ]
+  },
+  {
+    "id": "base-anchor-upgrade",
+    "name": "Add positive base anchorage",
+    "targetFailureTypes": ["connection_failure"],
+    "expectedBenefit": "Intended to improve the post/base-to-foundation load path against uplift, sliding, and overturning demand.",
+    "priority": "high",
+    "status": "needs_definition",
+    "assemblyChanges": [],
+    "notes": [
+      "Blocked until base connection is separated from generic connection data and an explicit anchor/pedestal assembly is defined.",
+      "The legacy Phase 1 fixed peso modifier is not accepted as a Phase 2 engineering/cost definition."
+    ]
+  }
+]
