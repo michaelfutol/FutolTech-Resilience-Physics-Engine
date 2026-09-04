@@ -1,0 +1,72 @@
+import type {
+  Assembly,
+  CostRate,
+  CostRateOverride,
+  Product,
+  Specimen,
+  SpecimenCostResult,
+} from "@/types/rpe";
+import { calculateAssemblyCost } from "./calculateAssemblyCost";
+
+interface CalculateSpecimenCostOptions {
+  overrides?: CostRateOverride[];
+  currency?: string;
+}
+
+export function calculateSpecimenCost(
+  specimen: Specimen,
+  assemblies: Assembly[],
+  products: Product[],
+  rates: CostRate[],
+  options: CalculateSpecimenCostOptions = {}
+): SpecimenCostResult {
+  const assembliesById = new Map(assemblies.map((assembly) => [assembly.id, assembly]));
+
+  const assemblyCosts = Object.entries(specimen.assemblySelections).map(([slot, assemblyId]) => {
+    const assembly = assembliesById.get(assemblyId);
+    if (!assembly) {
+      throw new Error(`Specimen ${specimen.id} references missing assembly ${assemblyId} in slot ${slot}`);
+    }
+
+    if (assembly.category !== slot) {
+      throw new Error(
+        `Specimen ${specimen.id} assigns assembly ${assemblyId} category ${assembly.category} to incompatible slot ${slot}`
+      );
+    }
+
+    return {
+      slot,
+      assembly: calculateAssemblyCost(assembly, products, rates, options),
+    };
+  });
+
+  const materialSubtotal = assemblyCosts.reduce(
+    (sum, item) => sum + item.assembly.materialSubtotal,
+    0
+  );
+  const laborSubtotal = assemblyCosts.reduce(
+    (sum, item) => sum + item.assembly.laborCost,
+    0
+  );
+  const equipmentSubtotal = assemblyCosts.reduce(
+    (sum, item) => sum + item.assembly.equipmentCost,
+    0
+  );
+  const installationSubtotal = assemblyCosts.reduce(
+    (sum, item) => sum + item.assembly.installationCost,
+    0
+  );
+  const totalCost =
+    materialSubtotal + laborSubtotal + equipmentSubtotal + installationSubtotal;
+
+  return {
+    specimenId: specimen.id,
+    assemblyCosts,
+    materialSubtotal,
+    laborSubtotal,
+    equipmentSubtotal,
+    installationSubtotal,
+    totalCost,
+    currency: options.currency ?? "PHP",
+  };
+}
