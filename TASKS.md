@@ -34,16 +34,20 @@
 - [x] Add runtime catalog/reference validation.
 - [x] Harden validation for order-independent references, parent specimens, unit compatibility, category-slot compatibility, dates, negative values, and allowances.
 - [x] Add GitHub Actions CI baseline: install, lint, TypeScript, build.
+- [x] Wire Product / Assembly / CostRate loaders into the demo data layer.
+- [x] Fix Phase 2A A0 lookup regression (`specimen-a0-dignity-3x3` vs legacy `A0`).
 - [ ] Add automated catalog-validation test execution to CI.
 - [ ] Add upgrade-reference validation after upgrade schema is migrated into the Phase 2 model.
 
 ## Phase 2B: Costing Engine
-- [ ] Implement pure `calculateAssemblyCost` function.
-- [ ] Implement pure `calculateSpecimenCost` function.
-- [ ] Apply material waste exactly once and only where intended.
-- [ ] Keep labor/equipment/installation separate and traceable.
-- [ ] Support library rate vs supplier quote vs user override without overwriting source data.
+- [x] Implement pure `calculateAssemblyCost` function.
+- [x] Implement pure `calculateSpecimenCost` function.
+- [x] Apply material waste exactly once and only to material quantity.
+- [x] Keep labor/equipment/installation separate and traceable.
+- [x] Support library/supplier rates plus explicit user overrides without overwriting source data.
 - [ ] Add deterministic costing tests.
+- [ ] Run costing against the curated A0 sample in automated validation.
+- [ ] Wire Phase 2B costing results into the UI after tests pass.
 
 ## Phase 2C: Prototype Derivation
 - [ ] Keep A0 immutable.
