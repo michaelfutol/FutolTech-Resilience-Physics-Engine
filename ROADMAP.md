@@ -33,6 +33,8 @@ RPE v1.0 is complete when all of the following are true:
 11. Benchmark cases are repeatable and saved as permanent RPE test specimens.
 12. Future physical test results can be attached to a benchmark and compared against RPE predictions without changing the original prediction record.
 
+**Physical destructive testing is a validation track, not a funding-dependent blocker for the software v1.0 release.** RPE v1.0 must be ready to preserve frozen pre-test predictions and ingest future physical-test evidence; actual destructive validation may continue in v1.x when resources are available.
+
 Anything beyond these requirements belongs to RPE v1.x or v2.0 and is not required to declare v1.0 complete.
 
 ---
@@ -370,9 +372,9 @@ Exit gate: benchmark runs are versioned, repeatable, and comparable side by side
 
 ---
 
-# PHASE 11 — Physical Validation and Calibration
+# PHASE 11 — Physical Validation and Calibration Track — NON-BLOCKING FOR SOFTWARE v1.0
 
-Goal: close the loop between calculation, simulation, and reality.
+Goal: close the loop between calculation, simulation, and reality when funding, equipment, and safe test facilities are available.
 
 When financially/practically feasible:
 - construct selected benchmark specimens;
@@ -387,12 +389,14 @@ Workflow:
 1. Freeze manual prediction.
 2. Freeze solver prediction.
 3. Freeze RPE prediction.
-4. Perform physical test.
+4. Perform physical test when feasible.
 5. Compare results.
 6. Record discrepancy.
 7. Calibrate a new model/version without overwriting the original prediction.
 
-Exit gate: at least one benchmark contains an immutable pre-test prediction and linked actual test results.
+Software-side exit gate for v1.0: RPE can freeze and preserve pre-test predictions, accept physical-test evidence later, compare prediction vs measured result, and create a new calibrated model/version without overwriting the original record.
+
+An actual destructive test is strongly desired and becomes a v1.x validation milestone if resources are not yet available at the time of the software v1.0 release.
 
 ---
 
@@ -411,7 +415,7 @@ Release requirements:
 - one CFD workflow;
 - wind and earthquake benchmark cases;
 - result-report export with provenance and limitations;
-- documented physical-calibration interface;
+- documented and implemented physical-calibration interface;
 - Dignity Studio/1BR/2BR/3BR specimen family.
 
 At this point **RPE v1.0 is declared COMPLETE and feature-frozen except for defects**.
