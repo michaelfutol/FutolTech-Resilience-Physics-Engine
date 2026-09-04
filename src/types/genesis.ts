@@ -42,6 +42,12 @@ export interface GenesisConnectionInput {
   verificationState: GenesisVerificationState;
 }
 
+export interface GenesisRigidBodyInput {
+  massKg: number | null;
+  sourceNote: string;
+  verificationState: GenesisVerificationState;
+}
+
 export interface GenesisAnalyticalWindResult {
   schemaVersion: typeof GENESIS_SCHEMA_VERSION;
   evidenceLayer: "rpe_analytical";
@@ -94,6 +100,27 @@ export interface GenesisPanelExperimentResult {
     windVerificationState: GenesisVerificationState;
     panelVerificationState: GenesisVerificationState;
     connectionVerificationState: GenesisVerificationState;
+  };
+}
+
+export type GenesisRigidBodyGateState =
+  | "blocked_unverified_capacity"
+  | "attached_within_capacity"
+  | "blocked_mass_missing"
+  | "release_ready";
+
+export interface GenesisRigidBodyGateResult {
+  schemaVersion: typeof GENESIS_SCHEMA_VERSION;
+  evidenceLayer: "rpe_simulation";
+  state: GenesisRigidBodyGateState;
+  canRelease: boolean;
+  massKg: number | null;
+  demandN: number;
+  capacityN: number | null;
+  reason: string;
+  provenance: {
+    rigidBodySourceNote: string;
+    rigidBodyVerificationState: GenesisVerificationState;
   };
 }
 
