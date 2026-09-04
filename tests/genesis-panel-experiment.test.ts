@@ -11,6 +11,7 @@ import { GENESIS_SCHEMA_VERSION } from "../src/types/genesis";
 const wind = {
   schemaVersion: GENESIS_SCHEMA_VERSION,
   speedKph: 36,
+  directionDegrees: 0,
   airDensityKgPerM3: 1.2,
   sourceNote: "synthetic test fixture",
   verificationState: "unverified" as const,
@@ -42,6 +43,7 @@ test("panel experiment records geometry, wind action, provenance, and an unverif
   assert.equal(result.panel.exposedAreaM2, 3);
   assert.equal(result.wind.dynamicPressurePa, 60);
   assert.equal(result.wind.panelForceN, 180);
+  assert.equal(result.wind.assumptions.directionDegrees, 0);
   assert.equal(result.connection.state, "unverified");
   assert.equal(result.experimentState, "unverified_connection");
   assert.equal(result.evidenceLayer, "rpe_analytical");
@@ -99,6 +101,7 @@ test("evidence log is deterministic and blocks release when capacity is unknown"
       [5, "release_gate", "blocked"],
     ],
   );
+  assert.equal(log[0].values.directionDegrees, 0);
   assert.match(log[4].message, /capacity is unverified/i);
 });
 
