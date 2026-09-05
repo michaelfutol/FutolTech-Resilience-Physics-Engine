@@ -4,137 +4,124 @@
 
 Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
-Phase 4 — **Small House Wind System** — is active. The gated progression now stands at:
+Phase 4 — **Small House Wind System** — remains active. The current progression is:
 
-**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage interface-readiness ✅ → storm protection topology-readiness ✅ → controlled A/B specimen difference 🔵**
+**topology/staging spine ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → analytical surface wind action 🔵**
 
-The exact next layer is now **Controlled A/B specimen difference**.
+The exact next layer is **Phase 4 analytical surface wind action**.
 
-## Completed Phase 4 topology/readiness spine
+Phase 4 is **not** complete merely because the A/B invariant audit passed. The locked roadmap still requires house-level pressure/load vectors, connection demand/capacity state, uplift/sliding reactions, racking indicators, failure sequence, detached debris, and residual state where supported.
 
-### Primary supports
-- Reviewable staged support identity and geometry.
-- Explicit local longitudinal axis and 12 end-restraint DOFs.
-- First transparent `rpe_analytical` Euler–Bernoulli cantilever benchmark only.
-- No capacity/PASS/FAIL or whole-house claim.
+## Newly completed — Controlled A/B specimen difference
 
-### Floor/ring frame
-- Reviewable ring-member identity, geometry/orientation, and endpoint roles.
-- No inferred physical joint coordinates or global frame mechanics.
+The first stable-ID A/B contract is complete for **input-control evidence only**.
 
-### Walls and roof
-- Explicit panel identities, geometry/orientation, local normals, exposed faces, and exposure classes.
-- Geometry-only face areas are allowed from declared geometry.
-- Effective wind area, pressure coefficients, net pressure, stiffness/strength, and fastener mechanics remain separate future gates.
+Canonical QA pair:
+- Case A = canonical `SYNTHETIC_PHASE4_HOUSE`.
+- Case B = the same validated specimen plus exactly one declared connection record, `synthetic-connection-storm-west-second-end`, from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
+- Added connection capacity remains `null` / UNKNOWN.
 
-### Connections
-- Topology is separated from physical joint location.
-- Missing joint coordinates stay unknown until explicitly supplied with provenance.
-- Production-browser artifact ID `9964232114`.
+The comparator proves:
+- specimen metadata unchanged;
+- envelope unchanged;
+- component records unchanged;
+- component geometry unchanged;
+- every pre-existing connection record unchanged;
+- exactly the declared connection record added.
 
-### Bracing topology-readiness
-- A diagonal-looking member is not a complete brace path by appearance.
-- Canonical `synthetic-brace-north-west` remains `load_path_incomplete`, `1 / 2` explicit ends.
-- No mechanics or adequacy is inferred.
-- Production-browser artifact ID `9964350351`.
+It rejects missing declared differences, geometry/property drift, unrelated connection edits/additions, and multiple simultaneous variables. Stable-ID sorting means array ordering alone is not treated as an engineering change.
 
-### Anchorage interface-readiness
-- Canonical browser case `synthetic-anchor-nw → synthetic-connection-anchor-nw → synthetic-support-nw` establishes interface identity only.
-- Physical attachment point, bolt/embedment/baseplate, footing/soil, reactions, resistance, capacity, and PASS/FAIL remain unavailable.
-- Production-browser run `33950699741` passed; artifact ID `9964743865`.
-- Final clean-head Anchorage run `33950979454` passed; artifact ID `9964831153`.
+Evidence boundary:
+- state: `controlled_input_difference`;
+- evidence layer: `rpe_input_review`;
+- mechanics available: NO;
+- performance comparison: NO;
+- winner/strength ranking: NOT AVAILABLE.
 
-### Storm Protection restraint topology-readiness — COMPLETE
-- Canonical `synthetic-storm-strap-west` has only one explicit relationship, to `synthetic-roof-west`, so its honest state is `restraint_path_incomplete`, `1 / 2` selected ends.
-- Two distinct explicit connection records are required, and their opposite endpoint components must also be distinct; duplicate records to the same roof cannot fake a complete restraint path.
-- Visible strap extent/crossing/touching never creates a missing endpoint or physical attachment point.
-- Tension, preload, stiffness, slack/elongation, wind/uplift demand, restraint force, load sharing, member/connection capacity, utilization, PASS/FAIL, and whole-house benefit remain unavailable.
-- QA-only augmented fixture may add one explicit second end to `synthetic-anchor-nw` and reach `review_ready_topology`; mechanics still remain unavailable.
-- RPE CI run `33951312722` passed.
-- Production-browser run `33951312736` passed; artifact ID `9964940298`.
+Canonical evidence:
+- RPE CI run `33959003440` passed install, lint, strict TypeScript, full regressions, and production build.
+- Production Chromium run `33959003346` passed retained Genesis + Phase 4 acceptance.
+- Browser artifact ID `9967337114`.
 
-## Exact next gated batch — Controlled A/B specimen difference
+## Exact next gated batch — Analytical surface wind action
 
-The first A/B batch is an **input-control audit**, not a performance comparison.
+The next step begins the actual Phase 4 pressure/load-vector path without skipping directly to whole-house mechanics.
 
-### Canonical A/B pair
+### First-slice scope
 
-- **Variant A:** the canonical `SYNTHETIC_PHASE4_HOUSE` unchanged.
-- **Variant B:** a deep-cloned equivalent specimen with exactly one additional explicit topology record:
-  - connection ID: `synthetic-connection-storm-west-second-end`;
-  - activation stage: `storm_protection`;
-  - from: `synthetic-storm-strap-west`;
-  - to: `synthetic-anchor-nw`;
-  - capacity remains `null`;
-  - provenance states that it is a QA-only second restraint-end topology declaration.
+Reference **one active staged wall or roof panel** by stable ID and require all aerodynamic/action-driving quantities explicitly. The first contract should calculate a transparent `rpe_analytical` surface action only when every required input is present.
 
-No component geometry, identity, orientation, material, mass, envelope value, or unrelated connection record may change.
+Required explicit inputs:
+- active wall/roof panel ID;
+- air density `ρ`;
+- wind speed `V`;
+- effective wind area `A_eff` supplied explicitly and kept distinct from geometry-only panel face area;
+- explicit signed coefficient basis for the first analytical action;
+- explicit finite global action direction vector;
+- source/provenance note;
+- verification state.
 
-### Required comparison behavior
+First transparent calculation path:
+- dynamic pressure: `q = 0.5ρV²`;
+- signed scalar surface action from the explicitly supplied coefficient basis;
+- global force vector using the explicit direction vector.
 
-- Validate both specimens independently before comparison.
-- Compare canonicalized specimen content by stable IDs rather than relying on array order.
-- Prove envelope equality.
-- Prove the component-ID set is identical.
-- Prove every component field is identical.
-- Prove every pre-existing connection record is identical.
-- Identify exactly one allowed structural-variable difference: the declared added connection record.
-- Reject zero differences, more than one difference, undeclared additions/removals, component mutations, geometry drift, property drift, or unrelated connection edits.
-- Preserve exact before/after evidence and provenance of the declared difference.
+### Permanent anti-inference rules
 
-### Evidence/result boundary
+The first surface-action gate must **not** silently create:
+- code pressure coefficients;
+- roof/wall zones;
+- internal pressure coefficient;
+- gust, topographic, shielding, or directionality factors;
+- effective wind area from rendered dimensions;
+- wind direction from the camera or scene;
+- surface normal/action direction from apparent geometry unless a later contract explicitly authorizes that derivation;
+- tributary load path;
+- connection demand;
+- support reactions;
+- uplift/sliding resistance;
+- PASS/FAIL or code-compliance result.
 
-A successful first A/B audit may say only:
-
-**`controlled_input_difference` — exactly one declared topology variable changed; all required invariants held.**
-
-It must not say:
-- Variant B is stronger;
-- Variant B resists more wind;
-- uplift is reduced;
-- failure is delayed;
-- the house is safer or code-compliant;
-- resilience improved by any percentage.
-
-Those claims require later mechanics/solver/test evidence.
+The browser must label this output **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**.
 
 ### Required regression/browser proof
 
-1. Canonical A vs exact clone → reject as `no_difference`.
-2. Canonical A vs QA Variant B → accept exactly one declared connection addition.
-3. Variant B plus any component geometry mutation → reject uncontrolled comparison.
-4. Variant B plus material/mass/orientation mutation → reject.
-5. Variant B plus unrelated connection edit/addition/removal → reject.
-6. Pure array reordering with identical stable-ID content → no structural difference.
-7. Result reports zero component changes and exactly one connection change for the canonical A/B pair.
-8. No mechanics/performance/PASS-FAIL field becomes available.
-9. Real browser shows the invariant audit and explicit non-performance warning.
+1. Stage before the selected panel exists → blocked.
+2. Missing/wrong-kind panel → blocked.
+3. Missing or non-finite `ρ`, `V`, `A_eff`, coefficient, or direction vector → blocked.
+4. Non-positive `ρ`, `V`, or `A_eff` → blocked.
+5. Direction vector must be explicit, finite, non-zero, and normalized deterministically before use.
+6. Geometry-only panel face area remains separately reported and never becomes `A_eff` automatically.
+7. Transparent numerical fixture reproduces `q`, scalar action, and force-vector components within tolerance.
+8. No downstream joint reaction, connection demand/capacity, structural adequacy, CFD, or code-compliance field becomes available.
+9. Real Chromium proves the live panel and stale-stage invalidation.
 
-Only after this input-difference gate is accepted should RPE connect a controlled A/B pair to future explicit analytical/solver mechanics.
+Only after this first surface action is accepted should RPE expand to multiple surfaces and later distribute loads into explicit structural/load-path mechanics.
 
-## After the controlled-difference gate
+## Following Phase 4 order
 
-Continue deliberately:
+After the first surface-action gate:
 
-1. Build explicit connection/bracing/anchorage/storm-restraint mechanics contracts only when all driving physical quantities are sourced.
-2. Add solver adapters through the locked engine ladder rather than replacing missing mechanics with visual heuristics.
-3. Reuse the controlled A/B invariant engine when analytical/OpenSees/OpenFOAM evidence becomes available, so only the intended structural variable changes between specimens.
-4. Reach the Phase 4 exit gate without claiming more evidence than exists.
+1. Extend to controlled multi-surface house loading with each surface input traceable.
+2. Define connection mechanics only after joint coordinates and all demand/capacity-driving quantities are explicit.
+3. Define bracing, anchorage, and storm-restraint mechanics through their own sourced input contracts.
+4. Reuse the controlled A/B invariant engine when analytical/solver evidence is available so only one structural variable changes.
+5. Generate the roadmap-required house-level outputs before declaring Phase 4 complete.
 
 ## Engine integration ladder
 
-The solver/physics roadmap is locked in `docs/ENGINE_INTEGRATION_LADDER.md`:
+Locked separately in `docs/ENGINE_INTEGRATION_LADDER.md`:
 
 **Three.js/R3F → Rapier → IFC/IfcOpenShell + Blender/Bonsai → OpenSees/OpenSeesPy → selected CalculiX → OpenFOAM → optional Chrono/Unreal → BlueQubit v2+**
 
-OpenSees-class structural coupling and an OpenFOAM CFD workflow are required before RPE v1.0 may be declared complete.
+OpenSees-class structural coupling and one OpenFOAM CFD workflow remain required RPE v1.0 gates.
 
 ## Independent outstanding gate
 
-Final Phase 2 manual browser visual acceptance remains open and must be recorded separately. Phase 3 completion and Phase 4 progress do not silently close it.
+Final Phase 2 manual browser visual acceptance remains open and must be recorded separately.
 
 ## Evidence boundary
 
-Manual/code calculations, engineering solver results, RPE analytical calculations, RPE simulation, browser QA/visualization, and future physical tests remain separate layers under:
+Manual/code calculations, engineering solver results, RPE analytical calculations, RPE simulation, browser QA/visualization, and future physical tests remain separate under:
 
 **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**
