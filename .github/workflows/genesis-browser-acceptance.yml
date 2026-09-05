@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes explicit force moment acceptance schema 0.15.0.
+# Phase 4 browser contract includes explicit structural load-case / solver-node input mapping acceptance schema 0.16.0.
 
 on:
   push:
@@ -33,6 +33,7 @@ on:
       - src/types/smallHouseMultiSurfaceWindLoadSet.ts
       - src/types/smallHouseSurfaceForceApplicationPoint.ts
       - src/types/smallHouseSurfaceForceMoment.ts
+      - src/types/smallHouseStructuralLoadCaseAdapter.ts
       - src/types/primarySupportMechanics.ts
       - src/types/primarySupportCantilever.ts
       - src/types/floorRingFrameReadiness.ts
