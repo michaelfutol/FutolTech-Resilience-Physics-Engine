@@ -33,7 +33,7 @@
 - [x] Explicit opt-in center-of-mass aerodynamic force application with fixed-step scheduler.
 - [x] Partial terminal force step preserves only the declared active-duration impulse.
 - [x] Real Chromium force-application and stale-context acceptance.
-- [ ] Define aerodynamic torque only in a future separately justified contract; do not infer it from current drag force.
+- [ ] Define aerodynamic torque only in a future separately justified contract; do not infer it from current drag force or ordinary `r×F` statics.
 
 ## Phase 4 — Small House Wind System — ACTIVE
 
@@ -139,20 +139,41 @@
 - [x] Prove lowering below wall activation blocks the full load set and clears the vector sum.
 - [x] Confirm core RPE CI `33960418016`, permanent RPE CI `33960633262`, production Chromium `33960633248`, browser artifact `9967837588`.
 
-### Explicit surface force-application points — CURRENT GATE
-- [ ] Define mapping contract from one ready analytical surface action to a caller-declared global application point.
-- [ ] Require exact stable surface ID match, finite `(x,y,z)` point, provenance, and verification.
-- [ ] Preserve the source force vector exactly; mapping must not mutate/recalculate aerodynamic action.
-- [ ] Never infer geometric centroid, rendered panel center, center of pressure, joint, support, anchor, nearest frame member, or solver node.
-- [ ] Keep moment/torque unavailable until a separate reference-point/axis contract exists.
-- [ ] Keep reaction, base shear, uplift/sliding, racking, connection demand, load-path distribution, and PASS/FAIL unavailable.
-- [ ] Add regressions for invalid coordinates, ID mismatch, blocked source action, geometry non-inference, copying/no aliasing, and exact force preservation.
-- [ ] Wire a deliberately non-centroid north-wall QA application point into production browser acceptance.
-- [ ] Browser must prove `APPLICATION POINT BASIS: CALLER_DECLARED_GLOBAL_POINT` plus center-of-pressure/solver-node/moment/reaction/PASS-FAIL all N/A and stale-stage clearing.
+### Explicit surface force-application points — COMPLETE FOR CURRENT MAPPING SCOPE
+- [x] Define mapping contract from one ready analytical surface action to a caller-declared global application point.
+- [x] Require exact stable surface ID match, finite `(x,y,z)` point, provenance, and verification.
+- [x] Preserve the source force vector exactly; mapping does not mutate or recalculate aerodynamic action.
+- [x] Never infer geometric centroid, rendered panel center, center of pressure, joint, support, anchor, nearest frame member, or solver node.
+- [x] Keep moment unavailable until a separate explicit reference-point contract exists.
+- [x] Keep reaction, base shear, uplift/sliding, racking, connection demand, load-path distribution, and PASS/FAIL unavailable.
+- [x] Add regressions for invalid coordinates, ID mismatch, blocked source action, geometry non-inference, copying/no aliasing, and exact force preservation.
+- [x] Wire deliberately non-centroid north-wall QA point `(0.370,1.230,-2.410) m` while rendered center remains `(0,1.650,-2.250) m`.
+- [x] Production browser proves `APPLICATION POINT BASIS: CALLER_DECLARED_GLOBAL_POINT`, no inferred point, center of pressure/solver node/moment/reaction/PASS-FAIL unavailable, and stale-stage clearing.
+- [x] Confirm RPE CI `33961159081`, production Chromium `33961159089`, browser artifact `9967997190`.
+
+### Explicit force moment about declared reference point — COMPLETE FOR CURRENT ORDINARY-STATICS SCOPE
+- [x] Define explicit global reference-point contract only after the surface force and application point are ready.
+- [x] Require exact stable surface ID match, finite caller-declared reference `(x,y,z)`, provenance, and verification; never assume global origin.
+- [x] Calculate only `r = r_app − r_ref`, `M_ref = r × F`, and Euclidean moment magnitude.
+- [x] Canonical QA: `F=(0,0,-960) N`, `r_app=(0.37,1.23,-2.41) m`, `r_ref=(0.1,0.2,-2.0) m`, `r=(0.27,1.03,-0.41) m` → `M=(-988.8,259.2,0) N·m`, `|M|=1022.208 N·m`.
+- [x] Prove equal translation of application/reference points preserves lever arm and moment within numerical tolerance.
+- [x] Preserve zero force moment when reference equals application point without inventing an aerodynamic couple.
+- [x] Keep `aerodynamicTorqueNm = null`; ordinary `r×F` is explicitly not aerodynamic torque/free couple.
+- [x] Keep reaction, base shear, uplift/sliding, racking, connection demand, load-path distribution, solver response, support moment, and PASS/FAIL unavailable.
+- [x] Production browser labels the gate `RPE_ANALYTICAL · ORDINARY STATICS r×F · NOT AERODYNAMIC TORQUE` and proves stale-stage clearing.
+- [x] Confirm permanent RPE CI `33966843019`, production Chromium `33966843040`, browser artifact `9969727754`.
+
+### Structural load-case / solver-node adapter — CURRENT GATE
+- [ ] Define a traceable adapter that maps accepted analytical force/application-point/moment evidence to an explicitly caller-declared structural load-case identity and solver-node identity.
+- [ ] Require explicit stable surface ID, load-case ID, solver-node ID, coordinate-system/basis declaration, provenance, and verification; no nearest-node or geometry-based inference.
+- [ ] Preserve analytical source force/moment exactly and maintain source-evidence references; adapter must not recalculate aerodynamics or structural response.
+- [ ] Explicitly distinguish `solver_input_mapping` from `solver_result`; mapping readiness alone must never create reactions, displacements, member forces, connection demands, or PASS/FAIL.
+- [ ] Block stale stage/surface evidence, ID mismatches, missing node/load-case identities, unsupported coordinate basis, and incomplete provenance.
+- [ ] Add regressions proving geometry proximity cannot select a solver node and that changing only node/load-case mapping changes only adapter metadata, not the analytical source result.
+- [ ] Wire one synthetic explicit node/load-case mapping into browser QA with strong `INPUT MAPPING ONLY / NO SOLVER RESPONSE` labeling.
 
 ### Later Phase 4 mechanics layers
-- [ ] Add an explicit moment-reference contract only after force application points exist and moment reporting is justified.
-- [ ] Build a traceable structural load-case/solver-node adapter rather than inferring tributary paths from scene geometry.
+- [ ] Execute a structural solver/load-path gate only after model topology, nodes, element properties, restraints/boundary conditions, coordinate transformations, and load-case mappings are explicit and validated.
 - [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
 - [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
 - [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
@@ -169,6 +190,7 @@
 - [x] Keep Roof readiness RPE CI run `33942967313` visible: exact floating-point assertion expected `9.84` while raw multiplication returned `9.839999999999998`; contract unchanged, test repaired with `1e-12` tolerance.
 - [x] Keep Roof Browser Acceptance Patch run `33943182691` visible: one-shot text anchor matched twice and failed before changing acceptance code; repaired with a unique multiline anchor.
 - [x] Keep Bracing Readiness Patch run `33949368220` visible: deterministic patch and `git diff --check` passed, but GitHub correctly refused bot modification of a workflow file without workflow permission. No permission escalation was used; repaired run `33949425974` passed.
+- [x] Keep force-moment RPE CI run `33966651039` visible: translation-invariance regression used strict deep equality and exposed normal IEEE-754 differences (`0.27` vs `0.2699999999999996`); mechanics contract stayed unchanged and the regression was repaired with a `1e-9` numerical tolerance before permanent green CI/browser acceptance.
 
 ## Later mechanics gates — not to be invented early
 - [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
