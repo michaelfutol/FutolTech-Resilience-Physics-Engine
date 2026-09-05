@@ -130,7 +130,7 @@ test("force application evidence cannot bypass blocked simulation activation", (
 
   assert.throws(
     () => recordGenesisAerodynamicForceApplication(snapshot, activeRecord),
-    /Cannot record live simulation observations before simulation activation/,
+    /Cannot record aerodynamic force application before simulation activation/,
   );
 });
 
