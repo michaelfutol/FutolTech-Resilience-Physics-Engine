@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.4.0",
+  schemaVersion: "0.5.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -43,6 +43,7 @@ const record = {
     "Primary-support readiness is an input-review evidence layer, not a structural-response calculation.",
     "The isolated cantilever calculator is an RPE analytical formula benchmark only; it does not evaluate strength, PASS/FAIL, whole-house load path, solver response, or code compliance.",
     "Floor/ring readiness is member/topology review only; schema v0.1.0 deliberately accepts no joint coordinates and performs no global frame calculation.",
+    "Wall-panel readiness derives box-face geometry only from an explicitly declared local normal; it does not define effective wind area, pressure coefficients, net pressure, stiffness, fastener capacity, or wind resistance.",
   ],
 };
 
@@ -62,12 +63,15 @@ try {
   await waitForBodyText(page, "VISIBLE ≠ ADEQUATE");
   await waitForBodyText(page, "Primary-support mechanics readiness");
   await waitForBodyText(page, "Floor/ring-frame member readiness");
+  await waitForBodyText(page, "Wall-panel geometry / exposure readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
+  await waitForBodyText(page, "Wind-action calculation: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
   record.checks.floorRingReadinessPanelVisible = true;
+  record.checks.wallExposureReadinessPanelVisible = true;
 
   const stage = page.getByLabel("Phase 4 stage", { exact: true });
   if ((await stage.count()) !== 1) fail(`Expected one Phase 4 stage selector; found ${await stage.count()}`);
@@ -197,9 +201,47 @@ try {
   record.checks.floorRingJointCoordinatesRemainUnavailable = true;
   record.checks.floorRingGlobalFrameCalculationBlocked = true;
 
-  // Lowering below floor/ring activation must block retained readiness assumptions.
+  // Wall exposure readiness: explicit local normal + face sign + exposure class only.
+  await stage.selectOption("walls");
+  await page.getByLabel("Wall panel component", { exact: true }).selectOption("synthetic-wall-north");
+  await page.getByLabel("Wall panel normal axis", { exact: true }).selectOption("local_z");
+  await page.getByLabel("Wall exposed face", { exact: true }).selectOption("negative_normal");
+  await page.getByLabel("Wall exposure class", { exact: true }).selectOption("exterior");
+  await page.getByLabel("Wall normal axis source note", { exact: true }).fill("Synthetic browser QA local-z normal declaration only");
+  await page.getByLabel("Wall normal axis verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Wall exposure source note", { exact: true }).fill("Synthetic browser QA exterior negative-face declaration only");
+  await page.getByLabel("Wall exposure verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Wall readiness source note", { exact: true }).fill("Synthetic browser QA wall exposure readiness only");
+  await page.getByLabel("Wall readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Wall readiness state: review_ready");
+  await waitForBodyText(page, "Wall ID: synthetic-wall-north");
+  await waitForBodyText(page, "Declared normal axis: local_z");
+  await waitForBodyText(page, "Declared exposed face: negative_normal");
+  await waitForBodyText(page, "Exposure class: exterior");
+  await waitForBodyText(page, "Geometric box-face area: 7.140000 m² — GEOMETRY ONLY");
+  await waitForBodyText(page, "Effective wind area: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Wind velocity / density / Cp / internal pressure / net pressure: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Panel stiffness / strength / fastener capacity: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Wind-action calculation: NO");
+  if (await page.locator('input[aria-label*="pressure coefficient" i], input[aria-label*="net pressure" i], input[aria-label*="effective wind area" i]').count()) {
+    fail("Wall readiness unexpectedly exposed aerodynamic calculation inputs");
+  }
+  record.checks.wallExposureExplicitInputsAccepted = true;
+  record.checks.wallGeometricFaceAreaVerified = true;
+  record.checks.wallEffectiveWindAreaRemainsUndefined = true;
+  record.checks.wallWindActionCalculationBlocked = true;
+
+  // Lowering below wall activation must block retained wall assumptions.
+  await stage.selectOption("floor_ring_frame");
+  await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
+  await waitForBodyTextAbsent(page, "Wall ID: synthetic-wall-north");
+  record.checks.wallReadinessBlockedBelowActivationStage = true;
+
+  // Lowering below floor/ring activation must also block retained floor/ring assumptions.
   await stage.selectOption("primary_supports");
   await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
+  await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyTextAbsent(page, "Member ID: synthetic-ring-north");
   record.checks.floorRingReadinessBlockedBelowActivationStage = true;
 
@@ -209,6 +251,7 @@ try {
   await waitForBodyText(page, "Readiness state: blocked_stage_before_primary_supports");
   await waitForBodyText(page, "Cantilever analytical result: NOT AVAILABLE");
   await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
+  await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
