@@ -28,13 +28,19 @@ text = replace_once(
     '  await waitForBodyText(page, "Roof-panel geometry / exposure readiness");\n',
     "wall panel heading",
 )
+
+initial_calculation_block = (
+    '  await waitForBodyText(page, "Readiness contract calculation: NO");\n'
+    '  await waitForBodyText(page, "Global frame calculation: NO");\n'
+    '  await waitForBodyText(page, "Wind-action calculation: NO");\n'
+)
 text = replace_once(
     text,
-    '  await waitForBodyText(page, "Wind-action calculation: NO");\n',
-    '  await waitForBodyText(page, "Wind-action calculation: NO");\n'
-    '  await waitForBodyText(page, "Uplift calculation: NO");\n',
-    "wall calculation status",
+    initial_calculation_block,
+    initial_calculation_block + '  await waitForBodyText(page, "Uplift calculation: NO");\n',
+    "initial calculation-status block",
 )
+
 text = replace_once(
     text,
     '  record.checks.wallExposureReadinessPanelVisible = true;\n',
