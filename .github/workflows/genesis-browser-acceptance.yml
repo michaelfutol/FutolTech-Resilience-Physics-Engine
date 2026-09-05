@@ -1,0 +1,81 @@
+name: Genesis Browser Acceptance
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/genesis-browser-acceptance.yml
+      - scripts/genesis-browser-acceptance.mjs
+      - src/components/Viewport3D.tsx
+      - src/components/GenesisEventLedgerPanel.tsx
+      - src/lib/genesis/**
+      - src/types/genesis*.ts
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-browser-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout canonical branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Install temporary browser harness
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Start production application
+        run: |
+          npm start -- -H 127.0.0.1 > /tmp/rpe-next.log 2>&1 &
+          echo $! > /tmp/rpe-next.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              echo "RPE browser target is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "RPE application did not become ready."
+          cat /tmp/rpe-next.log
+          exit 1
+
+      - name: Run real Chromium Genesis acceptance
+        env:
+          RPE_BASE_URL: http://127.0.0.1:3000
+          RPE_BROWSER_ACCEPTANCE_OUTPUT: genesis-browser-acceptance.json
+          RPE_BROWSER_ACCEPTANCE_SCREENSHOT: genesis-browser-acceptance.png
+        run: node scripts/genesis-browser-acceptance.mjs
+
+      - name: Show application log on failure
+        if: failure()
+        run: cat /tmp/rpe-next.log || true
+
+      - name: Upload browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-browser-acceptance-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            genesis-browser-acceptance.json
+            genesis-browser-acceptance.png
