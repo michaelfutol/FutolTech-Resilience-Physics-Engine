@@ -56,6 +56,7 @@ import BracingTopologyReadinessPanel from "@/components/BracingTopologyReadiness
 import AnchorageInterfaceReadinessPanel from "@/components/AnchorageInterfaceReadinessPanel";
 import StormProtectionTopologyReadinessPanel from "@/components/StormProtectionTopologyReadinessPanel";
 import SmallHouseControlledABPanel from "@/components/SmallHouseControlledABPanel";
+import SmallHouseSurfaceWindActionPanel from "@/components/SmallHouseSurfaceWindActionPanel";
 import { SYNTHETIC_PHASE4_HOUSE } from "@/data/smallHouseWind/syntheticPhase4House";
 import { materializeSmallHouseWindStage } from "@/lib/smallHouseWind/systemContract";
 import type { SmallHouseWindStage } from "@/types/smallHouseWind";
@@ -969,6 +970,8 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           <WallPanelExposureReadinessPanel snapshot={phase4Snapshot} />
 
           <RoofPanelExposureReadinessPanel snapshot={phase4Snapshot} />
+
+          <SmallHouseSurfaceWindActionPanel snapshot={phase4Snapshot} />
 
           <ConnectionJointLocationReadinessPanel snapshot={phase4Snapshot} />
 

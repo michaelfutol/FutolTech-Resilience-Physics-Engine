@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.11.0",
+  schemaVersion: "0.12.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -50,6 +50,7 @@ const record = {
     "Anchorage interface readiness identifies only an explicit anchor-to-primary-support topology relationship; it does not infer the physical attachment point, bolt/rod, embedment, base plate, pedestal/footing, concrete/soil properties, reactions, resistance, capacity, or adequacy.",
     "Storm-protection topology readiness requires two distinct explicit incident connection records to two distinct active opposite endpoint components; visible strap geometry cannot create a missing end, attachment point, preload, stiffness, demand, capacity, PASS/FAIL, or whole-house benefit.",
     "Controlled A/B comparison in this gate proves only that exactly one declared connection record differs while unrelated specimen inputs remain invariant; it does not compare structural performance or establish a stronger/better variant.",
+    "Single-surface wind action is RPE_ANALYTICAL only: density, speed, effective area, signed coefficient, and global action direction are explicit QA inputs; it is NON-CFD, NON-CODE-COMPLIANCE, and does not create connection demand, reactions, racking, PASS/FAIL, or whole-house performance evidence.",
   ],
 };
 
@@ -76,6 +77,8 @@ try {
   await waitForBodyText(page, "Anchorage interface readiness");
   await waitForBodyText(page, "Storm Protection restraint topology readiness");
   await waitForBodyText(page, "Controlled A/B specimen difference");
+  await waitForBodyText(page, "Analytical surface wind action");
+  await waitForBodyText(page, "RPE_ANALYTICAL · NON-CFD · NON-CODE-COMPLIANCE");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -93,6 +96,7 @@ try {
   record.checks.anchorageInterfaceReadinessPanelVisible = true;
   record.checks.stormProtectionTopologyReadinessPanelVisible = true;
   record.checks.controlledABPanelVisible = true;
+  record.checks.surfaceWindActionPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -254,6 +258,37 @@ try {
   record.checks.wallGeometricFaceAreaVerified = true;
   record.checks.wallEffectiveWindAreaRemainsUndefined = true;
   record.checks.wallWindActionCalculationBlocked = true;
+
+  // First Phase 4 analytical surface action: explicit aerodynamic/action inputs only.
+  await waitForBodyText(page, "Surface action state: analytical_ready");
+  await waitForBodyText(page, "Evidence layer: rpe_analytical");
+  await waitForBodyText(page, "Structural result: N/A");
+  await waitForBodyText(page, "Surface ID: synthetic-wall-north");
+  await waitForBodyText(page, "Surface kind: wall_panel");
+  await waitForBodyText(page, "Surface normal axis for geometry report: local_z");
+  await waitForBodyText(page, "Geometry-only face area: 7.140000 m²");
+  await waitForBodyText(page, "Effective wind area A_eff: 5.000000 m²");
+  await waitForBodyText(page, "Air density ρ: 1.200 kg/m³");
+  await waitForBodyText(page, "Wind speed V: 20.000 m/s");
+  await waitForBodyText(page, "Signed coefficient: -0.800");
+  await waitForBodyText(page, "Explicit direction input: (0.000, 0.000, 2.000)");
+  await waitForBodyText(page, "Normalized global action direction: (0.000, 0.000, 1.000)");
+  await waitForBodyText(page, "q = 0.5ρV²: 240.000 Pa");
+  await waitForBodyText(page, "Signed surface pressure qC: -192.000 Pa");
+  await waitForBodyText(page, "Scalar surface force qA_effC: -960.000 N");
+  await waitForBodyText(page, "Global force vector: (0.000, 0.000, -960.000) N");
+  await waitForBodyText(page, "Connection demand: N/A");
+  await waitForBodyText(page, "Connection capacity assessment: N/A");
+  await waitForBodyText(page, "Support reactions: N/A");
+  await waitForBodyText(page, "Uplift reaction: N/A");
+  await waitForBodyText(page, "Sliding reaction: N/A");
+  await waitForBodyText(page, "Racking indicator: N/A");
+  await waitForBodyText(page, "PASS/FAIL: N/A");
+  await waitForBodyText(page, "Geometry-only area 7.140000 m² ≠ declared A_eff 5.000000 m²");
+  record.checks.surfaceWindActionHandCheckVerified = true;
+  record.checks.surfaceWindActionGeometryAreaNotEffectiveArea = true;
+  record.checks.surfaceWindActionExplicitDirectionVerified = true;
+  record.checks.surfaceWindActionDownstreamMechanicsUnavailable = true;
 
   // Roof exposure readiness: rotated roof geometry + explicit local normal/exposed-face declaration only.
   await stage.selectOption("roof");
@@ -473,8 +508,12 @@ try {
   // Lowering below wall activation must block retained wall assumptions.
   await stage.selectOption("floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
+  await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
   await waitForBodyTextAbsent(page, "Wall ID: synthetic-wall-north");
+  await waitForBodyTextAbsent(page, "Surface ID: synthetic-wall-north");
+  await waitForBodyTextAbsent(page, "q = 0.5ρV²: 240.000 Pa");
   record.checks.wallReadinessBlockedBelowActivationStage = true;
+  record.checks.surfaceWindActionBlockedBelowWallStage = true;
 
   // Lowering below floor/ring activation must also block retained floor/ring assumptions.
   await stage.selectOption("primary_supports");
@@ -491,6 +530,7 @@ try {
   await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
+  await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
