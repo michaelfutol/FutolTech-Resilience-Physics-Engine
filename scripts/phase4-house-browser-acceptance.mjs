@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.14.0",
+  schemaVersion: "0.15.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -53,6 +53,7 @@ const record = {
     "Single-surface wind action is RPE_ANALYTICAL only: density, speed, effective area, signed coefficient, and global action direction are explicit QA inputs; it is NON-CFD, NON-CODE-COMPLIANCE, and does not create connection demand, reactions, racking, PASS/FAIL, or whole-house performance evidence.",
     "Multi-surface wind loading only algebraically sums already-valid explicit single-surface global force vectors; the sum is not a support reaction, base shear, connection demand, racking demand, moment/torque, load-path distribution, CFD integration, code-compliance result, or adequacy verdict.",
     "Surface force application-point mapping attaches an accepted analytical force only to an explicit caller-declared global point. It does not infer center of pressure, panel centroid, joint, support, solver node, load path, moment/torque, reaction, or adequacy.",
+    "Surface force moment is ordinary statics r×F about an explicit caller-declared global reference point only. It is not aerodynamic torque/free couple, support moment, reaction, load-path distribution, solver response, or adequacy evidence.",
   ],
 };
 
@@ -85,6 +86,8 @@ try {
   await waitForBodyText(page, "RPE_ANALYTICAL · VECTOR ALGEBRA ONLY · NON-CFD · NON-CODE-COMPLIANCE");
   await waitForBodyText(page, "Explicit surface force application-point mapping");
   await waitForBodyText(page, "RPE_ANALYTICAL · EXPLICIT MAPPING ONLY · NO MOMENT / NO REACTION");
+  await waitForBodyText(page, "Explicit force moment about declared reference point");
+  await waitForBodyText(page, "RPE_ANALYTICAL · ORDINARY STATICS r×F · NOT AERODYNAMIC TORQUE");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -105,6 +108,7 @@ try {
   record.checks.surfaceWindActionPanelVisible = true;
   record.checks.multiSurfaceWindLoadSetVisible = true;
   record.checks.surfaceForceApplicationPointMappingVisible = true;
+  record.checks.surfaceForceMomentVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -336,6 +340,23 @@ try {
   record.checks.surfaceForceApplicationPointPreservesForceVector = true;
   record.checks.surfaceForceApplicationPointNoMomentOrStructuralMapping = true;
 
+  // Ordinary statics force moment about one explicit non-origin caller-declared reference point.
+  await waitForBodyText(page, "Force-moment state: analytical_ready");
+  await waitForBodyText(page, "Moment surface ID: synthetic-wall-north");
+  await waitForBodyText(page, "Source force vector F: (0.000, 0.000, -960.000) N");
+  await waitForBodyText(page, "Application point r_app: (0.370, 1.230, -2.410) m");
+  await waitForBodyText(page, "Caller-declared reference point r_ref: (0.100, 0.200, -2.000) m");
+  await waitForBodyText(page, "Lever arm r = r_app − r_ref: (0.270, 1.030, -0.410) m");
+  await waitForBodyText(page, "M_ref = r × F: (-988.800, 259.200, 0.000) N·m");
+  await waitForBodyText(page, "|M_ref|: 1022.208 N·m");
+  await waitForBodyText(page, "Moment basis: force_moment_about_caller_declared_global_reference_point");
+  await waitForBodyText(page, "AERODYNAMIC TORQUE / FREE COUPLE: N/A");
+  await waitForBodyText(page, "FORCE MOMENT r×F ≠ AERODYNAMIC TORQUE / SUPPORT MOMENT / SOLVER RESPONSE");
+  record.checks.surfaceForceMomentHandCheckVerified = true;
+  record.checks.surfaceForceMomentExplicitReferenceVerified = true;
+  record.checks.surfaceForceMomentAerodynamicTorqueUnavailable = true;
+  record.checks.surfaceForceMomentStructuralResponseUnavailable = true;
+
   // Roof exposure readiness: rotated roof geometry + explicit local normal/exposed-face declaration only.
   await stage.selectOption("roof");
   await page.getByLabel("Roof panel component", { exact: true }).selectOption("synthetic-roof-west");
@@ -557,15 +578,18 @@ try {
   await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
   await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyText(page, "Force application-point state: blocked_source_action");
+  await waitForBodyText(page, "Force-moment state: blocked_source_mapping");
   await waitForBodyTextAbsent(page, "Wall ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "Surface ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "q = 0.5ρV²: 240.000 Pa");
   await waitForBodyTextAbsent(page, "Algebraic global force-vector sum: (480.000, 0.000, -960.000) N");
   await waitForBodyTextAbsent(page, "Caller-declared global application point: (0.370, 1.230, -2.410) m");
+  await waitForBodyTextAbsent(page, "M_ref = r × F: (-988.800, 259.200, 0.000) N·m");
   record.checks.wallReadinessBlockedBelowActivationStage = true;
   record.checks.surfaceWindActionBlockedBelowWallStage = true;
   record.checks.multiSurfaceWindLoadSetBlockedBelowWallStage = true;
   record.checks.surfaceForceApplicationPointBlockedBelowWallStage = true;
+  record.checks.surfaceForceMomentBlockedBelowWallStage = true;
 
   // Lowering below floor/ring activation must also block retained floor/ring assumptions.
   await stage.selectOption("primary_supports");
@@ -585,6 +609,7 @@ try {
   await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
   await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyText(page, "Force application-point state: blocked_source_action");
+  await waitForBodyText(page, "Force-moment state: blocked_source_mapping");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");

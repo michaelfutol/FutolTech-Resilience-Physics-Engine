@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { calculateSmallHouseMultiSurfaceWindLoadSet } from "@/lib/smallHouseWind/multiSurfaceWindLoadSet";
 import { mapSmallHouseSurfaceForceApplicationPoint } from "@/lib/smallHouseWind/surfaceForceApplicationPoint";
+import { calculateSmallHouseSurfaceForceMoment } from "@/lib/smallHouseWind/surfaceForceMoment";
 import { calculateSmallHouseSurfaceWindAction } from "@/lib/smallHouseWind/surfaceWindAction";
 import {
   SMALL_HOUSE_MULTI_SURFACE_WIND_LOAD_SET_SCHEMA_VERSION,
@@ -13,6 +14,10 @@ import {
   SMALL_HOUSE_SURFACE_FORCE_APPLICATION_POINT_SCHEMA_VERSION,
   type SmallHouseSurfaceForceApplicationPointInput,
 } from "@/types/smallHouseSurfaceForceApplicationPoint";
+import {
+  SMALL_HOUSE_SURFACE_FORCE_MOMENT_SCHEMA_VERSION,
+  type SmallHouseSurfaceForceMomentInput,
+} from "@/types/smallHouseSurfaceForceMoment";
 import {
   SMALL_HOUSE_SURFACE_WIND_ACTION_SCHEMA_VERSION,
   type SmallHouseSurfaceWindActionInput,
@@ -83,6 +88,15 @@ const QA_APPLICATION_POINT_INPUT: SmallHouseSurfaceForceApplicationPointInput = 
   verificationState: "unverified",
 };
 
+const QA_FORCE_MOMENT_INPUT: SmallHouseSurfaceForceMomentInput = {
+  schemaVersion: SMALL_HOUSE_SURFACE_FORCE_MOMENT_SCHEMA_VERSION,
+  surfaceComponentId: "synthetic-wall-north",
+  // Explicit non-origin reference proves RPE does not silently assume global zero.
+  referencePointGlobalM: { x: 0.1, y: 0.2, z: -2.0 },
+  sourceNote: "Synthetic caller-declared global moment reference point only",
+  verificationState: "unverified",
+};
+
 function scalar(value: number | null, decimals = 6): string {
   return value === null ? "N/A" : value.toFixed(decimals);
 }
@@ -111,6 +125,10 @@ export default function SmallHouseSurfaceWindActionPanel({
   const applicationPointResult = useMemo(
     () => mapSmallHouseSurfaceForceApplicationPoint(snapshot, result, QA_APPLICATION_POINT_INPUT),
     [snapshot, result],
+  );
+  const forceMomentResult = useMemo(
+    () => calculateSmallHouseSurfaceForceMoment(snapshot, applicationPointResult, QA_FORCE_MOMENT_INPUT),
+    [snapshot, applicationPointResult],
   );
 
   return (
@@ -342,6 +360,57 @@ export default function SmallHouseSurfaceWindActionPanel({
         )}
 
         <div className="mt-2 text-slate-500">{applicationPointResult.reason}</div>
+      </div>
+
+      <div className="mt-4 font-semibold text-fuchsia-200">Explicit force moment about declared reference point</div>
+      <div className="mt-1 rounded border border-fuchsia-900/70 bg-fuchsia-950/30 px-2 py-1 text-[10px] font-semibold tracking-wide text-fuchsia-200">
+        RPE_ANALYTICAL · ORDINARY STATICS r×F · NOT AERODYNAMIC TORQUE
+      </div>
+      <p className="mt-2 text-[10px] text-slate-500">
+        This gate calculates only the moment of the already-mapped analytical force about an explicit caller-declared global reference point. No origin, support, joint, solver node, center of pressure, or aerodynamic couple is inferred.
+      </p>
+
+      <div className="mt-3 rounded border border-fuchsia-950 bg-slate-900/60 p-2 text-[10px] text-slate-300">
+        <div>Force-moment state: <strong>{forceMomentResult.state}</strong></div>
+        <div>Evidence layer: <strong>{forceMomentResult.evidenceLayer}</strong></div>
+        <div>Structural result: <strong>{forceMomentResult.structuralResult}</strong></div>
+
+        {forceMomentResult.state === "analytical_ready" ? (
+          <>
+            <div className="mt-3 font-semibold text-slate-200">Explicit statics inputs</div>
+            <div>Moment surface ID: <strong>{forceMomentResult.surfaceComponentId}</strong></div>
+            <div>Source force vector F: <strong>{vector(forceMomentResult.sourceForceVectorN)} N</strong></div>
+            <div>Application point r_app: <strong>{vector(forceMomentResult.applicationPointGlobalM)} m</strong></div>
+            <div>Caller-declared reference point r_ref: <strong>{vector(forceMomentResult.referencePointGlobalM)} m</strong></div>
+            <div>Lever arm r = r_app − r_ref: <strong>{vector(forceMomentResult.leverArmGlobalM)} m</strong></div>
+
+            <div className="mt-3 font-semibold text-slate-200">Ordinary force moment</div>
+            <div>M_ref = r × F: <strong>{vector(forceMomentResult.forceMomentVectorNm)} N·m</strong></div>
+            <div>|M_ref|: <strong>{scalar(forceMomentResult.forceMomentMagnitudeNm, 3)} N·m</strong></div>
+            <div>Moment basis: <strong>{forceMomentResult.momentBasis}</strong></div>
+            <div>AERODYNAMIC TORQUE / FREE COUPLE: <strong>N/A</strong></div>
+
+            <div className="mt-3 font-semibold text-slate-200">Structural interpretation still unavailable</div>
+            <div>REACTION: <strong>N/A</strong></div>
+            <div>BASE SHEAR: <strong>N/A</strong></div>
+            <div>UPLIFT REACTION: <strong>N/A</strong></div>
+            <div>SLIDING REACTION: <strong>N/A</strong></div>
+            <div>RACKING DEMAND: <strong>N/A</strong></div>
+            <div>CONNECTION DEMAND: <strong>N/A</strong></div>
+            <div>LOAD-PATH DISTRIBUTION: <strong>N/A</strong></div>
+            <div>PASS/FAIL: <strong>N/A</strong></div>
+
+            <div className="mt-3 font-semibold text-amber-300">
+              FORCE MOMENT r×F ≠ AERODYNAMIC TORQUE / SUPPORT MOMENT / SOLVER RESPONSE. The reference point is caller declared; global origin is not assumed.
+            </div>
+          </>
+        ) : (
+          <div className="mt-2 text-amber-300">
+            Force moment unavailable because the explicit source force/application-point mapping is not ready in this staged snapshot. No stale moment is retained.
+          </div>
+        )}
+
+        <div className="mt-2 text-slate-500">{forceMomentResult.reason}</div>
       </div>
     </div>
   );
