@@ -1,5 +1,19 @@
 # Worklog
 
+## [2026-09-05] - Phase 4 Staged-House Viewer Browser Gate Closed
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and checked canonical CI before advancing.
+- Encountered and preserved an intermediate strict-TypeScript failure at Phase 4 orientation commit `c089e0e4423a2853a50b41066e1320fd1fbbe437`; later tests/build were skipped by CI as designed rather than waived.
+- Confirmed corrective orientation commit `383c4125b002d44244845166c7697ab79d82158e` restored the contract/test alignment and RPE CI run `33939039707` passed.
+- Reconciled canonical branch progress that had already landed the staged Small House viewer (`998d026056999232523eca7b7cd24808303ae2ab`) and deterministic Phase 4 Chromium acceptance script (`cdbf3623c457a6b646d6250bd6e71252600668fe`).
+- Verified the viewer is driven from validated `SmallHouseWindSpecimenInput` stage materialization, preserves `N/A / no_physical_specimen` for the empty envelope, instantiates only declared stage objects, exposes identity/provenance/orientation/unknown properties, and explicitly states `VISIBLE ≠ ADEQUATE`.
+- Verified connection topology is listed without fabricating physical joint coordinates or connection-line geometry.
+- Found the remaining acceptance gap: the Phase 4 Chromium script existed but the production browser workflow still executed only Genesis.
+- Commit `135a874d40982e293fd0763e43531d0bf0b0b71e` wired `scripts/phase4-house-browser-acceptance.mjs` into the same read-only production-browser workflow as Genesis, using the existing isolated pinned `playwright@1.62.1` harness and uploading both JSON/screenshot evidence sets.
+- RPE CI run `33939397709` passed install, lint, strict TypeScript, automated tests, and production build.
+- Genesis Browser Acceptance run `33939397798` passed both Genesis and Phase 4 browser gates. Artifact `browser-acceptance-135a874d40982e293fd0763e43531d0bf0b0b71e`, artifact ID `9961290314`, contains the resulting browser evidence.
+- No material property, mass, stiffness, strength, capacity, support reaction, displacement, code-compliance result, solver result, CFD result, or physical-test evidence was introduced by this viewer/QA batch.
+- Exact next gated task: define/test a primary-support mechanics readiness/input contract that references a validated `primary_support` by stable ID, preserves its declared geometry/orientation/provenance, requires explicit caller-supplied restraint/support assumptions, and leaves unknown material/mass/stiffness/strength/capacity unresolved. Do not calculate support response or whole-house wind performance in that readiness batch.
+
 ## [2026-09-05] - Deterministic Aerodynamic Force-Window Scheduler + Browser QA Repair
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch canonical head `77f0f650f454ca787b45c83addad241446223696` had successful RPE CI before changing code.
 - Reconciled documentation against canonical code truth before implementing anything: the provenance-bearing post-release aerodynamic analytical contract and the separate non-executing aerodynamic force-application gate had already landed and were tested. Live Rapier aerodynamic application was still absent.
@@ -54,7 +68,7 @@
 - Exact next gate: run the documented procedure against a real browser build of the canonical branch, accept only a genuine panel↔declared-target callback with exact target identity, then change one explicit input and confirm the old collision observation does not survive into the changed context.
 
 ## [2026-09-05] - Genesis Explicit Collision-Target Scene Wiring
-- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `dc9e5a5cc990de569bc51e971e50ac5fb3674b1c` had successful RPE CI run 132 before changing code.
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `dc9e5a5cc990de569bc51e971e50ac5fb3674b1c` had successful RPE CI run 132 before changing code.
 - Wired blank-by-default Genesis collision-target inputs into `Viewport3D`: explicit target object ID, center XYZ, box dimensions XYZ, source note, and verification state.
 - No target exists until the complete input set passes the existing typed/runtime collision-target validator. Invalid/partial inputs remain absent rather than producing fallback geometry.
 - Added a visible validated target. During active Panel 001 simulation, that same declared target is instantiated as a fixed Rapier rigid body in the same `Physics` world as the released panel. No hidden floor or obstacle was added.
