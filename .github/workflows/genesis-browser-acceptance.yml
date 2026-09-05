@@ -79,3 +79,32 @@ jobs:
           path: |
             genesis-browser-acceptance.json
             genesis-browser-acceptance.png
+
+  patch-aero-ui:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/lum-rpe-takeover'
+    needs: live-browser-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout canonical branch
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Apply inspectable aerodynamic UI patch
+        run: python scripts/patch-aero-ui.py
+
+      - name: Commit patched viewport if changed
+        run: |
+          git config user.name "RPE Browser Gate Patch Carrier"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/components/Viewport3D.tsx
+          if git diff --cached --quiet; then
+            echo "No aerodynamic UI patch needed."
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "Expose post-release aerodynamic analytical preview"
+          git push origin HEAD:lum-rpe-takeover
