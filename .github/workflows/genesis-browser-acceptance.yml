@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes Connection joint-location acceptance schema 0.7.0.
+# Phase 4 browser contract includes Bracing topology acceptance schema 0.8.0.
 
 on:
   push:
@@ -19,6 +19,7 @@ on:
       - src/components/WallPanelExposureReadinessPanel.tsx
       - src/components/RoofPanelExposureReadinessPanel.tsx
       - src/components/ConnectionJointLocationReadinessPanel.tsx
+      - src/components/BracingTopologyReadinessPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
@@ -30,6 +31,7 @@ on:
       - src/types/wallPanelExposureReadiness.ts
       - src/types/roofPanelExposureReadiness.ts
       - src/types/connectionJointLocationReadiness.ts
+      - src/types/bracingTopologyReadiness.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
