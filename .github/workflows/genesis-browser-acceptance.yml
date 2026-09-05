@@ -16,6 +16,7 @@ on:
       - src/components/FloorRingFrameReadinessPanel.tsx
       - src/components/WallPanelExposureReadinessPanel.tsx
       - src/components/RoofPanelExposureReadinessPanel.tsx
+      - src/components/ConnectionJointLocationReadinessPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
@@ -26,6 +27,7 @@ on:
       - src/types/floorRingFrameReadiness.ts
       - src/types/wallPanelExposureReadiness.ts
       - src/types/roofPanelExposureReadiness.ts
+      - src/types/connectionJointLocationReadiness.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
