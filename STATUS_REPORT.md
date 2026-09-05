@@ -6,7 +6,7 @@
 
 ## Current truth
 
-RPE has a trustworthy Phase 2 data/cost/candidate spine, a completed Phase 3 Genesis first-mechanics path, and an active Phase 4 Small House Wind System. Phase 4 now includes a validated staged-house viewer, an explicit primary-support readiness gate, and the first hand-checkable analytical support-response benchmark.
+RPE has a trustworthy Phase 2 data/cost/candidate spine, a completed Phase 3 Genesis first-mechanics path, and an active Phase 4 Small House Wind System. Phase 4 has now progressed cleanly through **primary supports → floor/ring frame → walls → roof** at deliberately narrow, reviewable evidence gates.
 
 The older Typhoon playback remains conceptual and is not promoted to calculated physics.
 
@@ -16,8 +16,9 @@ The older Typhoon playback remains conceptual and is not promoted to calculated 
 
 ### Dependencies and QA
 - Canonical app remains on Next.js / `eslint-config-next` `16.3.4` and `@react-three/rapier@2.2.0`.
-- Browser QA uses isolated pinned `playwright@1.62.1`; browser-tooling evidence remains separate from application dependency evidence.
-- Normal CI continues to gate install, lint, strict TypeScript, automated tests, and production build.
+- Browser QA uses isolated pinned `playwright@1.62.1` with `npm audit --audit-level=high`; the harness remains outside committed application dependencies.
+- Normal CI gates install, lint, strict TypeScript, automated tests, and production build.
+- Production-browser acceptance runs both the retained Genesis suite and the Phase 4 staged-house suite.
 
 ## Phase 3 Genesis — EXIT GATE SATISFIED
 
@@ -27,72 +28,54 @@ Evidence boundaries remain explicit: analytical calculations are not solver/CFD 
 
 ## Phase 4 Small House Wind System — ACTIVE
 
-### Staged-house foundation
-Implemented and accepted:
-- versioned `SmallHouseWindSpecimenInput`;
-- locked stage sequence `empty_envelope → primary_supports → floor_ring_frame → walls → roof → connections → bracing → anchorage → storm_protection`;
-- stable object identity;
-- explicit center/size/orientation;
-- unknown material/mass/connection capacity preserved as `null`;
-- immutable stage materialization;
-- empty envelope remains `N/A / no_physical_specimen`;
-- geometry-only physical stages remain `DECLARED_COMPONENTS_ONLY`;
-- staged `Small House` browser viewer with `VISIBLE ≠ ADEQUATE` boundary;
-- connection records remain topology only and do not invent physical joint coordinates.
+### Staged-house foundation — COMPLETE FOR CURRENT VIEWER SCOPE
+- Versioned `SmallHouseWindSpecimenInput` and locked stage order:
+  `empty_envelope → primary_supports → floor_ring_frame → walls → roof → connections → bracing → anchorage → storm_protection`.
+- Stable object identities and explicit center/size/orientation.
+- Unknown material/mass/connection capacity remain `null`.
+- Immutable stage materialization.
+- Empty envelope remains `N/A / no_physical_specimen`; geometry-only physical stages remain `DECLARED_COMPONENTS_ONLY`.
+- `Small House` browser viewer keeps `VISIBLE ≠ ADEQUATE` explicit.
+- Existing connection records remain topology-only and do not provide physical joint coordinates.
 
-### Primary-support readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+### Primary supports — COMPLETE FOR CURRENT ISOLATED FORMULA SCOPE
+- `rpe_input_review` readiness references a validated active support by stable ID.
+- Explicit local longitudinal axis and all 12 end-restraint DOF states are required; no defaults.
+- Rendered box dimensions do not silently become section area or second moment.
+- First calculated benchmark is `linear_elastic_euler_bernoulli_cantilever_tip_load` with explicit E, selected I, signed P, and provenance.
+- Calculated response is limited to `V=|P|`, `M=|P|L`, `δ=PL³/(3EI)`.
+- Strength/capacity remains `NOT_EVALUATED`; no PASS/FAIL, P-Δ, shear deformation, connection slip, solver, CFD, or whole-house claim.
+- Browser evidence: run `33941910817`, artifact ID `9962116271`.
 
-Added a dedicated `rpe_input_review` contract that:
-- references a validated active `primary_support` by stable ID;
-- preserves staged center, size, rotation, material ID, mass, provenance, and verification state;
-- requires an explicit local longitudinal axis;
-- requires all six DOFs at both ends to be explicitly `free` or `restrained` with provenance;
-- keeps E, area, principal moments, strength, material, and mass unknown unless explicitly supplied;
-- explicitly prevents rendered box dimensions from silently becoming section area or second moment;
-- returns no reaction, displacement, stress, buckling, capacity, PASS/FAIL, or whole-house performance result.
+### Floor/ring frame readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- References an active staged `floor_ring_frame_member` by stable ID.
+- Requires explicit member longitudinal axis and semantic End A / End B roles with provenance.
+- Schema v0.1.0 deliberately accepts **no physical joint coordinates**; both endpoints remain unknown.
+- No E/A/I/strength, load-transfer model, global frame stiffness, reactions, racking, or whole-house response is inferred.
+- Clean-head CI run `33942392860` passed.
+- Production-browser run `33942392870` passed.
 
-Readiness validation evidence:
-- Normal RPE CI run `33941591924` passed.
-- Production browser run `33941591888` passed Genesis and Phase 4 acceptance.
-- Browser artifact ID `9962015647`.
+### Wall geometry / exposure readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- References an active staged `wall_panel` by stable ID and preserves its declared geometry/orientation/provenance.
+- Requires explicit local panel-normal axis, exposed-face sign, exposure class, provenance, and verification state.
+- A **geometric box-face area** may be calculated from the explicitly declared local normal axis, but it is never promoted to effective wind area.
+- Synthetic north-wall browser fixture with `local_z` normal reports `7.140000 m² — GEOMETRY ONLY`.
+- Effective wind area, wind velocity, density, external/internal pressure coefficients, net pressure, panel stiffness, strength, and fastener capacity remain undefined.
+- Clean-head CI run `33942823443` passed.
+- Production-browser run `33942823436` passed; artifact ID `9962401294`.
 
-### First calculated primary-support benchmark — COMPLETE FOR ISOLATED FORMULA SCOPE
-
-Implemented `linear_elastic_euler_bernoulli_cantilever_tip_load` as an `rpe_analytical` benchmark only.
-
-Required before calculation:
-- reviewable primary-support identity;
-- exact fixed–free six-DOF end idealization;
-- explicit E;
-- explicit selected principal I;
-- explicit signed free-end transverse point load P;
-- provenance and verification state for all calculation-driving values.
-
-Calculated outputs only:
-- `V = |P|`;
-- `M = |P|L`;
-- `δ = PL³/(3EI)`.
-
-Length L comes only from the explicitly declared local longitudinal-axis dimension. The benchmark does not derive section properties from rendered geometry.
-
-Explicit exclusions:
-- no strength/capacity verdict;
-- no PASS/FAIL;
-- no shear-deformation correction;
-- no P-Δ/geometric nonlinearity;
-- no connection slip/joint flexibility;
-- no material nonlinearity;
-- no solver/CFD authority;
-- no whole-house load-path claim.
-
-Hand-check regression fixture: L=3 m, P=1000 N, E=10 GPa, I=1×10^-4 m^4 → V=1000 N, M=3000 N·m, δ=0.009 m.
-
-Production-browser synthetic fixture: L=2.7 m with the same P/E/I → V=1000 N, M=2700 N·m, δ=0.006561 m; capacity remains `NOT_EVALUATED`.
-
-Validation evidence:
-- Normal RPE CI run `33941910807` passed install, lint, strict TypeScript, automated tests, and production build.
-- Production browser run `33941910817` passed both Genesis and Phase 4 suites.
-- Browser artifact `browser-acceptance-190ad3b4bf63f81d53005b3f6b6cfee98c0e4abe`, artifact ID `9962116271`.
+### Roof geometry / exposure readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- References an active staged `roof_panel` by stable ID and preserves rotated roof geometry/orientation/provenance.
+- Requires explicit local panel-normal axis, exposed-face sign, exposure class, provenance, and verification state.
+- Synthetic `synthetic-roof-west` preserves `rotationRad.z = 0.35`; declaring `local_y` as the panel normal reports `9.840000 m² — GEOMETRY ONLY`.
+- `roofZone`, effective wind area, external/internal pressure coefficients, net pressure, uplift force, panel stiffness/strength, and connection demand/capacity remain undefined.
+- `upliftCalculationAvailable` remains false; no wind-resistance or capacity claim is made.
+- Initial Roof CI run `33942967313` retained one honest regression failure: binary floating-point produced `9.839999999999998` against an exact `9.84` assertion. The calculation contract was unchanged; the test was repaired with a tight `1e-12` tolerance.
+- Corrective Roof CI run `33943033552` passed install, lint, strict TypeScript, all tests, and build.
+- Roof browser patch run `33943182691` retained an honest patch-plumbing failure because a text anchor matched twice; no browser acceptance code was changed by that failed run. The patch was repaired using a unique multiline anchor.
+- Repaired patch run `33943267515` passed and landed the Roof browser checks.
+- Final clean-head RPE CI run `33943309011` passed.
+- Final production-browser run `33943309015` passed both Genesis and Phase 4 suites; browser artifact `browser-acceptance-fa202ad17bf2a691186a28ecae15940b064a07a3`, artifact ID `9962552182`.
 
 ## Evidence doctrine
 
@@ -103,10 +86,14 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 ## Open gates / limitations
 - Final Phase 2 manual browser visual acceptance remains outstanding.
 - Phase 4 still has no whole-house wind performance result.
-- The cantilever benchmark is an isolated formula benchmark, not a structural design/capacity check.
-- Existing Phase 4 connection records still lack physical joint-coordinate semantics.
-- No global frame stiffness/load distribution, racking, uplift/sliding system result, contact mechanics, impact/damage model, structural-solver result, CFD result, or physical-test evidence has been inferred.
+- Existing Phase 4 connection records establish object relationships only and still lack explicit physical joint-location semantics.
+- No global frame/load-path calculation may use inferred member intersections or center-to-center connector geometry.
+- No connection stiffness, fastener count, connector geometry/path, demand/capacity, PASS/FAIL, bracing mechanics, anchorage uplift/sliding result, solver result, CFD result, or physical-test evidence has been inferred.
 
 ## Exact next gated task
 
-Define and test the first **floor/ring-frame member readiness contract**. It must reference an active staged `floor_ring_frame_member` by stable ID, preserve its geometry/orientation/provenance, require an explicit local longitudinal axis and endpoint-role semantics, and keep joint coordinates/material/stiffness/loads/global frame response unknown until explicitly introduced. Do not infer physical joint locations from member centers and do not calculate whole-frame behavior in this readiness batch.
+Define and test the first **connection joint-location readiness contract**.
+
+It must reference an active staged connection by stable ID at the `connections` stage or later, preserve the original `fromComponentId`, `toComponentId`, capacity/provenance state, and require an explicit caller-supplied finite global joint point with provenance/verification before the location is reviewable. The system must prove that no plausible member-box intersection or center-to-center point is inferred when that coordinate is absent.
+
+This first connection-location batch must **not** calculate connection demand/capacity, stiffness, slip, connector path, fastener count, load transfer, PASS/FAIL, or whole-house response. Those remain later explicit mechanics gates.
