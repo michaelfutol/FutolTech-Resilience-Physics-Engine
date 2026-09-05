@@ -4,132 +4,134 @@
 
 Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
-Phase 4 — **Small House Wind System** — remains active. The current progression is:
+Phase 4 — **Small House Wind System** — remains active. Current progression:
 
-**topology/staging spine ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → single-surface analytical wind action ✅ → controlled multi-surface load set ✅ → explicit force-application points 🔵**
+**topology/staging ✅ → isolated primary-support formula ✅ → wall/roof exposure readiness ✅ → connection/bracing/anchorage/storm topology ✅ → controlled A/B input audit ✅ → single-surface wind action ✅ → multi-surface vector set ✅ → explicit force application point ✅ → explicit ordinary `r×F` moment ✅ → structural load-case / solver-node mapping ✅ → structural model + boundary-condition readiness 🔵**
 
-The exact next layer is **explicit analytical surface force-application-point mapping**.
+The exact next layer is **structural model / boundary-condition readiness**. This remains an input-evidence gate, not a solver result.
 
-Phase 4 is not complete. The locked roadmap still requires traceable house-level pressure/load vectors and, through later explicitly sourced mechanics/solver gates, connection demand/capacity state, uplift/sliding reactions, racking indicators, failure sequence, detached debris, and residual state where supported.
+Phase 4 is not complete. The locked roadmap still requires explicit structural-model evidence and then actual engineering-solver results before RPE can claim reactions, displacements, member forces, load-path response, connection demand, uplift/sliding reaction, or racking response.
 
-## Newly completed — Controlled multi-surface analytical load set
+## Newly completed — Explicit force moment about a declared reference point
 
-The first multi-surface Phase 4 load set is complete for deterministic vector algebra only.
+RPE now computes ordinary statics force moment only after both a caller-declared force application point and a separately caller-declared global reference point exist.
 
-Contract behavior:
-- accepts two or more unique active wall/roof surface-action records;
-- reuses `calculateSmallHouseSurfaceWindAction` for every action rather than introducing a second aerodynamic path;
-- requires every individual action to be analytically ready;
-- blocks the whole set if any action is invalid/blocked and never sums partial data;
-- prohibits duplicate `surfaceComponentId` records in schema `0.1.0`;
-- preserves each individual result and provenance;
-- canonicalizes output by stable surface ID so caller array order has no engineering meaning;
-- calculates only the algebraic sum of the already-proven explicit global force vectors and its Euclidean magnitude;
-- keeps structural result `N/A` and evidence layer `rpe_analytical`.
-
-Canonical two-wall QA fixture:
-- `synthetic-wall-north`: `(0,0,-960) N`;
-- `synthetic-wall-east`: `(480,0,0) N`;
-- algebraic vector sum: `(480,0,-960) N`;
-- resultant vector magnitude: `1073.313 N`.
+Canonical north-wall QA:
+- `F = (0,0,-960) N`;
+- application point `r_app = (0.370,1.230,-2.410) m`;
+- reference point `r_ref = (0.100,0.200,-2.000) m`;
+- lever arm `r = (0.270,1.030,-0.410) m`;
+- `M_ref = r × F = (-988.800,259.200,0) N·m`;
+- `|M_ref| = 1022.208 N·m`.
 
 Permanent boundary:
-- **RPE_ANALYTICAL / VECTOR ALGEBRA ONLY / NON-CFD / NON-CODE-COMPLIANCE**;
-- vector sum is not a support/foundation reaction;
-- not a structural-model base shear;
-- not anchorage uplift/sliding demand;
-- not racking or connection demand;
-- not load-path distribution;
-- not CFD pressure integration;
-- not code-compliance wind load;
-- not whole-house resistance/adequacy/PASS-FAIL;
-- moment/torque remains `N/A` because force application points and a moment reference have not yet been defined.
+- evidence layer = `rpe_analytical`;
+- ordinary `r×F` is **not aerodynamic torque / free couple**;
+- no global-origin default is allowed;
+- no support moment, reaction, solver response, connection demand, load-path distribution, or PASS/FAIL is inferred.
 
 Evidence:
-- Core regression/CI run `33960418016` passed.
-- Permanent RPE CI run `33960633262` passed install, lint, strict TypeScript, all regressions, and production build.
-- Production Chromium run `33960633248` passed retained Genesis + Phase 4 browser acceptance.
-- Browser artifact ID `9967837588`.
+- RPE CI `33966843019` — success;
+- Production Chromium `33966843040` — success;
+- Browser artifact `9969727754`.
 
-## Exact next gated batch — Explicit force-application points
+The earlier CI run `33966651039` remains visible because an exact floating-point equality assertion saw `0.27` versus `0.2699999999999996`. The mechanics contract was not changed; the regression was repaired with a tight numerical tolerance.
 
-The next gate must add **location semantics**, not structural distribution. Every already-valid analytical surface force remains unchanged; the new contract only records where that force is explicitly declared to act in global coordinates.
+## Newly completed — Structural load-case / solver-node adapter
 
-### First-slice scope
+RPE can now translate already-accepted analytical force/application/moment evidence into one explicit structural nodal-load input record without pretending that a structural analysis has run.
 
-For one ready single-surface action, require:
-- stable surface component ID matching the analytical action;
-- explicit finite global application point `(x,y,z)` in metres;
-- source/provenance note;
-- verification state.
+Required explicit adapter inputs:
+- stable surface component ID;
+- load-case ID;
+- solver-node ID;
+- solver-node global coordinate;
+- coordinate basis `global_cartesian_xyz_m`;
+- provenance and verification.
 
-The result should preserve:
-- the original analytical surface action and force vector exactly;
-- the explicit application point exactly;
-- `evidenceLayer = rpe_analytical`;
-- `structuralResult = N/A`.
+Critical mapping rule:
+- the solver-node coordinate must coincide with the explicit reference point used to calculate the source `r×F` moment;
+- RPE will not attach a moment calculated about one point to another node without an explicit load-transfer transformation;
+- nearest-node / scene-geometry inference is prohibited.
 
-### Permanent anti-inference rules
+Canonical QA mapping:
+- surface: `synthetic-wall-north`;
+- load case: `LC-WIND-QA-001`;
+- solver node: `NODE-WIND-NORTH-QA-001`;
+- node coordinate: `(0.100,0.200,-2.000) m`;
+- mapped force: `(0,0,-960) N`;
+- mapped nodal moment: `(-988.8,259.2,0) N·m`.
 
-The mapping contract must **not** infer or substitute:
-- rendered panel center;
-- geometric centroid;
-- center of pressure;
-- connection/joint location;
-- support/anchor location;
-- nearest frame member;
-- solver node;
-- tributary/load-path destination.
+Permanent boundary:
+- evidence layer = `solver_input_mapping`;
+- **SOLVER EXECUTED: NO**;
+- reactions, displacements, rotations, member forces, connection demands, base shear, racking response, and PASS/FAIL remain `N/A`.
 
-The application point is caller-declared mapping evidence only.
+Evidence:
+- clean core adapter RPE CI `33967371220` — success;
+- permanent browser-head RPE CI `33967553863` — success;
+- Production Chromium `33967553834` — success;
+- Browser artifact `9969940359`.
 
-### Moment/torque rule
+The earlier adapter CI run `33967204105` remains visible: its new regression used two wrong TypeScript schema names/paths (`SmallHouseWindSystemInput` and `.geometry.center`) before being repaired to the real specimen schema (`SmallHouseWindSpecimenInput` and `.centerM`). The adapter mechanics did not change.
 
-Even after a force application point exists, **do not calculate moment/torque yet**. Moment requires a separately explicit, justified reference point/axis contract. The first application-point gate therefore keeps:
-- `MOMENT/TORQUE: N/A`;
-- `REACTION: N/A`;
-- `BASE SHEAR: N/A`;
-- `CONNECTION DEMAND: N/A`;
-- `RACKING: N/A`;
-- `PASS/FAIL: N/A`.
+## Exact next gated batch — Structural model / boundary-condition readiness
 
-### Required regression proof
+The next contract must define a **solver-ready model input** without executing the solver yet.
 
-1. Missing/non-finite application coordinates are rejected.
-2. Surface ID must match the underlying ready surface action.
-3. A blocked/non-ready surface action cannot receive a valid mapping result.
-4. Changing rendered geometry cannot silently change the explicit application point.
-5. Returned mapping data is copied rather than aliased.
-6. Force vector remains byte/value-equivalent to the accepted analytical surface action.
-7. No moment, reaction, structural distribution, or adequacy field becomes available.
+### First-slice model scope
 
-### Required browser proof
+Use a deliberately small, synthetic static structural QA model so the software contract can be proved before whole-house mechanics are introduced. The model must explicitly declare:
+- model ID and intended solver target;
+- global coordinate basis and consistent units;
+- stable node IDs with finite global coordinates;
+- every node's six DOF restraint states explicitly, with no restraint defaults;
+- stable element IDs and explicit node connectivity;
+- element formulation/type;
+- explicit local/orientation vector or transformation basis where required;
+- all element properties required by that formulation, including material and section stiffness terms;
+- explicit load-case identities;
+- provenance and verification for mechanics-driving data.
 
-Use the accepted north-wall QA action and explicitly declare a global QA application point that is deliberately **not identical to the rendered wall center**, so Chromium can prove the point was not inferred from geometry.
+For the first canonical QA model, the already-mapped node `NODE-WIND-NORTH-QA-001 @ (0.100,0.200,-2.000) m` should exist exactly in the structural model and load case `LC-WIND-QA-001` should be declared exactly. A second support node and a simple two-node elastic 3D element may be used as a **synthetic software-verification submodel**, not as adopted Dignity geometry or whole-house performance evidence.
 
-The live panel must visibly show:
-- stable surface ID;
-- original force vector `(0,0,-960) N`;
-- caller-declared application point;
-- `APPLICATION POINT BASIS: CALLER_DECLARED_GLOBAL_POINT`;
-- `CENTER OF PRESSURE: N/A`;
-- `SOLVER NODE: N/A`;
-- `MOMENT/TORQUE: N/A`;
-- `REACTION: N/A`;
-- `PASS/FAIL: N/A`.
+### Required validation
 
-Lowering below wall activation must clear/block the mapping together with its source surface action.
+The readiness layer should reject:
+- duplicate node, element, or load-case IDs;
+- missing element endpoint nodes;
+- zero-length elements;
+- missing/non-finite mechanics properties;
+- missing/implicit DOF restraint states;
+- invalid or degenerate orientation vectors;
+- adapter node/load-case identities absent from the model;
+- adapter node coordinates inconsistent with the model node;
+- stale or incompatible adapter evidence.
+
+### Evidence boundary
+
+Successful readiness should report an input-review state such as `solver_model_ready` while still declaring:
+- `SOLVER EXECUTED: NO`;
+- reactions `N/A`;
+- displacements/rotations `N/A`;
+- element forces `N/A`;
+- base shear `N/A`;
+- connection demand `N/A`;
+- racking response `N/A`;
+- capacity/utilization/PASS-FAIL `N/A`.
+
+No software/browser readiness test may be described as an OpenSees result.
 
 ## Following Phase 4 order
 
-After application-point mapping:
+After structural model readiness:
 
-1. Define an explicit moment-reference contract only if moment/resultant reporting is justified.
-2. Define traceable structural node/load-case mapping semantics; never infer tributary paths from scene geometry.
-3. Couple validated load cases to an engineering structural solver layer such as OpenSees-class analysis before calling any vector sum a structural response.
-4. Define connection, bracing, anchorage, and storm-restraint mechanics only when their physical/mechanical inputs are explicit.
-5. Reuse the controlled A/B invariant engine when corresponding analytical/solver evidence exists so exactly one structural variable changes.
-6. Generate the locked roadmap outputs before declaring Phase 4 complete.
+1. Build the explicit OpenSees/OpenSeesPy translation/execution gate for the accepted synthetic model and compare solver results with independent hand checks where feasible.
+2. Only then expose reactions, nodal displacements/rotations, and element-force results as `solver_result` evidence.
+3. Expand from the synthetic isolated submodel toward the explicit Small House frame/load path without silently converting rendered topology into solver topology.
+4. Define connection, bracing, anchorage, and storm-restraint mechanics when their required physical/mechanical inputs are explicit.
+5. Reuse controlled A/B invariants only when corresponding analytical/solver evidence exists and exactly one declared structural variable changes.
+6. Add required Phase 4 failure/debris/residual-state layers and later CFD evidence before Phase 4/v1.0 exit.
 
 ## Engine integration ladder
 
@@ -145,6 +147,6 @@ Final Phase 2 manual browser visual acceptance remains open and must be recorded
 
 ## Evidence boundary
 
-Manual/code calculations, engineering solver results, RPE analytical calculations, RPE simulation, browser QA/visualization, and future physical tests remain separate under:
+Manual/code calculations, RPE analytical calculations, solver-input mapping/model readiness, engineering solver results, RPE simulation, browser QA/visualization, and future physical tests remain separate under:
 
 **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**
