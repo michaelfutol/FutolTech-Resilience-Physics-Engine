@@ -36,9 +36,15 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
-      - name: Install temporary browser harness
+      - name: Install and audit isolated browser harness
         run: |
-          npm install --no-save --package-lock=false playwright@1.55.0
+          rm -rf /tmp/rpe-browser-harness
+          mkdir -p /tmp/rpe-browser-harness
+          cp scripts/genesis-browser-acceptance.mjs /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
+          cd /tmp/rpe-browser-harness
+          npm init -y
+          npm install --save-exact playwright@1.62.1
+          npm audit --audit-level=high
           npx playwright install --with-deps chromium
 
       - name: Build production application
@@ -64,7 +70,7 @@ jobs:
           RPE_BASE_URL: http://127.0.0.1:3000
           RPE_BROWSER_ACCEPTANCE_OUTPUT: genesis-browser-acceptance.json
           RPE_BROWSER_ACCEPTANCE_SCREENSHOT: genesis-browser-acceptance.png
-        run: node scripts/genesis-browser-acceptance.mjs
+        run: node /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
 
       - name: Show application log on failure
         if: failure()
@@ -79,32 +85,3 @@ jobs:
           path: |
             genesis-browser-acceptance.json
             genesis-browser-acceptance.png
-
-  patch-aero-ui:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/lum-rpe-takeover'
-    needs: live-browser-gate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout canonical branch
-        uses: actions/checkout@v4
-        with:
-          ref: lum-rpe-takeover
-
-      - name: Apply inspectable aerodynamic UI patch
-        run: python scripts/patch-aero-ui.py
-
-      - name: Commit patched viewport if changed
-        run: |
-          git config user.name "RPE Browser Gate Patch Carrier"
-          git config user.email "actions@users.noreply.github.com"
-          git add src/components/Viewport3D.tsx
-          if git diff --cached --quiet; then
-            echo "No aerodynamic UI patch needed."
-            exit 0
-          fi
-          git diff --cached --check
-          git commit -m "Expose post-release aerodynamic analytical preview"
-          git push origin HEAD:lum-rpe-takeover
