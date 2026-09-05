@@ -1,0 +1,38 @@
+name: Floor Ring Readiness Panel Patch
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/floor-ring-readiness-panel-patch.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-floor-ring-readiness-panel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout canonical branch
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Apply inspectable floor-ring readiness patch
+        run: python scripts/patch-floor-ring-readiness-panel.py
+
+      - name: Commit readiness panel wiring if changed
+        run: |
+          git config user.name "RPE Floor Ring Patch Carrier"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/components/Viewport3D.tsx
+          if git diff --cached --quiet; then
+            echo "Floor-ring readiness panel already wired."
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "Wire floor-ring readiness review into Phase 4"
+          git push origin HEAD:lum-rpe-takeover
