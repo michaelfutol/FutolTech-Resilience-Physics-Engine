@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.7.0",
+  schemaVersion: "0.8.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -46,6 +46,7 @@ const record = {
     "Wall-panel readiness derives box-face geometry only from an explicitly declared local normal; it does not define effective wind area, pressure coefficients, net pressure, stiffness, fastener capacity, or wind resistance.",
     "Roof-panel readiness preserves rotated geometry and explicit local-normal/exposed-face declarations only; it does not define roof zones, effective wind area, pressure coefficients, uplift force, connection demand/capacity, or wind resistance.",
     "Connection joint-location readiness preserves topology and accepts only an explicit caller-declared global joint point; it never infers midpoint/intersection/touching geometry and does not calculate connection mechanics.",
+    "Bracing topology readiness requires two distinct explicit brace-end connection records; visible diagonal geometry cannot create a missing end, physical joint point, stiffness, axial force, buckling model, racking contribution, capacity, or adequacy verdict.",
   ],
 };
 
@@ -68,16 +69,19 @@ try {
   await waitForBodyText(page, "Wall-panel geometry / exposure readiness");
   await waitForBodyText(page, "Roof-panel geometry / exposure readiness");
   await waitForBodyText(page, "Connection joint-location readiness");
+  await waitForBodyText(page, "Bracing topology readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
   await waitForBodyText(page, "Uplift calculation: NO");
   await waitForBodyText(page, "Connection mechanics: NO");
+  await waitForBodyText(page, "Bracing mechanics: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
   record.checks.floorRingReadinessPanelVisible = true;
   record.checks.wallExposureReadinessPanelVisible = true;
+  record.checks.bracingTopologyReadinessPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -311,6 +315,39 @@ try {
   }
   record.checks.connectionExplicitJointPointAccepted = true;
   record.checks.connectionMechanicsRemainUnavailable = true;
+
+  // Bracing topology readiness: the current synthetic diagonal has only one explicit brace-end relationship.
+  await stage.selectOption("bracing");
+  await page.getByLabel("Bracing component", { exact: true }).selectOption("synthetic-brace-north-west");
+  await page.getByLabel("Bracing end A connection", { exact: true }).selectOption("synthetic-connection-brace-west");
+  await page.getByLabel("Bracing readiness source note", { exact: true }).fill("Synthetic browser QA bracing topology review only");
+  await page.getByLabel("Bracing readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Bracing topology state: load_path_incomplete");
+  await waitForBodyText(page, "Brace ID: synthetic-brace-north-west");
+  await waitForBodyText(page, "Brace material: UNKNOWN");
+  await waitForBodyText(page, "Brace mass: UNKNOWN");
+  await waitForBodyText(page, "Explicit incident connections: 1");
+  await waitForBodyText(page, "Explicit selected brace ends: 1 / 2");
+  await waitForBodyText(page, "End A: synthetic-connection-brace-west");
+  await waitForBodyText(page, "End B: UNKNOWN");
+  await waitForBodyText(page, "Physical joint locations: UNKNOWN / NOT REVIEWED IN THIS GATE");
+  await waitForBodyText(page, "Inferred joint locations: NONE — PROHIBITED");
+  await waitForBodyText(page, "Bracing mechanics: NO");
+  await waitForBodyText(page, "Axial force / tension-compression / stiffness / effective length / slenderness / buckling: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Racking contribution / demand / capacity / utilization / PASS-FAIL / load-path adequacy: UNKNOWN / NOT EVALUATED");
+  if (await page.locator('input[aria-label*="axial force" i], input[aria-label*="brace capacity" i], input[aria-label*="slenderness" i], input[aria-label*="buckling" i], input[aria-label*="racking contribution" i]').count()) {
+    fail("Bracing topology readiness unexpectedly exposed mechanics/capacity inputs");
+  }
+  record.checks.bracingVisibleDiagonalDoesNotCreateSecondEnd = true;
+  record.checks.bracingIncompleteLoadPathVisible = true;
+  record.checks.bracingMechanicsRemainUnavailable = true;
+
+  // Lowering below bracing activation must block retained brace topology.
+  await stage.selectOption("connections");
+  await waitForBodyText(page, "Bracing topology state: blocked_stage_before_bracing");
+  await waitForBodyTextAbsent(page, "Brace ID: synthetic-brace-north-west");
+  record.checks.bracingReadinessBlockedBelowActivationStage = true;
 
   // Lowering below connection activation must invalidate the retained location while roof review remains valid.
   await stage.selectOption("roof");
