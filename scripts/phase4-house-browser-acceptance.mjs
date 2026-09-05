@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.15.0",
+  schemaVersion: "0.16.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -54,6 +54,7 @@ const record = {
     "Multi-surface wind loading only algebraically sums already-valid explicit single-surface global force vectors; the sum is not a support reaction, base shear, connection demand, racking demand, moment/torque, load-path distribution, CFD integration, code-compliance result, or adequacy verdict.",
     "Surface force application-point mapping attaches an accepted analytical force only to an explicit caller-declared global point. It does not infer center of pressure, panel centroid, joint, support, solver node, load path, moment/torque, reaction, or adequacy.",
     "Surface force moment is ordinary statics r×F about an explicit caller-declared global reference point only. It is not aerodynamic torque/free couple, support moment, reaction, load-path distribution, solver response, or adequacy evidence.",
+    "Structural load-case/solver-node adapter is solver-input mapping only: load-case ID, node ID, and node coordinate are explicit; mapped force/moment preserve accepted analytical evidence; no solver execution or structural response is implied.",
   ],
 };
 
@@ -88,6 +89,8 @@ try {
   await waitForBodyText(page, "RPE_ANALYTICAL · EXPLICIT MAPPING ONLY · NO MOMENT / NO REACTION");
   await waitForBodyText(page, "Explicit force moment about declared reference point");
   await waitForBodyText(page, "RPE_ANALYTICAL · ORDINARY STATICS r×F · NOT AERODYNAMIC TORQUE");
+  await waitForBodyText(page, "Explicit structural load-case / solver-node mapping");
+  await waitForBodyText(page, "SOLVER_INPUT_MAPPING · EXPLICIT NODE/LOAD CASE ONLY · NO SOLVER RESPONSE");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -109,6 +112,7 @@ try {
   record.checks.multiSurfaceWindLoadSetVisible = true;
   record.checks.surfaceForceApplicationPointMappingVisible = true;
   record.checks.surfaceForceMomentVisible = true;
+  record.checks.structuralLoadCaseAdapterVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -357,6 +361,33 @@ try {
   record.checks.surfaceForceMomentAerodynamicTorqueUnavailable = true;
   record.checks.surfaceForceMomentStructuralResponseUnavailable = true;
 
+  // Explicit solver-input mapping only: no structural solver has been executed.
+  await waitForBodyText(page, "Structural load-case mapping state: mapping_ready");
+  await waitForBodyText(page, "Evidence layer: solver_input_mapping");
+  await waitForBodyText(page, "Adapter surface ID: synthetic-wall-north");
+  await waitForBodyText(page, "Load-case ID: LC-WIND-QA-001");
+  await waitForBodyText(page, "Solver-node ID: NODE-WIND-NORTH-QA-001");
+  await waitForBodyText(page, "Solver-node global point: (0.100, 0.200, -2.000) m");
+  await waitForBodyText(page, "Coordinate basis: global_cartesian_xyz_m");
+  await waitForBodyText(page, "Source application point: (0.370, 1.230, -2.410) m");
+  await waitForBodyText(page, "Source moment reference point: (0.100, 0.200, -2.000) m");
+  await waitForBodyText(page, "NODE COORDINATE = MOMENT REFERENCE POINT: YES");
+  await waitForBodyText(page, "NEAREST NODE INFERENCE: NONE — PROHIBITED");
+  await waitForBodyText(page, "Mapped nodal force: (0.000, 0.000, -960.000) N");
+  await waitForBodyText(page, "Mapped nodal moment: (-988.800, 259.200, 0.000) N·m");
+  await waitForBodyText(page, "SOLVER EXECUTED: NO");
+  await waitForBodyText(page, "REACTIONS: N/A");
+  await waitForBodyText(page, "DISPLACEMENTS: N/A");
+  await waitForBodyText(page, "ROTATIONS: N/A");
+  await waitForBodyText(page, "MEMBER FORCES: N/A");
+  await waitForBodyText(page, "CONNECTION DEMANDS: N/A");
+  await waitForBodyText(page, "RACKING RESPONSE: N/A");
+  await waitForBodyText(page, "SOLVER INPUT MAPPING ≠ SOLVER RESULT");
+  record.checks.structuralLoadCaseExplicitIdentityVerified = true;
+  record.checks.structuralLoadCaseNodeMatchesMomentReference = true;
+  record.checks.structuralLoadCasePreservesForceMoment = true;
+  record.checks.structuralLoadCaseNoSolverResponse = true;
+
   // Roof exposure readiness: rotated roof geometry + explicit local normal/exposed-face declaration only.
   await stage.selectOption("roof");
   await page.getByLabel("Roof panel component", { exact: true }).selectOption("synthetic-roof-west");
@@ -579,17 +610,21 @@ try {
   await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyText(page, "Force application-point state: blocked_source_action");
   await waitForBodyText(page, "Force-moment state: blocked_source_mapping");
+  await waitForBodyText(page, "Structural load-case mapping state: blocked_application_mapping");
   await waitForBodyTextAbsent(page, "Wall ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "Surface ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "q = 0.5ρV²: 240.000 Pa");
   await waitForBodyTextAbsent(page, "Algebraic global force-vector sum: (480.000, 0.000, -960.000) N");
   await waitForBodyTextAbsent(page, "Caller-declared global application point: (0.370, 1.230, -2.410) m");
   await waitForBodyTextAbsent(page, "M_ref = r × F: (-988.800, 259.200, 0.000) N·m");
+  await waitForBodyTextAbsent(page, "Mapped nodal force: (0.000, 0.000, -960.000) N");
+  await waitForBodyTextAbsent(page, "Mapped nodal moment: (-988.800, 259.200, 0.000) N·m");
   record.checks.wallReadinessBlockedBelowActivationStage = true;
   record.checks.surfaceWindActionBlockedBelowWallStage = true;
   record.checks.multiSurfaceWindLoadSetBlockedBelowWallStage = true;
   record.checks.surfaceForceApplicationPointBlockedBelowWallStage = true;
   record.checks.surfaceForceMomentBlockedBelowWallStage = true;
+  record.checks.structuralLoadCaseAdapterBlockedBelowWallStage = true;
 
   // Lowering below floor/ring activation must also block retained floor/ring assumptions.
   await stage.selectOption("primary_supports");
@@ -610,6 +645,7 @@ try {
   await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyText(page, "Force application-point state: blocked_source_action");
   await waitForBodyText(page, "Force-moment state: blocked_source_mapping");
+  await waitForBodyText(page, "Structural load-case mapping state: blocked_application_mapping");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { calculateSmallHouseMultiSurfaceWindLoadSet } from "@/lib/smallHouseWind/multiSurfaceWindLoadSet";
+import { mapSmallHouseStructuralLoadCase } from "@/lib/smallHouseWind/structuralLoadCaseAdapter";
 import { mapSmallHouseSurfaceForceApplicationPoint } from "@/lib/smallHouseWind/surfaceForceApplicationPoint";
 import { calculateSmallHouseSurfaceForceMoment } from "@/lib/smallHouseWind/surfaceForceMoment";
 import { calculateSmallHouseSurfaceWindAction } from "@/lib/smallHouseWind/surfaceWindAction";
@@ -10,6 +11,10 @@ import {
   SMALL_HOUSE_MULTI_SURFACE_WIND_LOAD_SET_SCHEMA_VERSION,
   type SmallHouseMultiSurfaceWindLoadSetInput,
 } from "@/types/smallHouseMultiSurfaceWindLoadSet";
+import {
+  SMALL_HOUSE_STRUCTURAL_LOAD_CASE_ADAPTER_SCHEMA_VERSION,
+  type SmallHouseStructuralLoadCaseAdapterInput,
+} from "@/types/smallHouseStructuralLoadCaseAdapter";
 import {
   SMALL_HOUSE_SURFACE_FORCE_APPLICATION_POINT_SCHEMA_VERSION,
   type SmallHouseSurfaceForceApplicationPointInput,
@@ -97,6 +102,18 @@ const QA_FORCE_MOMENT_INPUT: SmallHouseSurfaceForceMomentInput = {
   verificationState: "unverified",
 };
 
+const QA_STRUCTURAL_ADAPTER_INPUT: SmallHouseStructuralLoadCaseAdapterInput = {
+  schemaVersion: SMALL_HOUSE_STRUCTURAL_LOAD_CASE_ADAPTER_SCHEMA_VERSION,
+  surfaceComponentId: "synthetic-wall-north",
+  loadCaseId: "LC-WIND-QA-001",
+  solverNodeId: "NODE-WIND-NORTH-QA-001",
+  // Must coincide with the explicit force-moment reference point.
+  solverNodeGlobalM: { x: 0.1, y: 0.2, z: -2.0 },
+  coordinateBasis: "global_cartesian_xyz_m",
+  sourceNote: "Synthetic structural solver-input mapping only; no solver execution",
+  verificationState: "unverified",
+};
+
 function scalar(value: number | null, decimals = 6): string {
   return value === null ? "N/A" : value.toFixed(decimals);
 }
@@ -129,6 +146,15 @@ export default function SmallHouseSurfaceWindActionPanel({
   const forceMomentResult = useMemo(
     () => calculateSmallHouseSurfaceForceMoment(snapshot, applicationPointResult, QA_FORCE_MOMENT_INPUT),
     [snapshot, applicationPointResult],
+  );
+  const structuralAdapterResult = useMemo(
+    () => mapSmallHouseStructuralLoadCase(
+      snapshot,
+      applicationPointResult,
+      forceMomentResult,
+      QA_STRUCTURAL_ADAPTER_INPUT,
+    ),
+    [snapshot, applicationPointResult, forceMomentResult],
   );
 
   return (
@@ -411,6 +437,60 @@ export default function SmallHouseSurfaceWindActionPanel({
         )}
 
         <div className="mt-2 text-slate-500">{forceMomentResult.reason}</div>
+      </div>
+
+      <div className="mt-4 font-semibold text-emerald-200">Explicit structural load-case / solver-node mapping</div>
+      <div className="mt-1 rounded border border-emerald-900/70 bg-emerald-950/30 px-2 py-1 text-[10px] font-semibold tracking-wide text-emerald-200">
+        SOLVER_INPUT_MAPPING · EXPLICIT NODE/LOAD CASE ONLY · NO SOLVER RESPONSE
+      </div>
+      <p className="mt-2 text-[10px] text-slate-500">
+        This gate translates already-accepted analytical force and ordinary r×F moment evidence into one explicit solver-input nodal-load record. The solver node and load case are caller declared. Node proximity, rendered geometry, and nearest-node selection are prohibited.
+      </p>
+
+      <div className="mt-3 rounded border border-emerald-950 bg-slate-900/60 p-2 text-[10px] text-slate-300">
+        <div>Structural load-case mapping state: <strong>{structuralAdapterResult.state}</strong></div>
+        <div>Evidence layer: <strong>{structuralAdapterResult.evidenceLayer}</strong></div>
+        <div>Structural result: <strong>{structuralAdapterResult.structuralResult}</strong></div>
+
+        {structuralAdapterResult.state === "mapping_ready" ? (
+          <>
+            <div className="mt-3 font-semibold text-slate-200">Explicit solver-input identity</div>
+            <div>Adapter surface ID: <strong>{structuralAdapterResult.surfaceComponentId}</strong></div>
+            <div>Load-case ID: <strong>{structuralAdapterResult.loadCaseId}</strong></div>
+            <div>Solver-node ID: <strong>{structuralAdapterResult.solverNodeId}</strong></div>
+            <div>Solver-node global point: <strong>{vector(structuralAdapterResult.solverNodeGlobalM)} m</strong></div>
+            <div>Coordinate basis: <strong>{structuralAdapterResult.coordinateBasis}</strong></div>
+            <div>Source application point: <strong>{vector(structuralAdapterResult.sourceApplicationPointGlobalM)} m</strong></div>
+            <div>Source moment reference point: <strong>{vector(structuralAdapterResult.sourceMomentReferencePointGlobalM)} m</strong></div>
+            <div>NODE COORDINATE = MOMENT REFERENCE POINT: <strong>YES</strong></div>
+            <div>NEAREST NODE INFERENCE: <strong>NONE — PROHIBITED</strong></div>
+
+            <div className="mt-3 font-semibold text-slate-200">Mapped nodal load input</div>
+            <div>Mapped nodal force: <strong>{vector(structuralAdapterResult.mappedNodalLoad?.forceVectorN ?? null)} N</strong></div>
+            <div>Mapped nodal moment: <strong>{vector(structuralAdapterResult.mappedNodalLoad?.momentVectorNm ?? null)} N·m</strong></div>
+
+            <div className="mt-3 font-semibold text-slate-200">Solver response deliberately unavailable</div>
+            <div>SOLVER EXECUTED: <strong>NO</strong></div>
+            <div>REACTIONS: <strong>N/A</strong></div>
+            <div>DISPLACEMENTS: <strong>N/A</strong></div>
+            <div>ROTATIONS: <strong>N/A</strong></div>
+            <div>MEMBER FORCES: <strong>N/A</strong></div>
+            <div>CONNECTION DEMANDS: <strong>N/A</strong></div>
+            <div>BASE SHEAR: <strong>N/A</strong></div>
+            <div>RACKING RESPONSE: <strong>N/A</strong></div>
+            <div>PASS/FAIL: <strong>N/A</strong></div>
+
+            <div className="mt-3 font-semibold text-amber-300">
+              SOLVER INPUT MAPPING ≠ SOLVER RESULT. No reaction, displacement, member force, connection demand, racking response, base shear, or adequacy exists until an explicit structural model is validated and an engineering solver is actually executed.
+            </div>
+          </>
+        ) : (
+          <div className="mt-2 text-amber-300">
+            Structural solver-input mapping unavailable because its source analytical force/application/moment evidence is not ready or the explicit node/reference contract is inconsistent. No stale nodal load is retained.
+          </div>
+        )}
+
+        <div className="mt-2 text-slate-500">{structuralAdapterResult.reason}</div>
       </div>
     </div>
   );
