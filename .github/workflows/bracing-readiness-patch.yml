@@ -26,14 +26,17 @@ jobs:
       - name: Verify patch hygiene
         run: git diff --check
 
-      - name: Commit patched canonical files
+      - name: Keep permanent workflow update outside bot write boundary
+        run: git checkout -- .github/workflows/genesis-browser-acceptance.yml
+
+      - name: Commit patched viewport and browser acceptance
         run: |
-          if git diff --quiet -- src/components/Viewport3D.tsx .github/workflows/genesis-browser-acceptance.yml scripts/phase4-house-browser-acceptance.mjs; then
-            echo "No Bracing patch changes were produced."
+          if git diff --quiet -- src/components/Viewport3D.tsx scripts/phase4-house-browser-acceptance.mjs; then
+            echo "No Bracing viewport/browser acceptance changes were produced."
             exit 1
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/components/Viewport3D.tsx .github/workflows/genesis-browser-acceptance.yml scripts/phase4-house-browser-acceptance.mjs
+          git add src/components/Viewport3D.tsx scripts/phase4-house-browser-acceptance.mjs
           git commit -m "Wire Bracing topology readiness into Phase 4 browser gate"
           git push origin HEAD:lum-rpe-takeover
