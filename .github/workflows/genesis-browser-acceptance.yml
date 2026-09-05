@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 clean-head checkpoint: Storm Protection topology acceptance schema 0.10.0; controlled A/B specimen difference is next.
+# Phase 4 browser contract includes controlled A/B input-review acceptance schema 0.11.0.
 
 on:
   push:
@@ -22,6 +22,7 @@ on:
       - src/components/BracingTopologyReadinessPanel.tsx
       - src/components/AnchorageInterfaceReadinessPanel.tsx
       - src/components/StormProtectionTopologyReadinessPanel.tsx
+      - src/components/SmallHouseControlledABPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
@@ -36,6 +37,7 @@ on:
       - src/types/bracingTopologyReadiness.ts
       - src/types/anchorageInterfaceReadiness.ts
       - src/types/stormProtectionTopologyReadiness.ts
+      - src/types/smallHouseControlledAB.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
