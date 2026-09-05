@@ -19,6 +19,14 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - A clean dependency-audit gate was recorded before physics dependency installation.
 - `@react-three/rapier@2.2.0` is installed.
 
+### Canonical plugin/scientific orchestration
+- The durable RPE orchestration doctrine is locked in `skills/rpe-scientific-orchestration/SKILL.md` and referenced by both `AGENT.md` and `AGENTS.md`.
+- Preferred stack: **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**.
+- Figma is explicitly treated as the maintained architecture/state/sequence/ERD/timeline/system-diagram layer, not only as a UI-polish tool.
+- Data Analytics is explicitly treated as the scientific-analysis layer for test datasets, sensitivity studies, material experiments, calibration, comparisons, validation, uncertainty, charts, and experiment reports.
+- PostHog product telemetry is explicitly separated from engineering/scientific validation evidence.
+- The stack is a lifecycle/responsibility order, not a requirement to invoke every plugin for every task; unavailable layers must be recorded as pending rather than fabricated.
+
 ### Phase 3 Genesis
 - Versioned Genesis wind/panel/connection/result types preserve evidence boundaries.
 - Null House remains `N/A / no_physical_specimen`.
