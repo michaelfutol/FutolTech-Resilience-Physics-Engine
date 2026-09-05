@@ -4,86 +4,125 @@
 
 Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
-Phase 4 — **Small House Wind System** — is active. The staged-house data/viewer gate and the first primary-support mechanics gate are now complete for a deliberately narrow isolated-formula scope.
+Phase 4 — **Small House Wind System** — is active and has now crossed four topology layers with explicit, reviewable evidence boundaries:
 
-The locked topology progression remains:
+**primary supports → floor/ring frame → walls → roof**
+
+The locked full progression remains:
 
 **empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection**
 
-## Completed primary-support gate
+The exact next layer is now **Connections**.
 
-RPE now has two separate support layers:
+## What is complete before Connections
 
-1. **Primary-support readiness / `rpe_input_review`**
-   - stable `primary_support` identity sourced from the validated stage snapshot;
-   - center/size/orientation/material/mass/provenance preserved from the specimen;
-   - explicit local longitudinal axis;
-   - explicit 6-DOF state at both ends with no defaults;
-   - caller-supplied property evidence only;
-   - rendered box dimensions do **not** silently become area or second moment;
-   - no reaction/displacement/stress/buckling/capacity result is produced by the readiness gate.
+### 1. Primary supports
+- Reviewable staged support identity and geometry.
+- Explicit local longitudinal axis and 12 end-restraint DOFs.
+- No inferred section properties.
+- First transparent `rpe_analytical` Euler–Bernoulli cantilever benchmark only.
+- No capacity/PASS/FAIL or whole-house claim.
 
-2. **Isolated cantilever formula benchmark / `rpe_analytical`**
-   - exact fixed–free idealization only;
-   - explicit E;
-   - explicit selected principal I;
-   - explicit signed free-end transverse point load P;
-   - member length L taken only from the declared local longitudinal-axis dimension;
-   - transparent formulas `V=|P|`, `M=|P|L`, `δ=PL³/(3EI)`;
-   - linear-elastic, prismatic, small-deflection Euler–Bernoulli assumptions;
-   - no shear deformation, P-Δ/geometric nonlinearity, connection slip, material nonlinearity, strength/capacity verdict, solver authority, CFD authority, or whole-house load-path claim.
+### 2. Floor/ring frame
+- Reviewable active ring-member identity, geometry/orientation, and endpoint-role semantics.
+- Schema v0.1.0 deliberately accepts no joint coordinates.
+- No global frame stiffness/load distribution or racking calculation.
 
-Hand-check regression fixture:
-- L = 3.0 m;
-- P = 1000 N;
-- E = 10 GPa;
-- I = 1.0×10^-4 m^4;
-- expected V = 1000 N;
-- expected M = 3000 N·m;
-- expected δ = 0.009 m.
+### 3. Walls
+- Reviewable wall-panel identity, explicit local normal, exposed-face sign, and exposure class.
+- Geometric box-face area may be calculated only from the explicitly declared local normal.
+- Synthetic browser fixture reports `7.140000 m² — GEOMETRY ONLY`.
+- Effective wind area, pressure coefficients, net pressure, stiffness, and fastener capacity remain undefined.
 
-Production-browser fixture uses the synthetic Phase 4 support with L = 2.7 m and the same P/E/I, producing V = 1000 N, M = 2700 N·m, δ = 0.006561 m while capacity remains `NOT_EVALUATED`.
+### 4. Roof
+- Reviewable roof-panel identity and rotated geometry/orientation.
+- Explicit local normal, exposed-face sign, and exposure class.
+- `synthetic-roof-west` preserves `rotationRad.z = 0.35` and reports `9.840000 m² — GEOMETRY ONLY` for the explicit local-y normal.
+- Roof zone, effective wind area, Cp/internal pressure, net suction/uplift, panel mechanics, and connection demand/capacity remain undefined.
+- Final clean-head CI run `33943309011` passed.
+- Final production-browser run `33943309015` passed Genesis + Phase 4 acceptance; browser artifact ID `9962552182`.
 
-Validation evidence:
-- Normal RPE CI run `33941910807` passed install, lint, strict TypeScript, automated tests, and production build.
-- Production browser run `33941910817` passed Genesis and Phase 4 acceptance.
-- Browser artifact `browser-acceptance-190ad3b4bf63f81d53005b3f6b6cfee98c0e4abe`, artifact ID `9962116271`, preserves the QA record and screenshot.
+Two Roof failures remain intentionally visible in history:
+- `33942967313`: exact floating-point test assertion failed at `9.839999999999998` vs mathematical `9.84`; the contract remained unchanged and the test was repaired with a tight numerical tolerance.
+- `33943182691`: one-shot browser-patch anchor matched two identical strings; it failed before changing the acceptance script and was repaired with a unique multiline anchor.
 
-## Exact next gated batch — floor/ring frame readiness
+## Exact next gated batch — connection joint-location readiness
 
-Define the first explicit **floor/ring-frame member readiness contract** before introducing global frame response.
+Define a separate **connection joint-location readiness contract** before any global frame/load-path or connection mechanics calculation.
 
-Requirements:
-- Reference an active `floor_ring_frame_member` by stable ID from a validated `floor_ring_frame` or later stage snapshot.
-- Preserve its declared center, size, rotation, material ID, mass, source note, and verification state from the staged specimen.
-- Require an explicit local longitudinal axis; do not infer member axis from the largest rendered box dimension.
-- Introduce explicit endpoint-role labels (for example End A / End B semantic role) without inventing physical joint coordinates.
-- Keep endpoint/joint coordinates explicitly unknown until a later contract supplies them with provenance.
-- Keep E, A, I, strength, connection stiffness/capacity, loads, and support transfer assumptions unknown unless explicitly supplied.
-- Do **not** calculate global ring-frame reactions, stiffness, racking, load distribution, connection demand, or whole-house wind response in this readiness batch.
-- Reject wrong component kind/stage, missing identity, invalid axis, duplicate endpoint roles, unsupported verification state, or missing provenance where required.
-- Add deterministic unit tests and production-browser acceptance.
+### Required contract behavior
 
-## Why joint coordinates stay deferred
+- Reference an active connection by its stable `connection.id` from a validated `connections` or later stage snapshot.
+- Preserve the staged connection's:
+  - `fromComponentId`;
+  - `toComponentId`;
+  - activation stage;
+  - current `capacityN` state;
+  - source note;
+  - verification state.
+- Require a caller-supplied explicit global joint point `{x,y,z}` in metres.
+- Require finite coordinates, non-empty provenance, and supported verification state for that joint point.
+- Confirm both endpoint component IDs are active in the same validated snapshot.
+- Return an input-review state only; this batch does not establish mechanical adequacy.
 
-The existing Phase 4 connection records currently establish **topology only**—which objects are related. They deliberately do not state a physical joint point. RPE must not draw or calculate a member-center-to-member-center connection merely because it looks plausible.
+### Permanent anti-inference rule
 
-The later **connections** gate will introduce physical joint/location semantics and mechanics assumptions explicitly. Only then may global frame/load-path calculations use those connections.
+When no explicit joint point is supplied, RPE must **not** create one from any of the following:
+- component centers;
+- midpoint between component centers;
+- nearest box faces;
+- apparent box intersection;
+- rendered touching geometry;
+- assumed framing convention;
+- visual coincidence in the Three.js scene.
 
-## After floor/ring-frame readiness
+A visually plausible joint is still **UNKNOWN** until explicitly declared with provenance.
+
+### Keep these fields unknown in the first connection-location batch
+
+- connector axis/path/shape;
+- bearing/contact area;
+- fastener type/count/spacing;
+- weld length/size;
+- connection stiffness;
+- rotational/translational slip;
+- friction/restitution;
+- connection demand;
+- connection capacity assessment;
+- utilization;
+- PASS/FAIL;
+- load-transfer distribution;
+- global frame stiffness/reactions/racking;
+- whole-house wind performance.
+
+The existing topology `capacityN` value should simply be preserved from the staged record. If it is `null`, it remains `null`; this readiness layer must not generate a capacity.
+
+### Required regression/browser proof
+
+1. Connection stage not yet active → readiness blocked.
+2. Missing connection ID → blocked/rejected.
+3. Explicit wrong/non-active connection → blocked.
+4. Missing joint point → unresolved / calculation unavailable.
+5. Non-finite joint coordinate → rejected.
+6. Explicit finite joint point + provenance → `review_ready`.
+7. Returned endpoint IDs exactly match the staged connection record.
+8. No inferred midpoint/intersection field appears.
+9. No demand/capacity/PASS/FAIL calculation becomes available.
+10. Lowering the stage below `connections` invalidates the retained joint-location review.
+
+Only after this location gate is unit-tested and real-browser accepted should RPE define connection mechanics.
+
+## After connection location readiness
 
 Continue in roadmap order:
 
-1. Floor/ring member readiness.
-2. Wall geometry/exposure readiness.
-3. Roof geometry/exposure readiness.
-4. Connection joint-location + mechanics readiness.
-5. Bracing load-path relationships.
-6. Anchorage/uplift/sliding relationships.
-7. Storm-protection restraint as a separate structural variable.
-8. Controlled A/B house comparison with automated proof that only one declared structural variable changed.
+1. Connection mechanics inputs only when explicit joint location and required mechanical properties are sourced.
+2. Bracing load-path relationships and explicit member/joint identities.
+3. Anchorage/uplift/sliding relationships with explicit attachment/ground interface data.
+4. Storm-protection restraint as a separate optional structural variable.
+5. Controlled A/B house comparison with automated proof that unrelated geometry and inputs are unchanged.
 
-Do not jump directly to a complete animated house failure sequence.
+Do not jump directly to a complete animated house-failure sequence.
 
 ## Independent outstanding gate
 
