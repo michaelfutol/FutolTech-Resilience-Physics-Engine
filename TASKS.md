@@ -21,12 +21,13 @@
 - [ ] Perform manual browser visual acceptance: selectors, quantity/rate overrides, upgrade Apply, Reset, Create Candidate, refresh persistence, lineage, validation warnings.
 - [ ] Record final Phase 2 exit checkpoint after browser acceptance.
 
-## Cross-Cutting Dependency Hygiene
+## Cross-Cutting Dependency / Security Hygiene
 - [x] Classify the direct Next.js advisory gate.
 - [x] Upgrade `next` + matching `eslint-config-next` to `16.3.4`.
 - [x] Regenerate `package-lock.json` without hand-editing integrity data.
-- [x] Run fresh dependency audit and record clean audit gate.
+- [x] Run fresh canonical-application dependency audit and record clean audit gate.
 - [x] Install `@react-three/rapier@2.2.0` only after the dependency gate became green.
+- [ ] Classify and replace/upgrade the temporary Playwright browser harness version that currently reports one high advisory during its isolated no-save install. Do not confuse this with the clean committed application dependency graph.
 
 ## Phase 3 — Genesis Test Chamber
 - [x] Define versioned Genesis wind, panel, connection, evidence-layer and result types.
@@ -52,8 +53,11 @@
 - [x] Wire explicit collision-target inputs into `Viewport3D`, validate before rendering, and instantiate the validated fixed target in the same Rapier world as released Panel 001.
 - [x] Carry target identity through tested narrow runtime metadata and accept it only when it matches the currently validated explicit target.
 - [x] Add an executable synthetic browser-QA fixture plus documented live acceptance procedure without promoting fixture geometry into collision evidence.
-- [ ] Verify a genuine live collision callback in-browser with declared target identity and confirm changed explicit panel/dynamics/target inputs do not retain stale collision observations.
-- [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
+- [x] Add a reproducible headless-Chromium production-build acceptance workflow and evidence artifact.
+- [x] Verify a genuine live Rapier collision callback with declared target identity and confirm changed explicit target input clears the prior collision observation. Accepted on commit `510dc5c3b9892f40e82428e8aea64e3d2251b75b`, browser run `33935187278`, artifact `9959936762`.
+- [ ] Define a provenance-bearing post-release aerodynamic loading/time contract before applying continuing wind force or aerodynamic torque to debris.
+- [ ] Add tests proving post-release aerodynamic loading cannot run with missing time/aerodynamic inputs and cannot reuse pre-release force as an unstated impulse.
+- [ ] Wire the post-release aerodynamic model only after the pure contract/calculation gate passes.
 - [ ] Add synchronized A/B simulation/replay path.
 
 ## Later phases
