@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes controlled multi-surface analytical wind load-set acceptance schema 0.13.0.
+# Phase 4 browser contract includes explicit surface force application-point acceptance schema 0.14.0.
 
 on:
   push:
@@ -31,6 +31,7 @@ on:
       - src/types/smallHouseWind.ts
       - src/types/smallHouseSurfaceWindAction.ts
       - src/types/smallHouseMultiSurfaceWindLoadSet.ts
+      - src/types/smallHouseSurfaceForceApplicationPoint.ts
       - src/types/primarySupportMechanics.ts
       - src/types/primarySupportCantilever.ts
       - src/types/floorRingFrameReadiness.ts
