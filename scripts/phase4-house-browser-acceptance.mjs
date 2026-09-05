@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.12.0",
+  schemaVersion: "0.13.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -51,6 +51,7 @@ const record = {
     "Storm-protection topology readiness requires two distinct explicit incident connection records to two distinct active opposite endpoint components; visible strap geometry cannot create a missing end, attachment point, preload, stiffness, demand, capacity, PASS/FAIL, or whole-house benefit.",
     "Controlled A/B comparison in this gate proves only that exactly one declared connection record differs while unrelated specimen inputs remain invariant; it does not compare structural performance or establish a stronger/better variant.",
     "Single-surface wind action is RPE_ANALYTICAL only: density, speed, effective area, signed coefficient, and global action direction are explicit QA inputs; it is NON-CFD, NON-CODE-COMPLIANCE, and does not create connection demand, reactions, racking, PASS/FAIL, or whole-house performance evidence.",
+    "Multi-surface wind loading only algebraically sums already-valid explicit single-surface global force vectors; the sum is not a support reaction, base shear, connection demand, racking demand, moment/torque, load-path distribution, CFD integration, code-compliance result, or adequacy verdict.",
   ],
 };
 
@@ -79,6 +80,8 @@ try {
   await waitForBodyText(page, "Controlled A/B specimen difference");
   await waitForBodyText(page, "Analytical surface wind action");
   await waitForBodyText(page, "RPE_ANALYTICAL · NON-CFD · NON-CODE-COMPLIANCE");
+  await waitForBodyText(page, "Controlled multi-surface analytical load set");
+  await waitForBodyText(page, "RPE_ANALYTICAL · VECTOR ALGEBRA ONLY · NON-CFD · NON-CODE-COMPLIANCE");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -97,6 +100,7 @@ try {
   record.checks.stormProtectionTopologyReadinessPanelVisible = true;
   record.checks.controlledABPanelVisible = true;
   record.checks.surfaceWindActionPanelVisible = true;
+  record.checks.multiSurfaceWindLoadSetVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -289,6 +293,27 @@ try {
   record.checks.surfaceWindActionGeometryAreaNotEffectiveArea = true;
   record.checks.surfaceWindActionExplicitDirectionVerified = true;
   record.checks.surfaceWindActionDownstreamMechanicsUnavailable = true;
+
+  // Controlled two-wall analytical vector aggregation. This is vector algebra only, not structural distribution.
+  await waitForBodyText(page, "Multi-surface load-set state: analytical_ready");
+  await waitForBodyText(page, "Load-set surface ID: synthetic-wall-east");
+  await waitForBodyText(page, "Surface global force vector: (480.000, 0.000, 0.000) N");
+  await waitForBodyText(page, "Load-set surface ID: synthetic-wall-north");
+  await waitForBodyText(page, "Surface global force vector: (0.000, 0.000, -960.000) N");
+  await waitForBodyText(page, "Algebraic global force-vector sum: (480.000, 0.000, -960.000) N");
+  await waitForBodyText(page, "Resultant vector magnitude: 1073.313 N");
+  await waitForBodyText(page, "REACTION: N/A");
+  await waitForBodyText(page, "BASE SHEAR: N/A");
+  await waitForBodyText(page, "UPLIFT REACTION: N/A");
+  await waitForBodyText(page, "SLIDING REACTION: N/A");
+  await waitForBodyText(page, "RACKING DEMAND: N/A");
+  await waitForBodyText(page, "CONNECTION DEMAND: N/A");
+  await waitForBodyText(page, "MOMENT/TORQUE: N/A");
+  await waitForBodyText(page, "LOAD-PATH DISTRIBUTION: N/A");
+  await waitForBodyText(page, "PASS/FAIL: N/A");
+  await waitForBodyText(page, "VECTOR SUM ≠ REACTION / BASE SHEAR / STRUCTURAL DEMAND");
+  record.checks.multiSurfaceHandVectorSumVerified = true;
+  record.checks.multiSurfaceStructuralInterpretationUnavailable = true;
 
   // Roof exposure readiness: rotated roof geometry + explicit local normal/exposed-face declaration only.
   await stage.selectOption("roof");
@@ -509,11 +534,14 @@ try {
   await stage.selectOption("floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
+  await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyTextAbsent(page, "Wall ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "Surface ID: synthetic-wall-north");
   await waitForBodyTextAbsent(page, "q = 0.5ρV²: 240.000 Pa");
+  await waitForBodyTextAbsent(page, "Algebraic global force-vector sum: (480.000, 0.000, -960.000) N");
   record.checks.wallReadinessBlockedBelowActivationStage = true;
   record.checks.surfaceWindActionBlockedBelowWallStage = true;
+  record.checks.multiSurfaceWindLoadSetBlockedBelowWallStage = true;
 
   // Lowering below floor/ring activation must also block retained floor/ring assumptions.
   await stage.selectOption("primary_supports");
@@ -531,6 +559,7 @@ try {
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
   await waitForBodyText(page, "Surface action state: blocked_stage_before_walls");
+  await waitForBodyText(page, "Multi-surface load-set state: blocked_surface_action");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
