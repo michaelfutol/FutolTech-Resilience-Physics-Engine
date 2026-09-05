@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes Bracing topology acceptance schema 0.8.0.
+# Phase 4 clean-head browser checkpoint: Bracing topology acceptance schema 0.8.0; Anchorage is next.
 
 on:
   push:
