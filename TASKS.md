@@ -18,7 +18,7 @@
 - [x] Isolate browser acceptance tooling from committed application dependencies.
 - [x] Upgrade isolated browser harness to pinned Playwright 1.62.1 and verify `npm audit --audit-level=high` reports zero vulnerabilities.
 
-## Genesis analytical and simulation foundation
+## Phase 3 — Genesis analytical and simulation foundation — EXIT GATE COMPLETE
 - [x] Null House `N/A / no_physical_specimen` contract.
 - [x] Fast Smoke explicitly NON-CFD.
 - [x] Explicit analytical wind/panel path `q = 0.5ρV²` → `F = qAC`.
@@ -32,7 +32,7 @@
 - [x] Explicit provenance-bearing collision-target contract and runtime identity matching.
 - [x] Real Chromium synthetic collision-path acceptance and stale-context reset.
 
-## Post-release aerodynamics
+## Phase 3 — Post-release aerodynamics — COMPLETE FOR CURRENT COM-FORCE SCOPE
 - [x] Define/test explicit post-release aerodynamic analytical contract with interval, density, relative air velocity, projected area, drag coefficient, body identity, and provenance.
 - [x] Keep pre-release panel action distinct; do not convert it into post-release impulse.
 - [x] Define/test explicit opt-in aerodynamic force-application plan gated by ready dynamics + ready aerodynamic result + matching body ID.
@@ -40,19 +40,40 @@
 - [x] Add deterministic per-physics-step force-window scheduler.
 - [x] Preserve the declared load interval on a partial terminal physics step by scaling effective force rather than silently extending duration.
 - [x] Add scheduler regression coverage to the actual `npm test` command.
-- [ ] Wire explicit aerodynamic application opt-in/provenance into Genesis UI/live run context.
-- [ ] Apply only scheduler-returned center-of-mass force to the released Rapier body during the declared interval.
-- [ ] Record force-application start/active/partial/complete state as `rpe_simulation` evidence without promoting it to solver/CFD/physical-test authority.
-- [ ] Browser-test declared start/stop behavior and stale-context reset after any relevant aerodynamic/run input change.
+- [x] Wire explicit aerodynamic application opt-in/provenance into Genesis UI/live run context.
+- [x] Apply only scheduler-returned center-of-mass force to the released Rapier body during the declared interval.
+- [x] Record full-step/partial/completed force-application state as `rpe_simulation` evidence without promoting it to solver/CFD/physical-test authority.
+- [x] Browser-test declared application behavior and stale-context reset after relevant aerodynamic/run input changes.
+- [x] Confirm real Chromium live-force acceptance run `33938570653` with zero console/page errors and evidence artifact ID `9961013065`.
+- [x] Confirm RPE CI run `33938665291` and clean-helper CI run `33938717530` green.
 - [ ] Define aerodynamic torque only in a future separately justified contract; do not infer it from current drag force.
+
+## Phase 4 — Small House Wind System — ACTIVE
+- [x] Define versioned small-house wind topology/staging types.
+- [x] Lock progressive stage order to the roadmap: empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection.
+- [x] Preserve stable object identity across envelope, structural components, and connections.
+- [x] Preserve unknown material identity, mass, and connection capacity as explicit `null`.
+- [x] Validate positive geometry, supported verification state, component-kind/stage consistency, connection references, and endpoint activation order.
+- [x] Add deterministic stage materialization without source mutation.
+- [x] Preserve `N/A / no_physical_specimen` for the empty-envelope stage and avoid a performance claim for geometry-only physical stages.
+- [x] Add Phase 4 system-contract regression suite to canonical `npm test`.
+- [x] Confirm Phase 4 foundation CI run `33938835927` green.
+- [ ] Add a staged small-house test-chamber viewer driven only by a validated specimen contract.
+- [ ] Show stage/object identity and provenance in the UI; do not infer structural capacity from visibility.
+- [ ] Add browser acceptance for deterministic stage progression and `N/A` empty-envelope semantics.
+- [ ] Define the first explicit primary-support mechanics/input contract.
+- [ ] Add floor/ring frame only after the primary-support gate is reviewable.
+- [ ] Progress walls → roof → connections → bracing → anchorage → storm protection one gated layer at a time.
+- [ ] Add controlled A/B house comparison that proves geometry is held constant while exactly one declared structural variable changes.
+- [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
 
 ## Failed-check record retained
 - [x] Keep Genesis Browser Acceptance run `33936435595` failure visible: old selector matched two verification controls after aerodynamic UI expansion.
 - [x] Keep Genesis Browser Acceptance run `33936534126` failure visible: first repair used an inaccessible exact-label selector and found zero target selects.
-- [x] Repair browser selector by scoping from collision-target `Source note` to its sibling verification select without weakening acceptance criteria.
-- [x] Confirm RPE CI run `33936665268` green and Genesis Browser Acceptance run `33936665296` green on repair commit `4bad29c6d44fd7f08abcead1298dc1c61f89bdc6`.
+- [x] Keep RPE CI run `33938570631` failure visible: collision activation error text was unintentionally generalized; 92/94 tests passed and the two legacy assertions correctly caught the compatibility regression.
+- [x] Repair collision activation error compatibility while adding a separate explicit aerodynamic-application activation error.
 
-## Later Genesis gates — not to be invented early
+## Later mechanics gates — not to be invented early
 - [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
 - [ ] Impact mechanics contract, only after required physical quantities/evidence are defined.
 - [ ] Damage/failure model tied to solver/test/calibration evidence.
