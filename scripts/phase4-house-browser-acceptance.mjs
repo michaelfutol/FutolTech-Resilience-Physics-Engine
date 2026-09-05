@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.1.0",
+  schemaVersion: "0.2.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -40,6 +40,7 @@ const record = {
     "Synthetic house dimensions and topology are not adopted Dignity production geometry.",
     "Visible geometry does not establish structural capacity, code compliance, wind resistance, or material performance.",
     "Connection topology has no physical joint-coordinate contract yet, so the viewer intentionally draws no connection lines.",
+    "Primary-support readiness is input review only; no reaction, displacement, stress, buckling, or capacity is calculated.",
   ],
 };
 
@@ -57,8 +58,11 @@ try {
   await waitForBodyText(page, "Phase 4 Test Chamber — staged small-house topology review");
   await waitForBodyText(page, "Synthetic Phase 4 staged-house QA fixture");
   await waitForBodyText(page, "VISIBLE ≠ ADEQUATE");
+  await waitForBodyText(page, "Primary-support mechanics readiness");
+  await waitForBodyText(page, "Calculation available: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
+  record.checks.primarySupportReadinessPanelVisible = true;
 
   const stage = page.getByLabel("Phase 4 stage", { exact: true });
   if ((await stage.count()) !== 1) fail(`Expected one Phase 4 stage selector; found ${await stage.count()}`);
@@ -107,13 +111,46 @@ try {
   await waitForBodyText(page, "rotation(rad)=(0, 0, -0.72)");
   record.checks.explicitOrientationVisible = true;
 
+  // Review the first primary-support readiness contract with explicit assumptions only.
+  await stage.selectOption("primary_supports");
+  await page.getByLabel("Primary support component", { exact: true }).selectOption("synthetic-support-nw");
+  await page.getByLabel("Primary support longitudinal axis", { exact: true }).selectOption("local_y");
+  await page.getByLabel("End A label", { exact: true }).fill("lower end");
+  await page.getByLabel("End B label", { exact: true }).fill("upper end");
+
+  for (const dof of ["ux", "uy", "uz", "rx", "ry", "rz"]) {
+    await page.getByLabel(`End A restraint ${dof}`, { exact: true }).selectOption("restrained");
+    await page.getByLabel(`End B restraint ${dof}`, { exact: true }).selectOption("free");
+  }
+
+  await page.getByLabel("End A source note", { exact: true }).fill("Synthetic browser QA fixed-base assumption only");
+  await page.getByLabel("End B source note", { exact: true }).fill("Synthetic browser QA free-end assumption only");
+  await page.getByLabel("End A restraint verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("End B restraint verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Readiness source note", { exact: true }).fill("Synthetic browser QA readiness idealization only");
+  await page.getByLabel("Primary support readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Readiness state: review_ready_with_unknowns");
+  await waitForBodyText(page, "Support ID: synthetic-support-nw");
+  await waitForBodyText(page, "Calculation available: NO");
+  await waitForBodyText(page, "Section area: UNKNOWN — NOT DERIVED FROM BOX SIZE");
+  await waitForBodyText(page, "Principal second moments: UNKNOWN — NOT DERIVED FROM BOX SIZE");
+  await waitForBodyText(page, "Strength data: UNKNOWN / NONE SUPPLIED");
+  await waitForBodyText(page, "sectionAreaM2");
+  record.checks.primarySupportReadinessExplicitInputsAccepted = true;
+  record.checks.primarySupportSectionPropertiesNotInferred = true;
+  record.checks.primarySupportCalculationRemainsUnavailable = true;
+
   // Lower the stage back to the empty envelope and confirm stale physical identities disappear.
+  // The still-entered readiness assumptions must become blocked rather than remain apparently valid.
   await stage.selectOption("empty_envelope");
   await waitForBodyText(page, "Structural result: N/A");
+  await waitForBodyText(page, "Readiness state: blocked_stage_before_primary_supports");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
   record.checks.staleHigherStageComponentsCleared = true;
+  record.checks.primarySupportReadinessBlockedWhenStageRemoved = true;
 
   if (record.consoleErrors.length > 0) fail(`Browser console errors: ${record.consoleErrors.join(" | ")}`);
   if (record.pageErrors.length > 0) fail(`Page errors: ${record.pageErrors.join(" | ")}`);
