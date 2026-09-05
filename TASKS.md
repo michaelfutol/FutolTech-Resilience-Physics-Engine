@@ -53,15 +53,20 @@
 - [x] Lock progressive stage order to the roadmap: empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection.
 - [x] Preserve stable object identity across envelope, structural components, and connections.
 - [x] Preserve unknown material identity, mass, and connection capacity as explicit `null`.
+- [x] Require explicit finite component orientation rather than assuming rotation.
 - [x] Validate positive geometry, supported verification state, component-kind/stage consistency, connection references, and endpoint activation order.
 - [x] Add deterministic stage materialization without source mutation.
 - [x] Preserve `N/A / no_physical_specimen` for the empty-envelope stage and avoid a performance claim for geometry-only physical stages.
 - [x] Add Phase 4 system-contract regression suite to canonical `npm test`.
 - [x] Confirm Phase 4 foundation CI run `33938835927` green.
-- [ ] Add a staged small-house test-chamber viewer driven only by a validated specimen contract.
-- [ ] Show stage/object identity and provenance in the UI; do not infer structural capacity from visibility.
-- [ ] Add browser acceptance for deterministic stage progression and `N/A` empty-envelope semantics.
-- [ ] Define the first explicit primary-support mechanics/input contract.
+- [x] Add a staged small-house test-chamber viewer driven only by the validated specimen contract.
+- [x] Show stage/object identity, provenance, explicit orientation, and unknown material/mass/capacity in the UI without inferring structural adequacy.
+- [x] Keep connection topology visible without inventing physical joint coordinates/connector geometry.
+- [x] Add browser acceptance for deterministic stage progression, `N/A` empty-envelope semantics, orientation visibility, unknown engineering properties, and stale higher-stage identity clearing.
+- [x] Wire Phase 4 browser acceptance into the read-only production-browser workflow alongside Genesis.
+- [x] Confirm RPE CI run `33939397709` and browser run `33939397798` green; artifact ID `9961290314`.
+- [ ] Define the first explicit primary-support mechanics readiness/input contract.
+- [ ] Add a calculated primary-support mechanics path only after the readiness contract is reviewable and its required engineering quantities are explicitly supplied/sourced.
 - [ ] Add floor/ring frame only after the primary-support gate is reviewable.
 - [ ] Progress walls → roof → connections → bracing → anchorage → storm protection one gated layer at a time.
 - [ ] Add controlled A/B house comparison that proves geometry is held constant while exactly one declared structural variable changes.
@@ -71,7 +76,8 @@
 - [x] Keep Genesis Browser Acceptance run `33936435595` failure visible: old selector matched two verification controls after aerodynamic UI expansion.
 - [x] Keep Genesis Browser Acceptance run `33936534126` failure visible: first repair used an inaccessible exact-label selector and found zero target selects.
 - [x] Keep RPE CI run `33938570631` failure visible: collision activation error text was unintentionally generalized; 92/94 tests passed and the two legacy assertions correctly caught the compatibility regression.
-- [x] Repair collision activation error compatibility while adding a separate explicit aerodynamic-application activation error.
+- [x] Keep Phase 4 orientation intermediate RPE CI failure at commit `c089e0e4423a2853a50b41066e1320fd1fbbe437` visible; strict TypeScript failed and later tests/build were skipped rather than waived.
+- [x] Confirm corrective orientation commit `383c4125b002d44244845166c7697ab79d82158e` passed RPE CI run `33939039707`.
 
 ## Later mechanics gates — not to be invented early
 - [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
