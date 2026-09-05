@@ -1,5 +1,7 @@
 name: Genesis Browser Acceptance
 
+# Phase 4 browser contract includes Connection joint-location acceptance schema 0.7.0.
+
 on:
   push:
     branches:
