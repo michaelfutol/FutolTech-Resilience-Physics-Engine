@@ -23,7 +23,7 @@ import {
   SMALL_HOUSE_SURFACE_WIND_ACTION_SCHEMA_VERSION,
   type SmallHouseSurfaceWindActionInput,
 } from "../src/types/smallHouseSurfaceWindAction";
-import type { SmallHouseWindSystemInput } from "../src/types/smallHouseWind";
+import type { SmallHouseWindSpecimenInput } from "../src/types/smallHouseWind";
 
 function near(actual: number | null | undefined, expected: number, tolerance = 1e-9): void {
   assert.notEqual(actual, null);
@@ -92,7 +92,7 @@ function adapterInput(
   };
 }
 
-function readyFixture(specimen: SmallHouseWindSystemInput = SYNTHETIC_PHASE4_HOUSE) {
+function readyFixture(specimen: SmallHouseWindSpecimenInput = SYNTHETIC_PHASE4_HOUSE) {
   const snapshot = materializeSmallHouseWindStage(specimen, "walls");
   const action = calculateSmallHouseSurfaceWindAction(snapshot, actionInput());
   const application = mapSmallHouseSurfaceForceApplicationPoint(
@@ -198,9 +198,9 @@ test("rendered geometry drift cannot select or move the explicit solver node", (
   const moved = structuredClone(SYNTHETIC_PHASE4_HOUSE);
   const wall = moved.components.find((component) => component.id === "synthetic-wall-north");
   assert.ok(wall);
-  wall.geometry.center.x = 88;
-  wall.geometry.center.y = -42;
-  wall.geometry.center.z = 17;
+  wall.centerM.x = 88;
+  wall.centerM.y = -42;
+  wall.centerM.z = 17;
 
   const base = readyFixture();
   const drifted = readyFixture(moved);
