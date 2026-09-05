@@ -14,6 +14,7 @@ on:
       - src/components/SmallHouseWindStageScene.tsx
       - src/components/PrimarySupportReadinessPanel.tsx
       - src/components/FloorRingFrameReadinessPanel.tsx
+      - src/components/WallPanelExposureReadinessPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
@@ -22,6 +23,7 @@ on:
       - src/types/primarySupportMechanics.ts
       - src/types/primarySupportCantilever.ts
       - src/types/floorRingFrameReadiness.ts
+      - src/types/wallPanelExposureReadiness.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
