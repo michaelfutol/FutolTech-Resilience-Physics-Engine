@@ -13,12 +13,15 @@ on:
       - src/components/GenesisAerodynamicForceDriver.tsx
       - src/components/SmallHouseWindStageScene.tsx
       - src/components/PrimarySupportReadinessPanel.tsx
+      - src/components/FloorRingFrameReadinessPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
       - src/types/genesis*.ts
       - src/types/smallHouseWind.ts
       - src/types/primarySupportMechanics.ts
+      - src/types/primarySupportCantilever.ts
+      - src/types/floorRingFrameReadiness.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
