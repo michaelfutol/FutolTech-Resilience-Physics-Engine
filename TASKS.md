@@ -6,6 +6,7 @@
 - [x] Keep manual/code, solver, RPE analytical, RPE simulation, browser QA/visualization, and future physical-test evidence distinct.
 - [x] Require explicit provenance/verification state for engineering/simulation inputs where the contract requires them.
 - [x] Never invent missing material, code, aerodynamic, contact, or engineering properties.
+- [x] Lock external-engine roles in `docs/ENGINE_INTEGRATION_LADDER.md`.
 
 ## Phase 2
 - [x] Deterministic catalog validation/costing/candidate derivation/persistence foundation.
@@ -89,17 +90,39 @@
 - [x] Browser-test `synthetic-roof-west`: rotation `0.35 rad`, local-y geometry-only face `9.840000 m²`, uplift calculation unavailable, and stage invalidation.
 - [x] Confirm final clean-head CI run `33943309011` and browser run `33943309015` green; browser artifact ID `9962552182`.
 
-### Connections — CURRENT GATE
-- [ ] Define a separate connection joint-location readiness contract referencing an active staged connection by stable ID.
-- [ ] Preserve original `fromComponentId`, `toComponentId`, capacity state, provenance, and verification state from the staged specimen.
-- [ ] Require an explicit finite caller-supplied global joint point plus provenance/verification; no coordinate defaults.
-- [ ] Prove a missing joint point stays unresolved even when component boxes visibly intersect or a center-to-center midpoint looks plausible.
-- [ ] Keep connector path/axis/shape, stiffness, slip, fastener count, demand/capacity, PASS/FAIL, load transfer, and whole-house response unavailable in the first location-readiness batch.
-- [ ] Add deterministic unit tests and production-browser acceptance before any connection mechanics calculation.
+### Connections — COMPLETE FOR CURRENT JOINT-LOCATION INPUT-REVIEW SCOPE
+- [x] Define a separate connection joint-location readiness contract referencing an active staged connection by stable ID.
+- [x] Preserve original `fromComponentId`, `toComponentId`, capacity state, provenance, and verification state from the staged specimen.
+- [x] Require explicit finite caller-supplied global joint point plus provenance/verification; no coordinate defaults.
+- [x] Prove a missing joint point stays unresolved even when component boxes visibly intersect or a center-to-center midpoint looks plausible.
+- [x] Keep connector path/axis/shape, stiffness, slip, fastener count, demand/capacity assessment, PASS/FAIL, load transfer, and whole-house response unavailable in this location-readiness gate.
+- [x] Add deterministic unit tests and production-browser acceptance.
+- [x] Confirm CI run `33949048522` and browser run `33949048519` green; browser artifact ID `9964232114`.
 
-### Later Phase 4 topology layers
-- [ ] Add explicit connection mechanics only after joint-location readiness is reviewable and required mechanics-driving quantities are sourced.
-- [ ] Progress bracing → anchorage → storm protection one gated layer at a time.
+### Bracing topology-readiness — COMPLETE FOR CURRENT TOPOLOGY SCOPE
+- [x] Define a bracing topology-readiness contract referencing an active staged `brace` by stable ID.
+- [x] Require two distinct caller-selected active connection records explicitly incident to the selected brace before topology can become `review_ready_topology`.
+- [x] Prove visible diagonal geometry never creates a missing second brace end or physical joint location.
+- [x] Keep axial force, tension/compression state, stiffness, effective length, slenderness, buckling, racking contribution, demand/capacity, utilization, PASS/FAIL, and load-path adequacy unavailable.
+- [x] Preserve current canonical `synthetic-brace-north-west` as intentionally topology-incomplete: one explicit incident connection → `load_path_incomplete`, `1 / 2` selected ends.
+- [x] Add QA-only augmented test fixture proving two separately declared ends can reach topology review while mechanics remain unavailable.
+- [x] Wire Bracing review into the Small House chamber without adding a fake second end.
+- [x] Production-browser acceptance proves incomplete-load-path semantics and invalidation below `bracing`.
+- [x] Confirm RPE CI run `33949445089` and browser run `33949445200` green; browser artifact ID `9964350351`.
+
+### Anchorage readiness — CURRENT GATE
+- [ ] Define anchorage topology/interface readiness referencing an active staged `anchor` by stable ID.
+- [ ] Preserve anchor geometry/orientation/material/mass/provenance exactly from the stage snapshot.
+- [ ] Require explicit active anchor-to-support topology connection; do not infer attachment from proximity/rendered touching geometry.
+- [ ] Confirm the opposite endpoint is an active intended support.
+- [ ] Keep physical attachment point, bolt/rod properties, embedment, base plate, pedestal/footing, concrete/soil properties, uplift/sliding/overturning mechanics, demand/capacity, utilization, and PASS/FAIL unavailable.
+- [ ] Add deterministic unit tests and production-browser acceptance.
+
+### Later Phase 4 topology/mechanics layers
+- [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
+- [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
+- [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
+- [ ] Add storm-protection restraint as a separate optional structural variable.
 - [ ] Add controlled A/B house comparison proving geometry is held constant while exactly one declared structural variable changes.
 - [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
 
@@ -110,6 +133,7 @@
 - [x] Keep Phase 4 orientation intermediate RPE CI failure at commit `c089e0e4423a2853a50b41066e1320fd1fbbe437` visible; later tests/build were skipped rather than waived.
 - [x] Keep Roof readiness RPE CI run `33942967313` visible: exact floating-point assertion expected `9.84` while raw multiplication returned `9.839999999999998`; contract unchanged, test repaired with `1e-12` tolerance.
 - [x] Keep Roof Browser Acceptance Patch run `33943182691` visible: one-shot text anchor matched twice and failed before changing acceptance code; repaired with a unique multiline anchor.
+- [x] Keep Bracing Readiness Patch run `33949368220` visible: deterministic patch and `git diff --check` passed, but GitHub correctly refused bot modification of a workflow file without workflow permission. No permission escalation was used; the write boundary was narrowed and repaired run `33949425974` passed.
 
 ## Later mechanics gates — not to be invented early
 - [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
