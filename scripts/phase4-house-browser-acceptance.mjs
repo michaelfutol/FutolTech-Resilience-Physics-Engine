@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.9.0",
+  schemaVersion: "0.10.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -48,6 +48,7 @@ const record = {
     "Connection joint-location readiness preserves topology and accepts only an explicit caller-declared global joint point; it never infers midpoint/intersection/touching geometry and does not calculate connection mechanics.",
     "Bracing topology readiness requires two distinct explicit brace-end connection records; visible diagonal geometry cannot create a missing end, physical joint point, stiffness, axial force, buckling model, racking contribution, capacity, or adequacy verdict.",
     "Anchorage interface readiness identifies only an explicit anchor-to-primary-support topology relationship; it does not infer the physical attachment point, bolt/rod, embedment, base plate, pedestal/footing, concrete/soil properties, reactions, resistance, capacity, or adequacy.",
+    "Storm-protection topology readiness requires two distinct explicit incident connection records to two distinct active opposite endpoint components; visible strap geometry cannot create a missing end, attachment point, preload, stiffness, demand, capacity, PASS/FAIL, or whole-house benefit.",
   ],
 };
 
@@ -72,6 +73,7 @@ try {
   await waitForBodyText(page, "Connection joint-location readiness");
   await waitForBodyText(page, "Bracing topology readiness");
   await waitForBodyText(page, "Anchorage interface readiness");
+  await waitForBodyText(page, "Storm Protection restraint topology readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -79,6 +81,7 @@ try {
   await waitForBodyText(page, "Connection mechanics: NO");
   await waitForBodyText(page, "Bracing mechanics: NO");
   await waitForBodyText(page, "Anchorage mechanics: NO");
+  await waitForBodyText(page, "Storm protection mechanics: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
@@ -86,6 +89,7 @@ try {
   record.checks.wallExposureReadinessPanelVisible = true;
   record.checks.bracingTopologyReadinessPanelVisible = true;
   record.checks.anchorageInterfaceReadinessPanelVisible = true;
+  record.checks.stormProtectionTopologyReadinessPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -375,6 +379,41 @@ try {
   record.checks.anchoragePhysicalAttachmentNotInferred = true;
   record.checks.anchorageMechanicsRemainUnavailable = true;
 
+  // Storm Protection topology readiness: canonical strap has one explicit roof-side relationship only.
+  await stage.selectOption("storm_protection");
+  await page.getByLabel("Storm protection member", { exact: true }).selectOption("synthetic-storm-strap-west");
+  await page.getByLabel("Storm restraint End A connection", { exact: true }).selectOption("synthetic-connection-storm-west");
+  await page.getByLabel("Storm restraint readiness source note", { exact: true }).fill("Synthetic browser QA storm-restraint topology review only");
+  await page.getByLabel("Storm restraint readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Storm restraint topology state: restraint_path_incomplete");
+  await waitForBodyText(page, "Restraint member ID: synthetic-storm-strap-west");
+  await waitForBodyText(page, "Restraint material: UNKNOWN");
+  await waitForBodyText(page, "Restraint mass: UNKNOWN");
+  await waitForBodyText(page, "Explicit selected ends: 1 / 2");
+  await waitForBodyText(page, "Explicit incident relationships: 1");
+  await waitForBodyText(page, "End A connection: synthetic-connection-storm-west");
+  await waitForBodyText(page, "End B connection: UNKNOWN");
+  await waitForBodyText(page, "Physical attachment points: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Inferred attachment points: NONE — PROHIBITED");
+  await waitForBodyText(page, "Storm protection mechanics: NO");
+  await waitForBodyText(page, "Tension / preload / stiffness / slack / elongation: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Wind-uplift demand / restraint force / load sharing: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Fasteners / attachments / member & connection capacity: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Utilization / PASS-FAIL / whole-house improvement: UNKNOWN / NOT EVALUATED");
+  if (await page.locator('input[aria-label*="tension" i], input[aria-label*="preload" i], input[aria-label*="stiffness" i], input[aria-label*="slack" i], input[aria-label*="storm capacity" i], input[aria-label*="restraint force" i]').count()) {
+    fail("Storm Protection topology readiness unexpectedly exposed mechanics/capacity inputs");
+  }
+  record.checks.stormProtectionCanonicalPathIncomplete = true;
+  record.checks.stormProtectionVisibleStrapDoesNotCreateSecondEnd = true;
+  record.checks.stormProtectionMechanicsRemainUnavailable = true;
+
+  // Lowering below storm-protection activation must block retained restraint topology.
+  await stage.selectOption("anchorage");
+  await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
+  await waitForBodyTextAbsent(page, "Restraint member ID: synthetic-storm-strap-west");
+  record.checks.stormProtectionReadinessBlockedBelowActivationStage = true;
+
   // Lowering below anchorage activation must block retained anchor-interface review.
   await stage.selectOption("bracing");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
@@ -424,6 +463,7 @@ try {
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
+  await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
