@@ -4,8 +4,17 @@ This project uses an agent-based development workflow. Agents working on this re
 
 ## Core Philosophy
 - This is an early discovery and visualization tool for low-cost Filipino housing systems.
-- It is NOT a replacement for licensed engineering design, NSCP checks, STAAD/ETABS, or physical testing. All outputs are **conceptual**.
+- It is NOT a replacement for licensed engineering design, NSCP checks, STAAD/ETABS, or physical testing. All outputs are **conceptual** unless a specific evidence layer has been validated and labeled otherwise.
 - Keep the tone practical, engineering-aware, and honest. Do not use AI hype terms.
+
+## Canonical RPE Orchestration Skill
+For substantial architecture, experiment, data, deployment, analytics, observability, diagramming, and security work, follow:
+
+`skills/rpe-scientific-orchestration/SKILL.md`
+
+The preferred stack is:
+
+**GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**
 
 ## Reporting Requirements
 After every meaningful task batch, agents MUST update:
