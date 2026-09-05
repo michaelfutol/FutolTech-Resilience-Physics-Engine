@@ -121,8 +121,11 @@ export function buildGenesisOrderedEventLedger(
     ],
   });
 
-  if (!activated && (collisions.length > 0 || aerodynamicForceApplications.length > 0)) {
-    throw new Error("Cannot record live simulation observations before simulation activation");
+  if (!activated && collisions.length > 0) {
+    throw new Error("Cannot record a collision before simulation activation");
+  }
+  if (!activated && aerodynamicForceApplications.length > 0) {
+    throw new Error("Cannot record aerodynamic force application before simulation activation");
   }
 
   for (const application of aerodynamicForceApplications) {
