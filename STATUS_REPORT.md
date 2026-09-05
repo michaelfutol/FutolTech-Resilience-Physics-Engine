@@ -11,7 +11,7 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine, a completed Phase 3 Gen
 
 Phase 4 has progressed through:
 
-**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage 🔵 → storm protection → controlled A/B comparison**
+**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage interface-readiness ✅ → storm protection 🔵 → controlled A/B comparison**
 
 The older Typhoon playback remains conceptual and is not promoted to calculated physics.
 
@@ -85,7 +85,23 @@ Evidence boundaries remain explicit: analytical calculations are not solver/CFD 
 - A QA-only augmented test fixture with a separately declared second brace-end connection can reach topology review only; mechanics still remain unavailable.
 - RPE CI run `33949445089` passed install, lint, strict TypeScript, all regressions, and production build.
 - Production-browser run `33949445200` passed Genesis + Phase 4 acceptance; browser artifact ID `9964350351`.
-- Failed patch run `33949368220` is retained honestly: its deterministic patch and `git diff --check` passed, but GitHub correctly refused a bot workflow-file write without workflow permission. No permission escalation was used. The bot write boundary was narrowed and repaired run `33949425974` succeeded.
+
+### Anchorage interface-readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- An active staged `anchor` is referenced by stable ID and preserved exactly from the validated stage snapshot.
+- An explicit active anchor-to-`primary_support` connection is required; no interface is inferred from marker centers, midpoint, nearest faces, rendered touching/intersection, or apparent ground contact.
+- Canonical production-browser case: `synthetic-anchor-nw → synthetic-connection-anchor-nw → synthetic-support-nw` reaches `review_ready_interface` only.
+- The canonical anchor material, mass, and topology capacity remain UNKNOWN because the staged fixture declares them `null`.
+- Physical attachment point, bolt/rod type or diameter, embedment, base plate, weld/fastener details, pedestal/footing, concrete strength, soil model, bearing/friction, uplift/shear reactions, sliding/overturning resistance, pullout/breakout, demand/capacity, utilization, and PASS/FAIL remain UNKNOWN / NOT EVALUATED.
+- `mechanicsAvailable` and capacity-assessment availability remain false; this gate is `rpe_input_review`, not structural-response evidence.
+- RPE CI run `33950699730` passed install, lint, strict TypeScript, all regressions, and production build.
+- Production-browser run `33950699741` passed Genesis + Phase 4 staged-house acceptance; browser artifact ID `9964743865`.
+
+### Storm Protection restraint topology-readiness — CURRENT GATE
+- Canonical staged members `synthetic-storm-strap-west` / `synthetic-storm-strap-east` are `storm_protection_member` markers with material and mass deliberately unknown.
+- Each canonical strap currently has only one explicit storm-protection relationship, from the strap to its associated roof panel.
+- No second/lower restraint connection to a support, anchor, ground interface, or other structural endpoint is declared.
+- Therefore the correct first canonical result must be `restraint_path_incomplete`, not a completed tie-down/restraint path.
+- The upcoming gate must not infer a second end, physical attachment point, tension/preload, stiffness, slack/elongation, member strength, fastener details, roof uplift demand, restraint force, load sharing, capacity, utilization, PASS/FAIL, or whole-house improvement from visible strap geometry.
 
 ## Engine integration ladder
 
@@ -101,15 +117,17 @@ OpenSees-class structural coupling and one OpenFOAM CFD workflow are mandatory R
 - Final Phase 2 manual browser visual acceptance remains outstanding.
 - Phase 4 still has no whole-house wind performance result.
 - No bracing structural mechanics/adequacy result exists yet; the current canonical brace is intentionally topology-incomplete.
-- No anchorage uplift/sliding/overturning mechanics exist yet.
-- No storm-protection structural mechanics exist yet.
+- No anchorage uplift/sliding/overturning mechanics exist; Anchorage currently proves interface identity only.
+- No storm-protection structural mechanics or complete canonical restraint path exists yet.
 - No global frame/load-path solver result, OpenSees result, CalculiX result, OpenFOAM CFD result, or physical-test evidence has yet been generated for the Phase 4 house.
 
-## Exact next gated task — Anchorage readiness
+## Exact next gated task — Storm Protection restraint topology-readiness
 
-Define and test a separate anchorage topology/interface readiness contract referencing an active staged `anchor` by stable ID and an explicit active anchor-to-support connection. Preserve unknown material/mass/capacity as unknown. Do not infer bolt diameter, embedment, base plate, pedestal/footing geometry, concrete strength, soil properties, attachment coordinates, uplift/sliding reactions, demand/capacity, utilization, or PASS/FAIL from marker geometry or proximity.
+Define and test a separate `storm_protection_member` topology-readiness contract. Require two distinct explicit active incident connection records before the member can be considered a topology-complete restraint. Preserve the current canonical west strap as intentionally incomplete because it has only the explicit roof-side relationship `synthetic-connection-storm-west → synthetic-roof-west` and no second restraint endpoint.
 
-Only after the interface identity is unit-tested and accepted in real Chromium should anchorage mechanics be defined.
+Visible strap extent, crossing, proximity, or apparent contact with roof/walls/supports/anchors/ground must never manufacture the missing second end. Keep physical attachment coordinates, fastener details, tension/preload, slack/elongation, stiffness, member strength, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house improvement unavailable in this first gate.
+
+Only after this topology gate is unit-tested and accepted in real Chromium should storm-restraint mechanics or controlled A/B benefit calculations be defined.
 
 ## Evidence doctrine
 
