@@ -16,31 +16,72 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch-live-aerodynamic-force:
+  live-browser-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Checkout canonical branch
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ref: lum-rpe-takeover
+          node-version: 22
+          cache: npm
 
-      - name: Apply inspectable live aerodynamic force patch
-        run: python scripts/patch-live-aero-force.py
+      - name: Install application dependencies
+        run: npm ci
 
-      - name: Commit live force wiring if changed
+      - name: Install and audit isolated browser harness
         run: |
-          git config user.name "RPE Live Force Patch Carrier"
-          git config user.email "actions@users.noreply.github.com"
-          git add src/components/Viewport3D.tsx scripts/genesis-browser-acceptance.mjs
-          if git diff --cached --quiet; then
-            echo "Live aerodynamic force wiring already present."
-            exit 0
-          fi
-          git diff --cached --check
-          git commit -m "Wire live post-release aerodynamic force"
-          git push origin HEAD:lum-rpe-takeover
+          rm -rf /tmp/rpe-browser-harness
+          mkdir -p /tmp/rpe-browser-harness
+          cp scripts/genesis-browser-acceptance.mjs /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
+          cd /tmp/rpe-browser-harness
+          npm init -y
+          npm install --save-exact playwright@1.62.1
+          npm audit --audit-level=high
+          npx playwright install --with-deps chromium
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Start production application
+        run: |
+          npm start -- -H 127.0.0.1 > /tmp/rpe-next.log 2>&1 &
+          echo $! > /tmp/rpe-next.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              echo "RPE browser target is ready."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "RPE application did not become ready."
+          cat /tmp/rpe-next.log
+          exit 1
+
+      - name: Run real Chromium Genesis acceptance
+        env:
+          RPE_BASE_URL: http://127.0.0.1:3000
+          RPE_BROWSER_ACCEPTANCE_OUTPUT: genesis-browser-acceptance.json
+          RPE_BROWSER_ACCEPTANCE_SCREENSHOT: genesis-browser-acceptance.png
+        run: node /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
+
+      - name: Show application log on failure
+        if: failure()
+        run: cat /tmp/rpe-next.log || true
+
+      - name: Upload browser acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-browser-acceptance-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            genesis-browser-acceptance.json
+            genesis-browser-acceptance.png
