@@ -115,19 +115,44 @@
 - [x] Add deterministic regression coverage and production-browser acceptance including stage invalidation.
 - [x] Confirm RPE CI run `33959003440` and production-browser run `33959003346` green; browser artifact ID `9967337114`.
 
-### Analytical surface wind action — CURRENT GATE
-- [ ] Define a Phase 4 surface wind-action contract referencing one active staged wall or roof panel by stable ID.
-- [ ] Require explicit finite air density, wind speed, effective wind area, signed pressure/force coefficient basis, global action direction, provenance, and verification; no defaults.
-- [ ] Keep geometry-only panel face area distinct from caller-declared effective wind area.
-- [ ] Calculate only a transparent first-slice analytical action such as `q = 0.5ρV²`, signed scalar surface action from explicit coefficient inputs, and an explicit global force vector.
-- [ ] Do not infer code pressure coefficients, roof/wall zones, internal pressure, gust/topographic factors, shielding, tributary load paths, joint reactions, or connection demand.
-- [ ] Require the global action direction to be explicit and finite in the first slice rather than silently deriving it from rendered panel normal/scene geometry.
-- [ ] Add regressions proving missing/invalid inputs block calculation and unrelated geometry cannot manufacture aerodynamic inputs.
-- [ ] Wire one synthetic wall/roof QA case into the browser with strong `RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE` labeling.
-- [ ] Production-browser acceptance must prove pressure/load vector output while downstream connection/reaction/capacity claims remain unavailable.
+### Analytical surface wind action — COMPLETE FOR CURRENT SINGLE-SURFACE SCOPE
+- [x] Define a Phase 4 surface wind-action contract referencing one active staged wall or roof panel by stable ID.
+- [x] Require explicit finite air density, wind speed, effective wind area, signed coefficient basis, global action direction, provenance, and verification; no defaults.
+- [x] Keep geometry-only panel face area distinct from caller-declared effective wind area.
+- [x] Calculate only `q = 0.5ρV²`, signed scalar surface action, and explicit global force vector.
+- [x] Do not infer code pressure coefficients, roof/wall zones, internal pressure, gust/topographic factors, shielding, tributary load paths, joint reactions, or connection demand.
+- [x] Require global action direction explicitly rather than silently deriving it from rendered panel normal/scene geometry.
+- [x] Add regressions proving missing/invalid inputs block calculation and unrelated geometry cannot manufacture aerodynamic inputs.
+- [x] Wire the synthetic north-wall QA case into the browser with `RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE` labeling.
+- [x] Production-browser acceptance proves `240 Pa → -192 Pa → -960 N → (0,0,-960) N` while downstream mechanics remain unavailable.
+- [x] Confirm RPE CI `33959585363`, production Chromium `33959585360`, browser artifact `9967518320`.
+
+### Controlled multi-surface analytical load set — COMPLETE FOR CURRENT VECTOR-ALGEBRA SCOPE
+- [x] Reuse the accepted single-surface calculator for every load-set record; no second aerodynamic formula path.
+- [x] Require at least two unique active wall/roof surface IDs; duplicate surface IDs are blocked in schema `0.1.0`.
+- [x] Block the entire set if any individual action is invalid/not ready; never publish a partial sum.
+- [x] Preserve/canonicalize individual results by stable surface ID so array order is not engineering meaning.
+- [x] Calculate only algebraic global force-vector sum and pure Euclidean magnitude.
+- [x] Canonical QA pair: north `(0,0,-960) N` + east `(480,0,0) N` → `(480,0,-960) N`, magnitude `1073.313 N`.
+- [x] Keep reaction, base shear, uplift/sliding, racking, connection demand, moment/torque, load-path distribution, and PASS/FAIL unavailable.
+- [x] Label live evidence `RPE_ANALYTICAL / VECTOR ALGEBRA ONLY / NON-CFD / NON-CODE-COMPLIANCE`.
+- [x] Prove lowering below wall activation blocks the full load set and clears the vector sum.
+- [x] Confirm core RPE CI `33960418016`, permanent RPE CI `33960633262`, production Chromium `33960633248`, browser artifact `9967837588`.
+
+### Explicit surface force-application points — CURRENT GATE
+- [ ] Define mapping contract from one ready analytical surface action to a caller-declared global application point.
+- [ ] Require exact stable surface ID match, finite `(x,y,z)` point, provenance, and verification.
+- [ ] Preserve the source force vector exactly; mapping must not mutate/recalculate aerodynamic action.
+- [ ] Never infer geometric centroid, rendered panel center, center of pressure, joint, support, anchor, nearest frame member, or solver node.
+- [ ] Keep moment/torque unavailable until a separate reference-point/axis contract exists.
+- [ ] Keep reaction, base shear, uplift/sliding, racking, connection demand, load-path distribution, and PASS/FAIL unavailable.
+- [ ] Add regressions for invalid coordinates, ID mismatch, blocked source action, geometry non-inference, copying/no aliasing, and exact force preservation.
+- [ ] Wire a deliberately non-centroid north-wall QA application point into production browser acceptance.
+- [ ] Browser must prove `APPLICATION POINT BASIS: CALLER_DECLARED_GLOBAL_POINT` plus center-of-pressure/solver-node/moment/reaction/PASS-FAIL all N/A and stale-stage clearing.
 
 ### Later Phase 4 mechanics layers
-- [ ] Extend surface wind action to controlled multi-surface house loading only after the first surface contract is accepted.
+- [ ] Add an explicit moment-reference contract only after force application points exist and moment reporting is justified.
+- [ ] Build a traceable structural load-case/solver-node adapter rather than inferring tributary paths from scene geometry.
 - [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
 - [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
 - [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
