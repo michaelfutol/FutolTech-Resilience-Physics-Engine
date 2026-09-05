@@ -6,11 +6,11 @@ Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
 Phase 4 — **Small House Wind System** — is active. The gated progression now stands at:
 
-**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage 🔵 → storm protection → controlled A/B house comparison**
+**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage interface-readiness ✅ → storm protection 🔵 → controlled A/B house comparison**
 
-The exact next layer is now **Anchorage readiness**.
+The exact next layer is now **Storm Protection restraint topology-readiness**.
 
-## What is complete before Anchorage
+## What is complete before Storm Protection
 
 ### Primary supports
 - Reviewable staged support identity and geometry.
@@ -51,63 +51,82 @@ The exact next layer is now **Anchorage readiness**.
 - A QA-only augmented unit-test fixture with a separately declared second brace-end connection can reach `review_ready_topology`, but mechanics still remain unavailable.
 - RPE CI run `33949445089` passed install, lint, strict TypeScript, all regressions, and production build.
 - Production-browser run `33949445200` passed Genesis + Phase 4 acceptance; browser artifact ID `9964350351`.
-- One-shot patch run `33949368220` remains intentionally visible as a tooling failure: the GitHub bot was correctly refused permission to modify a workflow file. The patch itself and `git diff --check` passed. The write boundary was repaired without escalating token permissions; run `33949425974` then succeeded.
 
-## Exact next gated batch — Anchorage readiness
+### Anchorage interface-readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- An active staged `anchor` is referenced by stable ID and preserved exactly from the staged specimen.
+- Review requires an explicit active anchor-to-`primary_support` topology connection; marker position, proximity, rendered touching geometry, or apparent ground contact cannot create the interface.
+- Canonical browser case: `synthetic-anchor-nw → synthetic-connection-anchor-nw → synthetic-support-nw`.
+- The staged `materialId`, `massKg`, and connection `capacityN` remain UNKNOWN where the fixture declares `null`.
+- Physical attachment point, bolt/rod type and diameter, embedment, base plate, weld/fastener details, pedestal/footing, concrete strength, soil model, bearing/friction, uplift/shear reactions, sliding/overturning resistance, pullout/breakout, demand/capacity, utilization, and PASS/FAIL remain unavailable.
+- RPE CI run `33950699730` passed install, lint, strict TypeScript, all regressions, and production build.
+- Production-browser run `33950699741` passed Genesis + Phase 4 acceptance; browser artifact ID `9964743865`.
 
-Define a separate **anchorage topology/interface readiness contract** before any uplift, sliding, overturning, soil, footing, pedestal, or anchor-capacity calculation.
+## Exact next gated batch — Storm Protection restraint topology-readiness
+
+Define a separate **storm-protection restraint topology-readiness contract** before any strap/sling tension, preload, stiffness, strength, load sharing, wind/uplift demand, capacity, or A/B performance claim.
+
+### Canonical fixture truth
+
+The current synthetic house has:
+- `synthetic-storm-strap-west` and `synthetic-storm-strap-east` as staged `storm_protection_member` markers;
+- each strap has `materialId: null` and `massKg: null`;
+- `synthetic-storm-strap-west` has one explicit topology relationship only: `synthetic-connection-storm-west → synthetic-roof-west`;
+- `synthetic-storm-strap-east` likewise has one explicit relationship only to `synthetic-roof-east`;
+- no second/lower restraint endpoint is declared to a support, anchor, ground interface, or other structural component.
+
+Therefore the honest first result for the canonical west strap must be **`restraint_path_incomplete`**, not a completed tie-down/restraint path.
 
 ### Required first-slice behavior
 
-- Reference an active staged `anchor` component by stable object ID at the `anchorage` stage or later.
-- Preserve the staged anchor marker's geometry/orientation/material/mass/provenance exactly as declared.
-- Reference the explicit active anchor-to-support topology relationship by connection ID.
-- Confirm the opposite endpoint is the intended active support; do not infer an attachment from proximity or rendered touching geometry.
-- Require explicit provenance/verification for the readiness review.
-- Keep the physical attachment point UNKNOWN until a later explicit coordinate/interface contract supplies it.
-- Return input-review evidence only; do not calculate structural adequacy.
+- Reference an active staged `storm_protection_member` by stable ID at `storm_protection` stage.
+- Preserve its staged center/size/orientation/material/mass/source/verification exactly.
+- Enumerate only explicit active topology relationships incident to the selected member.
+- Require two distinct caller-selected incident connection records before topology can become review-ready.
+- Keep both endpoint component identities explicit and active; never derive an endpoint from the rendered line/strap extent.
+- Missing second end must remain missing even when the strap visibly crosses or appears to touch roof, wall, support, anchor, or ground geometry.
+- Require readiness provenance/verification.
+- Return topology-review evidence only; do not calculate structural adequacy or restraint effectiveness.
 
-### Permanent anti-inference rules for the first Anchorage gate
+### Permanent anti-inference rules
 
-A visible anchor marker, support, pedestal-looking object, or ground plane must **not** silently create any of the following:
-- bolt/rod type or diameter;
-- embedded length;
-- base plate geometry;
-- weld or fastener details;
-- pedestal dimensions/material;
-- footing dimensions/depth;
-- concrete strength;
-- soil bearing/friction/passive resistance;
-- pull-out/cone breakout/bond model;
-- shear/sliding/friction model;
-- uplift reaction;
-- overturning resistance;
-- anchor demand/capacity;
-- utilization or PASS/FAIL.
-
-The current synthetic fixture's `capacityN: null` must remain `null`.
+Visible strap/sling geometry must **not** silently create:
+- a second connection;
+- attachment coordinates;
+- clamp/fastener/bolt/weld details;
+- strap section/material strength;
+- initial tension or preload;
+- slack/elongation;
+- axial stiffness;
+- force distribution/load sharing;
+- roof uplift demand;
+- restraint force;
+- connection or member capacity;
+- utilization or PASS/FAIL;
+- whole-house wind-resistance improvement.
 
 ### Required regression/browser proof
 
-1. Stage before `anchorage` → readiness blocked.
-2. Missing/non-active anchor ID → blocked.
-3. Active non-anchor component → blocked.
-4. Missing/non-active or unrelated attachment connection → blocked.
-5. Explicit anchor→support topology relationship → reviewable topology/interface identity only.
-6. Material, mass, connection capacity, and physical attachment point remain UNKNOWN where the specimen says `null`/undeclared.
-7. No uplift/sliding/overturning/capacity/PASS-FAIL inputs or results appear.
-8. Lowering below `anchorage` invalidates retained review state.
+1. Stage before `storm_protection` → blocked.
+2. Missing/non-active storm-protection member → blocked.
+3. Active wrong component kind → blocked.
+4. Current west strap exposes exactly one explicit incident storm relationship.
+5. Selecting that single relationship yields `restraint_path_incomplete` / `1 / 2`, not a completed restraint path.
+6. No visible crossing/touching geometry generates the second end.
+7. QA-only augmented fixture with a separately declared second incident connection can reach `review_ready_topology` while mechanics remain unavailable.
+8. Material/mass/capacity remain UNKNOWN where the staged records say `null`.
+9. No tension/preload/stiffness/load/capacity/PASS-FAIL controls or results appear.
+10. Lowering below `storm_protection` invalidates retained restraint review.
 
-Only after this interface gate is unit-tested and accepted in real Chromium should RPE define anchorage mechanics.
+Only after this topology gate is unit-tested and accepted in real Chromium should any storm-restraint mechanics be defined.
 
-## After Anchorage readiness
+## After Storm Protection topology-readiness
 
-Continue in roadmap order:
+Continue deliberately:
 
-1. Define anchorage mechanics only when actual attachment geometry, support/base interface, material properties, ground/foundation model, loads, and applicable failure modes are explicitly sourced.
-2. Add storm-protection restraint as a separate optional structural variable, including the future pedestal-lock / sling / Spiderweb concepts only through explicit connection and capacity data.
-3. Add controlled A/B house comparison with automated proof that unrelated geometry and inputs are unchanged.
-4. Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
+1. Define storm-restraint mechanics only when the complete two-ended path, physical attachment geometry, restraint material/section, stiffness/preload/slack model, loads, and failure modes are explicitly sourced.
+2. Define anchorage/bracing/connection mechanics only through their own explicit mechanics gates; topology completion alone does not authorize them.
+3. Add the controlled A/B house comparison with automated proof that unrelated geometry and inputs are unchanged.
+4. Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one declared structural variable changed.
 
 Do not jump directly to a complete animated house-failure sequence.
 
