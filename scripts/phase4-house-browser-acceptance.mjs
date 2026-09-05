@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.5.0",
+  schemaVersion: "0.6.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -44,6 +44,7 @@ const record = {
     "The isolated cantilever calculator is an RPE analytical formula benchmark only; it does not evaluate strength, PASS/FAIL, whole-house load path, solver response, or code compliance.",
     "Floor/ring readiness is member/topology review only; schema v0.1.0 deliberately accepts no joint coordinates and performs no global frame calculation.",
     "Wall-panel readiness derives box-face geometry only from an explicitly declared local normal; it does not define effective wind area, pressure coefficients, net pressure, stiffness, fastener capacity, or wind resistance.",
+    "Roof-panel readiness preserves rotated geometry and explicit local-normal/exposed-face declarations only; it does not define roof zones, effective wind area, pressure coefficients, uplift force, connection demand/capacity, or wind resistance.",
   ],
 };
 
@@ -64,14 +65,17 @@ try {
   await waitForBodyText(page, "Primary-support mechanics readiness");
   await waitForBodyText(page, "Floor/ring-frame member readiness");
   await waitForBodyText(page, "Wall-panel geometry / exposure readiness");
+  await waitForBodyText(page, "Roof-panel geometry / exposure readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
+  await waitForBodyText(page, "Uplift calculation: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
   record.checks.floorRingReadinessPanelVisible = true;
   record.checks.wallExposureReadinessPanelVisible = true;
+  record.checks.roofExposureReadinessPanelVisible = true;
 
   const stage = page.getByLabel("Phase 4 stage", { exact: true });
   if ((await stage.count()) !== 1) fail(`Expected one Phase 4 stage selector; found ${await stage.count()}`);
@@ -232,6 +236,47 @@ try {
   record.checks.wallEffectiveWindAreaRemainsUndefined = true;
   record.checks.wallWindActionCalculationBlocked = true;
 
+  // Roof exposure readiness: rotated roof geometry + explicit local normal/exposed-face declaration only.
+  await stage.selectOption("roof");
+  await page.getByLabel("Roof panel component", { exact: true }).selectOption("synthetic-roof-west");
+  await page.getByLabel("Roof panel normal axis", { exact: true }).selectOption("local_y");
+  await page.getByLabel("Roof exposed face", { exact: true }).selectOption("positive_normal");
+  await page.getByLabel("Roof exposure class", { exact: true }).selectOption("exterior");
+  await page.getByLabel("Roof normal axis source note", { exact: true }).fill("Synthetic browser QA local-y roof normal declaration only");
+  await page.getByLabel("Roof normal axis verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Roof exposure source note", { exact: true }).fill("Synthetic browser QA exterior positive-face roof declaration only");
+  await page.getByLabel("Roof exposure verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Roof readiness source note", { exact: true }).fill("Synthetic browser QA roof exposure readiness only");
+  await page.getByLabel("Roof readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Roof readiness state: review_ready");
+  await waitForBodyText(page, "Roof ID: synthetic-roof-west");
+  await waitForBodyText(page, "Rotation(rad): (0, 0, 0.35)");
+  await waitForBodyText(page, "Declared normal axis: local_y");
+  await waitForBodyText(page, "Declared exposed face: positive_normal");
+  await waitForBodyText(page, "Exposure class: exterior");
+  await waitForBodyText(page, "Geometric box-face area: 9.840000 m² — GEOMETRY ONLY");
+  await waitForBodyText(page, "Roof zone: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Effective wind area: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Wind velocity / density / Cp / internal pressure / net pressure / uplift force: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Panel stiffness / strength / connection demand / connection capacity: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Uplift calculation: NO");
+  if (await page.locator('input[aria-label*="roof zone" i], input[aria-label*="pressure coefficient" i], input[aria-label*="uplift" i], input[aria-label*="effective wind area" i]').count()) {
+    fail("Roof readiness unexpectedly exposed aerodynamic/uplift calculation inputs");
+  }
+  record.checks.roofExposureExplicitInputsAccepted = true;
+  record.checks.roofRotatedGeometryPreserved = true;
+  record.checks.roofGeometricFaceAreaVerified = true;
+  record.checks.roofZoneAndEffectiveWindAreaRemainUndefined = true;
+  record.checks.roofUpliftCalculationBlocked = true;
+
+  // Lowering below roof activation must block retained roof assumptions while walls remain active.
+  await stage.selectOption("walls");
+  await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
+  await waitForBodyTextAbsent(page, "Roof ID: synthetic-roof-west");
+  await waitForBodyText(page, "Wall readiness state: review_ready");
+  record.checks.roofReadinessBlockedBelowActivationStage = true;
+
   // Lowering below wall activation must block retained wall assumptions.
   await stage.selectOption("floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
@@ -252,6 +297,7 @@ try {
   await waitForBodyText(page, "Cantilever analytical result: NOT AVAILABLE");
   await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
+  await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
