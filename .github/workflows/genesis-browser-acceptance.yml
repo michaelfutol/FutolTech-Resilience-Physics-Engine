@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/genesis-browser-acceptance.yml
       - scripts/genesis-browser-acceptance.mjs
+      - scripts/phase4-house-browser-acceptance.mjs
       - src/components/Viewport3D.tsx
       - src/components/GenesisEventLedgerPanel.tsx
       - src/components/GenesisAerodynamicForceDriver.tsx
@@ -46,6 +47,7 @@ jobs:
           rm -rf /tmp/rpe-browser-harness
           mkdir -p /tmp/rpe-browser-harness
           cp scripts/genesis-browser-acceptance.mjs /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
+          cp scripts/phase4-house-browser-acceptance.mjs /tmp/rpe-browser-harness/phase4-house-browser-acceptance.mjs
           cd /tmp/rpe-browser-harness
           npm init -y
           npm install --save-exact playwright@1.62.1
@@ -77,6 +79,13 @@ jobs:
           RPE_BROWSER_ACCEPTANCE_SCREENSHOT: genesis-browser-acceptance.png
         run: node /tmp/rpe-browser-harness/genesis-browser-acceptance.mjs
 
+      - name: Run real Chromium Phase 4 staged-house acceptance
+        env:
+          RPE_BASE_URL: http://127.0.0.1:3000
+          RPE_PHASE4_BROWSER_ACCEPTANCE_OUTPUT: phase4-house-browser-acceptance.json
+          RPE_PHASE4_BROWSER_ACCEPTANCE_SCREENSHOT: phase4-house-browser-acceptance.png
+        run: node /tmp/rpe-browser-harness/phase4-house-browser-acceptance.mjs
+
       - name: Show application log on failure
         if: failure()
         run: cat /tmp/rpe-next.log || true
@@ -85,8 +94,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: genesis-browser-acceptance-${{ github.sha }}
+          name: browser-acceptance-${{ github.sha }}
           if-no-files-found: warn
           path: |
             genesis-browser-acceptance.json
             genesis-browser-acceptance.png
+            phase4-house-browser-acceptance.json
+            phase4-house-browser-acceptance.png
