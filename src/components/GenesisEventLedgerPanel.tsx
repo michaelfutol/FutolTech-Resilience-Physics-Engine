@@ -41,7 +41,7 @@ export default function GenesisEventLedgerPanel({ events }: GenesisEventLedgerPa
         ))}
       </div>
       <p className="mt-2 text-[10px] text-slate-500">
-        Collision-enter records are event observations only. They do not establish impact force, energy, damage, contact properties, solver authority, CFD authority, or physical-test evidence.
+        Aerodynamic force-application records are RPE simulation observations driven by the explicit simplified analytical contract; they are not CFD, solver, code, material-test, or physical-test evidence. Collision-enter records likewise do not establish impact force, energy, damage, or contact properties.
       </p>
     </section>
   );
