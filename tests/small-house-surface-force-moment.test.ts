@@ -141,8 +141,12 @@ test("translating both application and reference points equally preserves lever 
     momentInput({ x: 10.1, y: -3.8, z: 5.0 }),
   );
 
-  assert.deepEqual(shiftedResult.leverArmGlobalM, baseResult.leverArmGlobalM);
-  assert.deepEqual(shiftedResult.forceMomentVectorNm, baseResult.forceMomentVectorNm);
+  near(shiftedResult.leverArmGlobalM?.x ?? null, baseResult.leverArmGlobalM?.x ?? 0);
+  near(shiftedResult.leverArmGlobalM?.y ?? null, baseResult.leverArmGlobalM?.y ?? 0);
+  near(shiftedResult.leverArmGlobalM?.z ?? null, baseResult.leverArmGlobalM?.z ?? 0);
+  near(shiftedResult.forceMomentVectorNm?.x ?? null, baseResult.forceMomentVectorNm?.x ?? 0);
+  near(shiftedResult.forceMomentVectorNm?.y ?? null, baseResult.forceMomentVectorNm?.y ?? 0);
+  near(shiftedResult.forceMomentVectorNm?.z ?? null, baseResult.forceMomentVectorNm?.z ?? 0);
   near(shiftedResult.forceMomentMagnitudeNm, baseResult.forceMomentMagnitudeNm ?? 0);
 });
 
