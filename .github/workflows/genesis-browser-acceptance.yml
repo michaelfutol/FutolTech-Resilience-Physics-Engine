@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 clean-head browser checkpoint: Bracing topology acceptance schema 0.8.0; Anchorage is next.
+# Phase 4 browser contract includes Anchorage interface acceptance schema 0.9.0.
 
 on:
   push:
@@ -20,6 +20,7 @@ on:
       - src/components/RoofPanelExposureReadinessPanel.tsx
       - src/components/ConnectionJointLocationReadinessPanel.tsx
       - src/components/BracingTopologyReadinessPanel.tsx
+      - src/components/AnchorageInterfaceReadinessPanel.tsx
       - src/data/smallHouseWind/**
       - src/lib/genesis/**
       - src/lib/smallHouseWind/**
@@ -32,6 +33,7 @@ on:
       - src/types/roofPanelExposureReadiness.ts
       - src/types/connectionJointLocationReadiness.ts
       - src/types/bracingTopologyReadiness.ts
+      - src/types/anchorageInterfaceReadiness.ts
       - package.json
       - package-lock.json
   workflow_dispatch:
