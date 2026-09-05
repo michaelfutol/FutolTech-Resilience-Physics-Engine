@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes explicit surface force application-point acceptance schema 0.14.0.
+# Phase 4 browser contract includes explicit force moment acceptance schema 0.15.0.
 
 on:
   push:
@@ -32,6 +32,7 @@ on:
       - src/types/smallHouseSurfaceWindAction.ts
       - src/types/smallHouseMultiSurfaceWindLoadSet.ts
       - src/types/smallHouseSurfaceForceApplicationPoint.ts
+      - src/types/smallHouseSurfaceForceMoment.ts
       - src/types/primarySupportMechanics.ts
       - src/types/primarySupportCantilever.ts
       - src/types/floorRingFrameReadiness.ts
