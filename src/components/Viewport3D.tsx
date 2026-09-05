@@ -46,6 +46,10 @@ import GenesisAerodynamicForceDriver, {
   GENESIS_RAPIER_FIXED_STEP_SECONDS,
 } from "@/components/GenesisAerodynamicForceDriver";
 import GenesisEventLedgerPanel from "@/components/GenesisEventLedgerPanel";
+import SmallHouseWindStageScene from "@/components/SmallHouseWindStageScene";
+import { SYNTHETIC_PHASE4_HOUSE } from "@/data/smallHouseWind/syntheticPhase4House";
+import { materializeSmallHouseWindStage } from "@/lib/smallHouseWind/systemContract";
+import type { SmallHouseWindStage } from "@/types/smallHouseWind";
 import { rpeTokens } from "@/lib/ui/tokens";
 
 interface Viewport3DProps {
@@ -53,13 +57,25 @@ interface Viewport3DProps {
   activeFailureEvent: FailureEvent | null;
 }
 
-type ViewMode = "conceptual" | "genesis_null" | "genesis_panel";
+type ViewMode = "conceptual" | "genesis_null" | "genesis_panel" | "phase4_house";
 type TargetVerificationText = "" | "verified" | "provisional" | "unverified";
 
 type CollisionEvidenceState = {
   inputKey: string;
   snapshot: GenesisLiveSimulationEvidenceSnapshot | null;
 };
+
+const PHASE4_STAGES: SmallHouseWindStage[] = [
+  "empty_envelope",
+  "primary_supports",
+  "floor_ring_frame",
+  "walls",
+  "roof",
+  "connections",
+  "bracing",
+  "anchorage",
+  "storm_protection",
+];
 
 const NULL_HOUSE_RESULT: GenesisNullHouseResult = {
   schemaVersion: GENESIS_SCHEMA_VERSION,
@@ -414,6 +430,7 @@ function VectorInputs({
 
 export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("conceptual");
+  const [phase4Stage, setPhase4Stage] = useState<SmallHouseWindStage>("empty_envelope");
   const [speedText, setSpeedText] = useState("");
   const [directionText, setDirectionText] = useState("");
   const [airDensityText, setAirDensityText] = useState("");
@@ -666,6 +683,11 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const panelEvidenceLog = useMemo(() => (panelExperiment ? buildGenesisEvidenceLog(panelExperiment) : []), [panelExperiment]);
   const simulationReady = releaseGate?.state === "release_ready" && releaseGate.canRelease && dynamicsGate?.state === "simulation_ready" && dynamicsGate.canSimulate;
 
+  const phase4Snapshot = useMemo(
+    () => materializeSmallHouseWindStage(SYNTHETIC_PHASE4_HOUSE, phase4Stage),
+    [phase4Stage],
+  );
+
   const liveEvidenceInputKey = [
     speedText,
     directionText,
@@ -846,6 +868,8 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           <GenesisNullHouse directionDegrees={smokeEnabled ? directionDegrees : null} />
         ) : null}
 
+        {viewMode === "phase4_house" && <SmallHouseWindStageScene snapshot={phase4Snapshot} />}
+
         <Grid infiniteGrid fadeDistance={20} sectionColor="#334155" cellColor="#0f172a" />
         <OrbitControls makeDefault />
       </Canvas>
@@ -855,13 +879,83 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           <button type="button" className="rounded border border-slate-600 px-2 py-1 text-xs" onClick={() => setViewMode("conceptual")}>Conceptual</button>
           <button type="button" className="rounded border border-sky-700 px-2 py-1 text-xs" onClick={() => setViewMode("genesis_null")}>Null House</button>
           <button type="button" className="rounded border border-amber-700 px-2 py-1 text-xs" onClick={() => setViewMode("genesis_panel")}>Panel 001</button>
+          <button type="button" className="rounded border border-emerald-700 px-2 py-1 text-xs" onClick={() => setViewMode("phase4_house")}>Small House</button>
         </div>
         <div className="mt-1">
           {viewMode === "conceptual" && `Conceptual Physics Viewport — ${specimen ? specimen.name : "Loading..."}`}
           {viewMode === "genesis_null" && "Genesis Test Chamber — empty envelope only"}
           {viewMode === "genesis_panel" && "Genesis Test Chamber — analytical gate + explicit Rapier initial conditions"}
+          {viewMode === "phase4_house" && "Phase 4 Test Chamber — staged small-house topology review"}
         </div>
       </div>
+
+      {viewMode === "phase4_house" && (
+        <div className="absolute top-4 right-4 w-96 max-h-[calc(100%-2rem)] overflow-y-auto rounded border border-emerald-900 bg-slate-950/95 p-3 text-xs text-slate-200 shadow-lg">
+          <div className="font-semibold text-emerald-300">Phase 4 · Small House Wind System</div>
+          <p className="mt-1 text-slate-400">Synthetic software-QA geometry only. This is not a Dignity production dimension set and does not establish structural capacity, code compliance, wind resistance, or material performance.</p>
+
+          <label className="mt-3 block text-slate-300">Construction stage
+            <select
+              aria-label="Phase 4 stage"
+              className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+              value={phase4Stage}
+              onChange={(event) => setPhase4Stage(event.target.value as SmallHouseWindStage)}
+            >
+              {PHASE4_STAGES.map((stage) => (
+                <option key={stage} value={stage}>{stage.replaceAll("_", " ")}</option>
+              ))}
+            </select>
+          </label>
+
+          <div className="mt-3 rounded border border-slate-800 bg-slate-900/60 p-2">
+            <div>Fixture: <strong>{SYNTHETIC_PHASE4_HOUSE.label}</strong></div>
+            <div className="mt-1">Stage: <strong>{phase4Snapshot.stage}</strong></div>
+            <div className="mt-1">Structural result: <strong>{phase4Snapshot.structuralResult}</strong></div>
+            <div className="mt-1">Reason: <code>{phase4Snapshot.reason}</code></div>
+            <div className="mt-1">Declared components: <strong>{phase4Snapshot.components.length}</strong></div>
+            <div className="mt-1">Declared topology connections: <strong>{phase4Snapshot.connections.length}</strong></div>
+          </div>
+
+          <div className="mt-3 border-t border-slate-800 pt-2">
+            <div className="font-semibold text-slate-200">Active component identities</div>
+            {phase4Snapshot.components.length === 0 ? (
+              <p className="mt-1 text-slate-500">No physical component exists in this stage. Envelope only.</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {phase4Snapshot.components.map((component) => (
+                  <div key={component.id} className="rounded border border-slate-800 bg-slate-900/55 p-2">
+                    <div className="font-mono text-[10px] text-slate-200">{component.id}</div>
+                    <div className="mt-1 text-[10px] text-slate-400">{component.kind} · stage={component.activationStage} · verification={component.verificationState}</div>
+                    <div className="mt-1 text-[10px] text-slate-500">rotation(rad)=({component.rotationRad.x}, {component.rotationRad.y}, {component.rotationRad.z})</div>
+                    <div className="mt-1 text-[10px] text-slate-500">material={component.materialId ?? "UNKNOWN"} · mass={component.massKg === null ? "UNKNOWN" : `${component.massKg} kg`}</div>
+                    <div className="mt-1 text-[10px] text-slate-600">{component.sourceNote}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 border-t border-slate-800 pt-2">
+            <div className="font-semibold text-slate-200">Active connection topology</div>
+            <p className="mt-1 text-[10px] text-slate-500">Connections list object relationships only. No joint coordinate is declared yet, so RPE deliberately does not draw a physical connection line between member centers.</p>
+            {phase4Snapshot.connections.length === 0 ? (
+              <p className="mt-1 text-slate-500">No connection topology is active in this stage.</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {phase4Snapshot.connections.map((connection) => (
+                  <div key={connection.id} className="rounded border border-slate-800 bg-slate-900/55 p-2 text-[10px]">
+                    <div className="font-mono text-slate-200">{connection.id}</div>
+                    <div className="mt-1 text-slate-400">{connection.fromComponentId} → {connection.toComponentId}</div>
+                    <div className="mt-1 text-slate-500">stage={connection.activationStage} · capacity={connection.capacityN === null ? "UNKNOWN" : `${connection.capacityN} N`} · verification={connection.verificationState}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="mt-3 border-t border-slate-800 pt-2 text-[10px] text-amber-300">VISIBLE ≠ ADEQUATE. This viewer is topology/geometry QA only. Whole-house wind actions, stiffness, reactions, racking, uplift, sliding, failure, and debris are not claimed by this stage viewer.</p>
+        </div>
+      )}
 
       {viewMode === "genesis_null" && (
         <div className="absolute top-4 right-4 w-64 rounded border border-slate-700 bg-slate-950/90 p-3 text-xs text-slate-200 shadow-lg">
