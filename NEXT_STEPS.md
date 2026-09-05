@@ -4,125 +4,120 @@
 
 Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
-Phase 4 — **Small House Wind System** — is active and has now crossed four topology layers with explicit, reviewable evidence boundaries:
+Phase 4 — **Small House Wind System** — is active. The gated progression now stands at:
 
-**primary supports → floor/ring frame → walls → roof**
+**empty envelope ✅ → primary supports ✅ → floor/ring frame ✅ → walls ✅ → roof ✅ → connections ✅ → bracing topology-readiness ✅ → anchorage 🔵 → storm protection → controlled A/B house comparison**
 
-The locked full progression remains:
+The exact next layer is now **Anchorage readiness**.
 
-**empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection**
+## What is complete before Anchorage
 
-The exact next layer is now **Connections**.
-
-## What is complete before Connections
-
-### 1. Primary supports
+### Primary supports
 - Reviewable staged support identity and geometry.
 - Explicit local longitudinal axis and 12 end-restraint DOFs.
 - No inferred section properties.
 - First transparent `rpe_analytical` Euler–Bernoulli cantilever benchmark only.
 - No capacity/PASS/FAIL or whole-house claim.
 
-### 2. Floor/ring frame
-- Reviewable active ring-member identity, geometry/orientation, and endpoint-role semantics.
-- Schema v0.1.0 deliberately accepts no joint coordinates.
+### Floor/ring frame
+- Reviewable ring-member identity, geometry/orientation, and endpoint-role semantics.
+- No inferred physical joint coordinates.
 - No global frame stiffness/load distribution or racking calculation.
 
-### 3. Walls
-- Reviewable wall-panel identity, explicit local normal, exposed-face sign, and exposure class.
-- Geometric box-face area may be calculated only from the explicitly declared local normal.
-- Synthetic browser fixture reports `7.140000 m² — GEOMETRY ONLY`.
-- Effective wind area, pressure coefficients, net pressure, stiffness, and fastener capacity remain undefined.
+### Walls
+- Reviewable wall identity/local normal/exposed face/exposure class.
+- Geometry-only face area is allowed from explicitly declared local normal.
+- Effective wind area, pressure coefficients, net pressure, stiffness, strength, and fastener capacity remain undefined.
 
-### 4. Roof
-- Reviewable roof-panel identity and rotated geometry/orientation.
-- Explicit local normal, exposed-face sign, and exposure class.
-- `synthetic-roof-west` preserves `rotationRad.z = 0.35` and reports `9.840000 m² — GEOMETRY ONLY` for the explicit local-y normal.
-- Roof zone, effective wind area, Cp/internal pressure, net suction/uplift, panel mechanics, and connection demand/capacity remain undefined.
-- Final clean-head CI run `33943309011` passed.
-- Final production-browser run `33943309015` passed Genesis + Phase 4 acceptance; browser artifact ID `9962552182`.
+### Roof
+- Reviewable rotated roof geometry and exposure semantics.
+- `synthetic-roof-west` preserves `rotationRad.z = 0.35` and geometry-only face `9.840000 m²` for the explicit local-y normal.
+- Roof zone, effective wind area, Cp/internal pressure, suction/uplift, panel mechanics, and connection demand/capacity remain undefined.
 
-Two Roof failures remain intentionally visible in history:
-- `33942967313`: exact floating-point test assertion failed at `9.839999999999998` vs mathematical `9.84`; the contract remained unchanged and the test was repaired with a tight numerical tolerance.
-- `33943182691`: one-shot browser-patch anchor matched two identical strings; it failed before changing the acceptance script and was repaired with a unique multiline anchor.
+### Connections — COMPLETE FOR JOINT-LOCATION INPUT-REVIEW SCOPE
+- Stable connection topology is preserved without inventing a physical joint point.
+- Missing joint point remains `location_unknown` even when visible geometry suggests a plausible intersection or midpoint.
+- Explicit finite caller-declared global X/Y/Z + provenance/verification can reach `review_ready`.
+- Connector path/shape, bearing area, stiffness/slip, fasteners/welds, demand/capacity assessment, utilization, PASS/FAIL, load transfer, and global frame mechanics remain unavailable.
+- Normal CI run `33949048522` passed on the clean Connection checkpoint.
+- Production-browser run `33949048519` passed; browser artifact ID `9964232114`.
 
-## Exact next gated batch — connection joint-location readiness
+### Bracing topology-readiness — COMPLETE FOR CURRENT TOPOLOGY SCOPE
+- A visible diagonal member is **not** accepted as a complete brace load path merely because it looks connected in the 3D scene.
+- The readiness contract requires two distinct explicit active brace-end connection records.
+- The current canonical synthetic fixture intentionally provides only one explicit connection for `synthetic-brace-north-west`.
+- Therefore the correct production result is `load_path_incomplete`, with `1 / 2` explicit selected brace ends.
+- No second end, physical joint point, axial force, tension/compression state, stiffness, effective length, slenderness, buckling model, racking contribution, demand, capacity, utilization, PASS/FAIL, or load-path adequacy is inferred.
+- A QA-only augmented unit-test fixture with a separately declared second brace-end connection can reach `review_ready_topology`, but mechanics still remain unavailable.
+- RPE CI run `33949445089` passed install, lint, strict TypeScript, all regressions, and production build.
+- Production-browser run `33949445200` passed Genesis + Phase 4 acceptance; browser artifact ID `9964350351`.
+- One-shot patch run `33949368220` remains intentionally visible as a tooling failure: the GitHub bot was correctly refused permission to modify a workflow file. The patch itself and `git diff --check` passed. The write boundary was repaired without escalating token permissions; run `33949425974` then succeeded.
 
-Define a separate **connection joint-location readiness contract** before any global frame/load-path or connection mechanics calculation.
+## Exact next gated batch — Anchorage readiness
 
-### Required contract behavior
+Define a separate **anchorage topology/interface readiness contract** before any uplift, sliding, overturning, soil, footing, pedestal, or anchor-capacity calculation.
 
-- Reference an active connection by its stable `connection.id` from a validated `connections` or later stage snapshot.
-- Preserve the staged connection's:
-  - `fromComponentId`;
-  - `toComponentId`;
-  - activation stage;
-  - current `capacityN` state;
-  - source note;
-  - verification state.
-- Require a caller-supplied explicit global joint point `{x,y,z}` in metres.
-- Require finite coordinates, non-empty provenance, and supported verification state for that joint point.
-- Confirm both endpoint component IDs are active in the same validated snapshot.
-- Return an input-review state only; this batch does not establish mechanical adequacy.
+### Required first-slice behavior
 
-### Permanent anti-inference rule
+- Reference an active staged `anchor` component by stable object ID at the `anchorage` stage or later.
+- Preserve the staged anchor marker's geometry/orientation/material/mass/provenance exactly as declared.
+- Reference the explicit active anchor-to-support topology relationship by connection ID.
+- Confirm the opposite endpoint is the intended active support; do not infer an attachment from proximity or rendered touching geometry.
+- Require explicit provenance/verification for the readiness review.
+- Keep the physical attachment point UNKNOWN until a later explicit coordinate/interface contract supplies it.
+- Return input-review evidence only; do not calculate structural adequacy.
 
-When no explicit joint point is supplied, RPE must **not** create one from any of the following:
-- component centers;
-- midpoint between component centers;
-- nearest box faces;
-- apparent box intersection;
-- rendered touching geometry;
-- assumed framing convention;
-- visual coincidence in the Three.js scene.
+### Permanent anti-inference rules for the first Anchorage gate
 
-A visually plausible joint is still **UNKNOWN** until explicitly declared with provenance.
+A visible anchor marker, support, pedestal-looking object, or ground plane must **not** silently create any of the following:
+- bolt/rod type or diameter;
+- embedded length;
+- base plate geometry;
+- weld or fastener details;
+- pedestal dimensions/material;
+- footing dimensions/depth;
+- concrete strength;
+- soil bearing/friction/passive resistance;
+- pull-out/cone breakout/bond model;
+- shear/sliding/friction model;
+- uplift reaction;
+- overturning resistance;
+- anchor demand/capacity;
+- utilization or PASS/FAIL.
 
-### Keep these fields unknown in the first connection-location batch
-
-- connector axis/path/shape;
-- bearing/contact area;
-- fastener type/count/spacing;
-- weld length/size;
-- connection stiffness;
-- rotational/translational slip;
-- friction/restitution;
-- connection demand;
-- connection capacity assessment;
-- utilization;
-- PASS/FAIL;
-- load-transfer distribution;
-- global frame stiffness/reactions/racking;
-- whole-house wind performance.
-
-The existing topology `capacityN` value should simply be preserved from the staged record. If it is `null`, it remains `null`; this readiness layer must not generate a capacity.
+The current synthetic fixture's `capacityN: null` must remain `null`.
 
 ### Required regression/browser proof
 
-1. Connection stage not yet active → readiness blocked.
-2. Missing connection ID → blocked/rejected.
-3. Explicit wrong/non-active connection → blocked.
-4. Missing joint point → unresolved / calculation unavailable.
-5. Non-finite joint coordinate → rejected.
-6. Explicit finite joint point + provenance → `review_ready`.
-7. Returned endpoint IDs exactly match the staged connection record.
-8. No inferred midpoint/intersection field appears.
-9. No demand/capacity/PASS/FAIL calculation becomes available.
-10. Lowering the stage below `connections` invalidates the retained joint-location review.
+1. Stage before `anchorage` → readiness blocked.
+2. Missing/non-active anchor ID → blocked.
+3. Active non-anchor component → blocked.
+4. Missing/non-active or unrelated attachment connection → blocked.
+5. Explicit anchor→support topology relationship → reviewable topology/interface identity only.
+6. Material, mass, connection capacity, and physical attachment point remain UNKNOWN where the specimen says `null`/undeclared.
+7. No uplift/sliding/overturning/capacity/PASS-FAIL inputs or results appear.
+8. Lowering below `anchorage` invalidates retained review state.
 
-Only after this location gate is unit-tested and real-browser accepted should RPE define connection mechanics.
+Only after this interface gate is unit-tested and accepted in real Chromium should RPE define anchorage mechanics.
 
-## After connection location readiness
+## After Anchorage readiness
 
 Continue in roadmap order:
 
-1. Connection mechanics inputs only when explicit joint location and required mechanical properties are sourced.
-2. Bracing load-path relationships and explicit member/joint identities.
-3. Anchorage/uplift/sliding relationships with explicit attachment/ground interface data.
-4. Storm-protection restraint as a separate optional structural variable.
-5. Controlled A/B house comparison with automated proof that unrelated geometry and inputs are unchanged.
+1. Define anchorage mechanics only when actual attachment geometry, support/base interface, material properties, ground/foundation model, loads, and applicable failure modes are explicitly sourced.
+2. Add storm-protection restraint as a separate optional structural variable, including the future pedestal-lock / sling / Spiderweb concepts only through explicit connection and capacity data.
+3. Add controlled A/B house comparison with automated proof that unrelated geometry and inputs are unchanged.
+4. Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
 
 Do not jump directly to a complete animated house-failure sequence.
+
+## Engine integration ladder
+
+The solver/physics roadmap is locked separately in `docs/ENGINE_INTEGRATION_LADDER.md`:
+
+**Three.js/R3F → Rapier → IFC/IfcOpenShell + Blender/Bonsai → OpenSees/OpenSeesPy → selected CalculiX → OpenFOAM → optional Chrono/Unreal → BlueQubit v2+**
+
+OpenSees-class structural coupling and an OpenFOAM CFD workflow are required before RPE v1.0 may be declared complete. Current Phase 4 semantic/load-path work is intentional preparation for those adapters.
 
 ## Independent outstanding gate
 
