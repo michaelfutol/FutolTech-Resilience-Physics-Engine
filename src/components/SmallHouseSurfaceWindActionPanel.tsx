@@ -3,11 +3,16 @@
 import { useMemo } from "react";
 
 import { calculateSmallHouseMultiSurfaceWindLoadSet } from "@/lib/smallHouseWind/multiSurfaceWindLoadSet";
+import { mapSmallHouseSurfaceForceApplicationPoint } from "@/lib/smallHouseWind/surfaceForceApplicationPoint";
 import { calculateSmallHouseSurfaceWindAction } from "@/lib/smallHouseWind/surfaceWindAction";
 import {
   SMALL_HOUSE_MULTI_SURFACE_WIND_LOAD_SET_SCHEMA_VERSION,
   type SmallHouseMultiSurfaceWindLoadSetInput,
 } from "@/types/smallHouseMultiSurfaceWindLoadSet";
+import {
+  SMALL_HOUSE_SURFACE_FORCE_APPLICATION_POINT_SCHEMA_VERSION,
+  type SmallHouseSurfaceForceApplicationPointInput,
+} from "@/types/smallHouseSurfaceForceApplicationPoint";
 import {
   SMALL_HOUSE_SURFACE_WIND_ACTION_SCHEMA_VERSION,
   type SmallHouseSurfaceWindActionInput,
@@ -69,6 +74,15 @@ const QA_MULTI_SURFACE_INPUT: SmallHouseMultiSurfaceWindLoadSetInput = {
   verificationState: "unverified",
 };
 
+const QA_APPLICATION_POINT_INPUT: SmallHouseSurfaceForceApplicationPointInput = {
+  schemaVersion: SMALL_HOUSE_SURFACE_FORCE_APPLICATION_POINT_SCHEMA_VERSION,
+  surfaceComponentId: "synthetic-wall-north",
+  // Deliberately not the rendered north-wall center (0, 1.65, -2.25).
+  applicationPointGlobalM: { x: 0.37, y: 1.23, z: -2.41 },
+  sourceNote: "Synthetic caller-declared global force application point only",
+  verificationState: "unverified",
+};
+
 function scalar(value: number | null, decimals = 6): string {
   return value === null ? "N/A" : value.toFixed(decimals);
 }
@@ -93,6 +107,10 @@ export default function SmallHouseSurfaceWindActionPanel({
   const multiSurfaceResult = useMemo(
     () => calculateSmallHouseMultiSurfaceWindLoadSet(snapshot, QA_MULTI_SURFACE_INPUT),
     [snapshot],
+  );
+  const applicationPointResult = useMemo(
+    () => mapSmallHouseSurfaceForceApplicationPoint(snapshot, result, QA_APPLICATION_POINT_INPUT),
+    [snapshot, result],
   );
 
   return (
@@ -195,7 +213,7 @@ export default function SmallHouseSurfaceWindActionPanel({
         RPE_ANALYTICAL · VECTOR ALGEBRA ONLY · NON-CFD · NON-CODE-COMPLIANCE
       </div>
       <p className="mt-2 text-[10px] text-slate-500">
-        Two unique explicit surface-action records are independently calculated by the accepted single-surface contract, then only their global force vectors are algebraically summed. No force application point or structural load path is defined here.
+        Two unique explicit surface-action records are independently calculated by the accepted single-surface contract, then only their global force vectors are algebraically summed. No force application point or structural load path is defined by the load-set contract.
       </p>
 
       <div className="mt-3 rounded border border-cyan-950 bg-slate-900/60 p-2 text-[10px] text-slate-300">
@@ -249,7 +267,7 @@ export default function SmallHouseSurfaceWindActionPanel({
             <div>PASS/FAIL: <strong>N/A</strong></div>
 
             <div className="mt-3 font-semibold text-amber-300">
-              VECTOR SUM ≠ REACTION / BASE SHEAR / STRUCTURAL DEMAND. No moment is calculated because no explicit force-application points or reference point exist in this contract.
+              VECTOR SUM ≠ REACTION / BASE SHEAR / STRUCTURAL DEMAND. No moment is calculated because the load-set contract has no explicit application points or reference point.
             </div>
           </>
         ) : (
@@ -259,6 +277,71 @@ export default function SmallHouseSurfaceWindActionPanel({
         )}
 
         <div className="mt-2 text-slate-500">{multiSurfaceResult.reason}</div>
+      </div>
+
+      <div className="mt-4 font-semibold text-violet-200">Explicit surface force application-point mapping</div>
+      <div className="mt-1 rounded border border-violet-900/70 bg-violet-950/30 px-2 py-1 text-[10px] font-semibold tracking-wide text-violet-200">
+        RPE_ANALYTICAL · EXPLICIT MAPPING ONLY · NO MOMENT / NO REACTION
+      </div>
+      <p className="mt-2 text-[10px] text-slate-500">
+        This gate does not change the accepted surface force. It attaches that force only to a caller-declared global point. The QA point is deliberately different from the rendered north-wall center so geometry cannot masquerade as a center of pressure.
+      </p>
+
+      <div className="mt-3 rounded border border-violet-950 bg-slate-900/60 p-2 text-[10px] text-slate-300">
+        <div>
+          Force application-point state: <strong>{applicationPointResult.state}</strong>
+        </div>
+        <div>
+          Evidence layer: <strong>{applicationPointResult.evidenceLayer}</strong>
+        </div>
+        <div>
+          Structural result: <strong>{applicationPointResult.structuralResult}</strong>
+        </div>
+
+        {applicationPointResult.state === "mapping_ready" ? (
+          <>
+            <div className="mt-3 font-semibold text-slate-200">Preserved analytical force</div>
+            <div>
+              Application surface ID: <strong>{applicationPointResult.surfaceComponentId}</strong>
+            </div>
+            <div>
+              Source global force vector: <strong>{vector(applicationPointResult.sourceForceVectorN)} N</strong>
+            </div>
+
+            <div className="mt-3 font-semibold text-slate-200">Explicit location mapping</div>
+            <div>
+              Caller-declared global application point: <strong>{vector(applicationPointResult.applicationPointGlobalM)} m</strong>
+            </div>
+            <div>
+              APPLICATION POINT BASIS: <strong>CALLER_DECLARED_GLOBAL_POINT</strong>
+            </div>
+            <div>Rendered north-wall center: <strong>(0.000, 1.650, -2.250) m — GEOMETRY REFERENCE ONLY</strong></div>
+            <div>INFERRED APPLICATION POINT: <strong>NONE — PROHIBITED</strong></div>
+            <div>CENTER OF PRESSURE: <strong>N/A</strong></div>
+            <div>SOLVER NODE: <strong>N/A</strong></div>
+
+            <div className="mt-3 font-semibold text-slate-200">Still not structural response</div>
+            <div>MOMENT/TORQUE: <strong>N/A</strong></div>
+            <div>REACTION: <strong>N/A</strong></div>
+            <div>BASE SHEAR: <strong>N/A</strong></div>
+            <div>UPLIFT REACTION: <strong>N/A</strong></div>
+            <div>SLIDING REACTION: <strong>N/A</strong></div>
+            <div>RACKING DEMAND: <strong>N/A</strong></div>
+            <div>CONNECTION DEMAND: <strong>N/A</strong></div>
+            <div>LOAD-PATH DISTRIBUTION: <strong>N/A</strong></div>
+            <div>PASS/FAIL: <strong>N/A</strong></div>
+
+            <div className="mt-3 font-semibold text-amber-300">
+              APPLICATION POINT ≠ CENTER OF PRESSURE / JOINT / SUPPORT / SOLVER NODE. MOMENT remains N/A until a separate explicit reference-point/axis contract exists.
+            </div>
+          </>
+        ) : (
+          <div className="mt-2 text-amber-300">
+            Application-point mapping unavailable because its source surface action is not valid in this staged snapshot. No stale point or force is retained.
+          </div>
+        )}
+
+        <div className="mt-2 text-slate-500">{applicationPointResult.reason}</div>
       </div>
     </div>
   );
