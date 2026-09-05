@@ -5,6 +5,8 @@
 - [x] Phase 1 engineering cockpit / scripted visual MVP shell.
 - [x] Phase 1.5 UI refinement and token system.
 - [x] Lock finite RPE v1.0 roadmap and validation doctrine.
+- [x] Lock canonical RPE plugin/scientific orchestration skill: **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**.
+- [x] Treat Figma as maintained architecture/state/sequence/ERD/timeline/system-diagram infrastructure and Data Analytics as a core scientific-analysis layer.
 
 ## Phase 2 — Data Spine, Costing, Immutable Prototypes
 - [x] Product / Assembly / CostRate separation and runtime validation.
