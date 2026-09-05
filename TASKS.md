@@ -49,6 +49,7 @@
 - [x] Define and test an explicit provenance-bearing collision-target contract: box identity, center, dimensions, source note, verification state only; no inferred contact/engineering properties.
 - [x] Wire explicit collision-target inputs into `Viewport3D`, validate before rendering, and instantiate the validated fixed target in the same Rapier world as released Panel 001.
 - [x] Carry target identity through tested narrow runtime metadata and accept it only when it matches the currently validated explicit target.
+- [x] Add an executable synthetic browser-QA fixture plus documented live acceptance procedure without promoting fixture geometry into collision evidence.
 - [ ] Verify a genuine live collision callback in-browser with declared target identity and confirm changed explicit panel/dynamics/target inputs do not retain stale collision observations.
 - [ ] Define any post-release wind/aerodynamic loading explicitly before applying it to debris.
 - [ ] Add synchronized A/B simulation/replay path.

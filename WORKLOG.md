@@ -1,5 +1,15 @@
 # Worklog
 
+## [2026-09-05] - Genesis Browser-Acceptance Fixture Gate
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `81b8a5e3d36ab1d99c230bba073c14115c5921bb` had successful RPE CI run 134 before changing repository state.
+- The connected Vercel project list did not contain an RPE deployment, so the required live browser collision acceptance could not be truthfully executed from a deployed canonical build in this run. The gate remains open.
+- Added `tests/genesis-browser-acceptance-fixture.test.ts` with one explicitly synthetic QA input set chosen only to reach deterministic connection exceedance, `release_ready`, `simulation_ready`, and a valid explicit box-target contract.
+- The fixture deliberately stops before collision evidence. It contains no assertion that geometry guarantees a collision; only a genuine live Rapier `onCollisionEnter` callback may establish that `rpe_simulation` observation.
+- Added `docs/GENESIS_BROWSER_ACCEPTANCE.md` with the exact synthetic input set, live acceptance observations, stale-context reset procedure, and evidence-boundary checks.
+- Added the new regression suite to the explicit `npm test` command.
+- No adopted material, code, site, aerodynamic, friction, restitution, impact-force/energy, damage, solver, CFD, or physical-test property was introduced. All fixture values are labeled synthetic QA only.
+- Exact next gate: run the documented procedure against a real browser build of the canonical branch, accept only a genuine panel↔declared-target callback with exact target identity, then change one explicit input and confirm the old collision observation does not survive into the changed context.
+
 ## [2026-09-05] - Genesis Explicit Collision-Target Scene Wiring
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `dc9e5a5cc990de569bc51e971e50ac5fb3674b1c` had successful RPE CI run 132 before changing code.
 - Wired blank-by-default Genesis collision-target inputs into `Viewport3D`: explicit target object ID, center XYZ, box dimensions XYZ, source note, and verification state.
@@ -13,7 +23,7 @@
 - Exact next gate: browser-verify a genuine panel↔declared-target Rapier collision records the declared target ID, then change one explicit run/target input and confirm the old collision observation does not survive into the changed context. This remains unclosed until actually verified in-browser.
 
 ## [2026-09-05] - Genesis Collision-Target Contract Gate
-- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `f2808fad10f77db24ca59b00a28a588b58e18b7e` had successful RPE CI run 130 before changing code.
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `f2808fad10f77db24ca59b00a28a588b58e18b7e` had successful RPE CI run 130 before changing code.
 - Added `src/types/genesisCollisionTarget.ts` with a narrow explicit box-target contract: schema version, object identity, center coordinates, box dimensions, source note, and verification state only.
 - Added `src/lib/genesis/collisionTarget.ts` runtime validation requiring non-empty identity/provenance, finite center coordinates, positive finite dimensions, supported schema, supported shape, and valid verification state.
 - The target contract is explicitly `rpe_simulation` input/evidence context only and does not infer material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or other contact/engineering properties from geometry.

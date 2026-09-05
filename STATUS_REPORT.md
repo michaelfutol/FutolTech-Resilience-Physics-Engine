@@ -32,12 +32,12 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine plus an active Phase 3 G
 - The deterministic ordered simulation-event ledger preserves analytical events first, then release gate, dynamics gate, simulation activation, and optional collision-enter records as `rpe_simulation` evidence.
 - The live evidence bridge is wired into the actual Genesis Rapier `onCollisionEnter` path. The Genesis UI renders the combined ordered analytical→simulation ledger using `GenesisEventLedgerPanel`.
 - A typed Genesis collision-target contract accepts only explicit box identity, center position, dimensions, source note, and verification state. It does not infer material, mass, stiffness, friction, restitution, capacity, impact force/energy, damage, or other contact/engineering properties.
-- Genesis Panel 001 now exposes blank-by-default collision-target ID, center, box dimensions, source note, and verification-state inputs. No target is created unless the complete contract validates.
+- Genesis Panel 001 exposes blank-by-default collision-target ID, center, box dimensions, source note, and verification-state inputs. No target is created unless the complete contract validates.
 - A validated target is rendered visibly; during an active Rapier run it is instantiated as a fixed rigid body in the same physics world as the released panel. No hidden floor or obstacle is added.
 - Runtime target identity is carried through narrow RPE user-data metadata and is accepted into collision evidence only when it matches the currently validated explicit target. Any other collider remains unresolved rather than receiving a manufactured RPE identity.
-- Collision context identity now includes all explicit target inputs as well as panel/wind/dynamics inputs, so changing target or run inputs prevents stale collision observations from appearing in the changed context.
-- Implementation checkpoint `78ccb43123c29aedff83b2e6145be96cbbd25c53` passed RPE CI run 133: dependency install, lint, strict TypeScript, automated tests, and production build all succeeded.
-- Browser acceptance of an actual panel↔declared-target collision and changed-input stale-context reset is still required; it has not been marked complete from code/CI alone.
+- Collision context identity includes all explicit target inputs as well as panel/wind/dynamics inputs, so changing target or run inputs prevents stale collision observations from appearing in the changed context.
+- A synthetic browser-QA fixture and acceptance procedure now exercise the exact gate inputs needed for live verification. The automated fixture proves only connection exceedance + `release_ready` + `simulation_ready` + valid target contract; it deliberately does not claim a collision event.
+- Live browser acceptance of an actual panel↔declared-target collision and changed-input stale-context reset is still required; it has not been marked complete from code/CI alone.
 
 ## Engineering doctrine
 
@@ -47,4 +47,4 @@ Manual/code calculation, engineering solvers, RPE analytical calculations, RPE s
 
 ## Exact next gated task
 
-Perform live browser acceptance of the new explicit collision-target path: enter a complete declared target plus explicit panel/release/dynamics inputs that produce a genuine Rapier panel↔target collision, verify the ordered ledger records exactly that declared target ID from the real callback, then change one explicit panel/dynamics/target input and verify the previous collision observation is absent from the new context. Do not treat Rapier contact response as impact-force, energy, damage, material, code, solver, CFD, or physical-test evidence. Phase 2 browser acceptance remains an independent outstanding gate.
+Run `docs/GENESIS_BROWSER_ACCEPTANCE.md` against a real browser build of the canonical branch. Accept the gate only if a genuine Rapier `onCollisionEnter` callback records exactly the declared target ID and changing one explicit panel/dynamics/target input removes the prior collision observation from the changed context. Do not treat the synthetic fixture or Rapier contact response as impact-force, energy, damage, material, code, solver, CFD, or physical-test evidence. Phase 2 browser acceptance remains an independent outstanding gate.
