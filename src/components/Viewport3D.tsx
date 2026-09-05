@@ -51,6 +51,7 @@ import PrimarySupportReadinessPanel from "@/components/PrimarySupportReadinessPa
 import FloorRingFrameReadinessPanel from "@/components/FloorRingFrameReadinessPanel";
 import WallPanelExposureReadinessPanel from "@/components/WallPanelExposureReadinessPanel";
 import RoofPanelExposureReadinessPanel from "@/components/RoofPanelExposureReadinessPanel";
+import ConnectionJointLocationReadinessPanel from "@/components/ConnectionJointLocationReadinessPanel";
 import { SYNTHETIC_PHASE4_HOUSE } from "@/data/smallHouseWind/syntheticPhase4House";
 import { materializeSmallHouseWindStage } from "@/lib/smallHouseWind/systemContract";
 import type { SmallHouseWindStage } from "@/types/smallHouseWind";
@@ -964,6 +965,8 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
           <WallPanelExposureReadinessPanel snapshot={phase4Snapshot} />
 
           <RoofPanelExposureReadinessPanel snapshot={phase4Snapshot} />
+
+          <ConnectionJointLocationReadinessPanel snapshot={phase4Snapshot} />
 
           <p className="mt-3 border-t border-slate-800 pt-2 text-[10px] text-amber-300">VISIBLE ≠ ADEQUATE. This viewer is topology/geometry QA only. Whole-house wind actions, stiffness, reactions, racking, uplift, sliding, failure, and debris are not claimed by this stage viewer.</p>
         </div>
