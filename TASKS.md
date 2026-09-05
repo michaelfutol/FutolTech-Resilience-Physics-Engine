@@ -121,22 +121,34 @@
 - [x] Add deterministic unit tests and production-browser acceptance including invalidation below `anchorage`.
 - [x] Confirm RPE CI run `33950699730` and browser run `33950699741` green; browser artifact ID `9964743865`.
 
-### Storm-protection restraint topology-readiness — CURRENT GATE
-- [ ] Define a storm-protection restraint topology contract referencing an active staged `storm_protection_member` by stable ID.
-- [ ] Require two distinct explicit active connection records incident to the selected restraint member before a restraint path can be considered topology-complete.
-- [ ] Prove visible strap/line geometry cannot manufacture a missing second restraint endpoint or physical attachment point.
-- [ ] Preserve the current canonical `synthetic-storm-strap-west` as intentionally incomplete: it has only one explicit storm-protection relationship, to `synthetic-roof-west`.
-- [ ] Keep tension/preload, stiffness, elongation/slack, fastener/attachment details, member strength, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house improvement unavailable in the first topology gate.
-- [ ] Add a QA-only augmented fixture with a separately declared second restraint-end relationship to prove topology review without mechanics.
-- [ ] Add deterministic unit tests and production-browser acceptance before any storm-restraint mechanics or A/B performance claim.
+### Storm-protection restraint topology-readiness — COMPLETE FOR CURRENT TOPOLOGY SCOPE
+- [x] Define a storm-protection restraint topology contract referencing an active staged `storm_protection_member` by stable ID.
+- [x] Require two distinct explicit active connection records incident to the selected restraint member and two distinct active opposite endpoint components before topology can become review-ready.
+- [x] Prove visible strap/line geometry cannot manufacture a missing second restraint endpoint or physical attachment point.
+- [x] Preserve canonical `synthetic-storm-strap-west` as intentionally incomplete: one explicit roof-side relationship to `synthetic-roof-west` → `restraint_path_incomplete`, `1 / 2` selected ends.
+- [x] Reject two different connection records that both terminate at the same opposite component as a fake two-ended path.
+- [x] Keep tension/preload, stiffness, elongation/slack, fastener/attachment details, member strength, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house improvement unavailable.
+- [x] Add a QA-only augmented fixture with a separately declared second restraint-end relationship to `synthetic-anchor-nw`; topology may become `review_ready_topology` while mechanics remain unavailable.
+- [x] Wire the Storm Protection review panel into the Small House chamber without adding a fake second end.
+- [x] Add deterministic regressions and real production-browser acceptance, including invalidation below `storm_protection`.
+- [x] Confirm RPE CI run `33951312722` and production-browser run `33951312736` green; browser artifact ID `9964940298`.
+
+### Controlled A/B specimen difference — CURRENT GATE
+- [ ] Define a deterministic comparison contract for two validated Small House specimen definitions.
+- [ ] Require identical schema/envelope/component geometry/identity/material/mass/orientation and all unrelated connection records unless the caller explicitly declares the one allowed structural variable.
+- [ ] First QA pair: Variant A = canonical house; Variant B = same house plus exactly one explicit second Storm restraint-end topology relationship from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
+- [ ] Prove the comparison detects exactly one connection-record addition and zero unrelated geometry/component/property mutations.
+- [ ] Reject zero-difference pairs, multi-variable differences, geometry drift, component property drift, reordered/rewritten unrelated records, or undeclared mutations.
+- [ ] Preserve result as `controlled_input_difference` / input-review evidence only; do not call Variant B stronger, safer, more resilient, code-compliant, or better-performing.
+- [ ] Add deterministic regression tests and production-browser evidence for the controlled-difference audit.
 
 ### Later Phase 4 topology/mechanics layers
 - [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
 - [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
 - [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
 - [ ] Add storm-protection mechanics only after a two-ended restraint path, attachment geometry, member properties, loads, and failure modes are explicit.
-- [ ] Add controlled A/B house comparison proving geometry is held constant while exactly one declared structural variable changes.
-- [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
+- [ ] Connect controlled A/B specimen differences to explicit analytical/solver evidence only when the corresponding mechanics gates exist.
+- [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one declared structural variable changed and the evidence layer is reported honestly.
 
 ## Failed-check record retained
 - [x] Keep Genesis Browser Acceptance run `33936435595` visible: old selector matched two verification controls after aerodynamic UI expansion.
