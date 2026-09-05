@@ -1,46 +1,60 @@
 # Next Steps
 
-## Current Genesis gate
+## Current roadmap position
 
-The post-release aerodynamic path now has three deliberately separate layers before live Rapier coupling:
+The Phase 3 Genesis exit gate is satisfied. RPE has crossed from one-panel analytical action into calculated connection release, physically simulated Rapier debris, explicit collision evidence, and explicitly gated post-release center-of-mass aerodynamic force over a declared fixed-step application window.
 
-1. **RPE analytical result** — explicit post-release air-relative drag calculation with caller-supplied interval, density, relative air velocity, projected area, drag coefficient, body identity, and provenance.
-2. **RPE simulation application plan** — explicit opt-in, ready dynamics, matching body identity, center-of-mass constant force, no aerodynamic torque.
-3. **Deterministic physics-step scheduler** — maps the declared force interval to each future physics step and prevents a terminal partial step from extending the declared duration.
+Phase 4 — **Small House Wind System** — is now active.
 
-The scheduler is pure: it does not mutate Rapier, advance time, infer torque, reuse pre-release force, or create engineering properties.
+The first Phase 4 foundation is already implemented as a versioned system contract with the locked progression:
+
+**empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection**
+
+The contract preserves stable object identity and explicit provenance while allowing material identity, mass, and connection capacity to remain unknown (`null`). Geometry alone never creates a capacity or performance claim.
 
 ## Exact next gated batch
 
-Wire those already-tested contracts into the live Genesis Panel 001 Rapier path, but only under the following rules:
+Build a reviewable staged-house chamber driven from the validated Phase 4 contract.
 
-- Add explicit user opt-in for post-release aerodynamic force application; default remains off.
-- Reuse only the already validated aerodynamic result and force-application plan. Do not invent density, Cd, area, exposure interval, force direction, or body identity.
-- Use a deterministic physics-step clock appropriate to the Rapier integration path.
-- For every physics step, call the tested scheduler and apply only `effectiveForceN` while `shouldApplyForce` is true.
-- On the terminal partial step, preserve only the declared active-duration impulse; do not apply the full force for the entire coarse step.
-- Apply force at center of mass only. Aerodynamic torque remains explicitly unmodeled.
-- Never convert the pre-release panel action into an impulse or continuing load.
-- Extend the run/evidence context key so changed aerodynamic/application inputs invalidate stale application observations.
-- Add ordered `rpe_simulation` evidence for application activation/state without claiming solver, CFD, code, material-test, or physical-test authority.
-- Add unit/integration tests before browser acceptance.
-- Run normal RPE CI and the real Chromium Genesis acceptance; retain and repair any failed check instead of weakening criteria.
+Requirements:
+- Add a dedicated Phase 4 small-house view/mode rather than repurposing the conceptual Phase 1 playback.
+- Use a clearly labeled synthetic software-QA house fixture first; do not silently adopt Dignity production dimensions or engineering properties.
+- Let the user select/review each roadmap construction stage in order.
+- The `empty_envelope` stage must show the transparent envelope and report `N/A / no_physical_specimen`.
+- At later stages, instantiate only the components and connections returned by `materializeSmallHouseWindStage`.
+- Expose component IDs, kinds, activation stages, verification states, and whether material/mass/capacity remain unknown.
+- Do not label visible geometry PASS/FAIL or structurally adequate merely because it exists.
+- Keep Fast Smoke / wind visualization separate from structural mechanics unless an explicit small-house wind-action contract is introduced.
+- Add deterministic browser QA proving stage progression and empty-envelope semantics before introducing whole-house wind loads.
 
-## Acceptance criteria for that batch
+## After the viewer gate
 
-The gate closes only when tests demonstrate:
+Introduce Phase 4 mechanics in the same order as the topology:
 
-- application is blocked when explicit opt-in is off;
-- application is blocked when dynamics/aerodynamic/body-identity/provenance gates are not ready;
-- no force is applied before the declared window;
-- full-step force is preserved inside the window;
-- the terminal partial step preserves `F × activeDuration` rather than extending the load;
-- no force is applied after the declared interval;
-- no aerodynamic torque is introduced;
-- changing a relevant explicit run/aerodynamic input clears stale force-application evidence;
-- normal CI passes; and
-- real browser QA passes without console/page errors.
+1. **Primary supports** — explicit geometry, mass/material state, restraint/support assumptions, and provenance; no hidden stiffness/strength.
+2. **Floor/ring frame** — explicit member relationships and connection identities.
+3. **Walls and roof** — explicit panel geometry/orientation/exposure and connection mapping.
+4. **Connections** — demand/capacity only from declared/sourced inputs; unknown remains unverified.
+5. **Bracing and anchorage** — explicit load-path relationships before calculating racking/uplift/sliding response.
+6. **Storm protection** — separate optional structural variable, not a decorative overlay.
+7. **Controlled A/B comparison** — same house geometry, one declared structural variable changed, with automated proof that unrelated geometry/inputs are unchanged.
+
+Do not jump directly to a complete animated house failure sequence. Phase 4 must remain reviewable member-by-member and gate-by-gate.
+
+## Phase 3 evidence retained
+
+- Genesis Browser Acceptance run `33938570653` passed the live force/collision production-browser gate.
+- Evidence artifact ID `9961013065` records opt-in blocking, readiness, full-step application, partial terminal application, force-window completion, genuine collision, identity match, stale collision reset, stale force-evidence reset, and zero console/page errors.
+- RPE CI run `33938665291` passed after preserving the legacy collision activation error contract and adding a distinct aerodynamic force-application activation error.
+- Clean helper-removal CI run `33938717530` passed.
+- Phase 4 foundation CI run `33938835927` passed.
 
 ## Independent outstanding gate
 
-Final Phase 2 manual browser visual acceptance remains open and must be recorded separately; Phase 3 software progress does not silently close it.
+Final Phase 2 manual browser visual acceptance remains open and must be recorded separately. Phase 3 completion and Phase 4 progress do not silently close that gate.
+
+## Evidence boundary
+
+Manual/code calculations, engineering solver results, RPE analytical calculations, RPE simulation, browser QA/visualization, and future physical tests remain separate layers under:
+
+**CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**
