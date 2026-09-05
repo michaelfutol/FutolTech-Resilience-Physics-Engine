@@ -2,32 +2,43 @@
 
 The finite RPE v1.0 roadmap remains locked in `ROADMAP.md`. GitHub is the implementation source of truth.
 
-The canonical scientific/plugin-routing skill is now `skills/rpe-scientific-orchestration/SKILL.md` with preferred lifecycle:
+The canonical scientific/plugin-routing skill is `skills/rpe-scientific-orchestration/SKILL.md` with preferred lifecycle:
 
 **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**
 
-Use the relevant layers for every substantial RPE task while preserving their evidence boundaries. Figma is the maintained visual architecture/model layer; Data Analytics is the scientific analysis layer; PostHog product telemetry is not engineering validation evidence.
+Use relevant layers for substantial RPE tasks while preserving evidence boundaries. Figma is the maintained visual architecture/model layer; Data Analytics is the scientific analysis layer; PostHog product telemetry is not engineering validation evidence.
 
 ## Current checkpoint
 
-The canonical branch is active in Phase 3 Genesis. Null House, NON-CFD Fast Smoke, Panel 001 analytical wind action, equivalent connection assessment, A/B comparison, rigid-body release gating, explicit debris initial-condition gating, gated Rapier activation, deterministic ordered simulation-event ledger, the live Rapier evidence callback path, and explicit collision-target integration are implemented.
+The canonical branch is active in Phase 3 Genesis. Null House, NON-CFD Fast Smoke, Panel 001 analytical wind action, equivalent connection assessment, A/B analytical comparison, rigid-body release gating, explicit debris initial-condition gating, gated Rapier activation, deterministic ordered simulation-event ledger, the live Rapier evidence callback path, and explicit collision-target integration are implemented.
 
-A synthetic browser-QA fixture is now executable in CI and documented in `docs/GENESIS_BROWSER_ACCEPTANCE.md`. Its numbers are test-only inputs chosen to exercise the wiring. The automated fixture proves only connection exceedance, `release_ready`, `simulation_ready`, and a valid declared target contract. It deliberately stops before collision evidence because only a genuine live Rapier callback may establish a collision-enter observation.
+The single-panel live browser gate is now reproducible and passed:
 
-No RPE deployment was available in the connected Vercel project list during this checkpoint, so live browser acceptance was not falsely marked complete.
+- tested commit: `510dc5c3b9892f40e82428e8aea64e3d2251b75b`;
+- normal RPE CI run `33935187251`: passed;
+- Genesis Browser Acceptance run `33935187278`: passed in a production Next.js build under headless Chromium;
+- artifact ID `9959936762` contains the JSON evidence record and screenshot;
+- genuine Rapier `collision_enter` was observed for declared target `synthetic-browser-target-001`;
+- changing explicit target center input cleared the prior collision observation from the changed context;
+- no browser console/page errors were recorded.
+
+This proves the current event/wiring path for a synthetic QA fixture only. It does not establish impact mechanics, damage, aerodynamic truth, code compliance, solver/CFD authority, or physical-test validation.
+
+Vercel is still not linked to an RPE project in the connected account. The successful headless-browser production-build gate is valid for software acceptance, but Vercel deployment remains a separate lifecycle task.
 
 ## Immediate execution order
 
-1. **Provide/run a real browser build:** deploy or otherwise run the canonical `lum-rpe-takeover` head in a browser-capable environment.
-2. **Live collision browser acceptance:** execute `docs/GENESIS_BROWSER_ACCEPTANCE.md` and verify a genuine Rapier panel↔target collision records exactly `synthetic-browser-target-001` from the real callback.
-3. **Context-reset browser acceptance:** after that collision, change one explicit panel, dynamics, or target input and verify the prior collision observation is absent from the changed run context.
-4. **Evidence-boundary review:** confirm the UI does not present Rapier contact response as impact force, impact energy, damage, material response, manual/code evidence, structural-solver evidence, CFD evidence, or physical-test evidence.
-5. **No invented contact mechanics:** do not add friction, restitution, constitutive response, impact-force/energy, or damage calculations unless separately declared, justified, and provenance-bearing.
-6. **No invented post-release wind model:** define a separate time/load/aerodynamic contract before applying continuing wind force or aerodynamic torque to debris.
-7. **Phase 2 browser acceptance:** independently verify the remaining Phase 2 manual UI acceptance path and record the Phase 2 exit SHA only after it actually passes.
-8. **Later simulation comparison:** add synchronized A/B simulation/replay only after the single-panel live collision record is browser-verified and reviewable.
-9. **Maintain the systems model:** when architecture/data/state relationships materially change, update the corresponding Figma architecture/state/sequence/ERD/system diagram and reference it from GitHub documentation rather than leaving the architecture only in conversation.
-10. **Scientific-analysis handoff:** as material/test datasets become available, route sensitivity, calibration, validation, uncertainty, comparisons, charts, and experiment reports through the Data Analytics layer with traceable source data and explicit evidence labels.
+1. **Define post-release aerodynamic input contract:** explicit time variable/step or exposure interval, relative airflow inputs, projected area/orientation basis, aerodynamic coefficient source/provenance, and verification state. Missing inputs must block the calculation.
+2. **Keep force and impulse distinct:** continuing aerodynamic force may be calculated only from the declared post-release state. Never silently reuse the pre-release panel force as an instantaneous impulse. Any impulse requires an explicit integration interval/history.
+3. **Pure calculation/tests first:** implement the post-release aerodynamic calculation as deterministic pure functions with dimensional checks and regression tests before coupling it to Rapier.
+4. **Only then couple to Rapier:** apply force/torque over explicitly modeled time; record it as `rpe_simulation` evidence, not CFD or physical-test evidence.
+5. **Preserve aerodynamic uncertainty:** coefficients/density/orientation assumptions remain caller-supplied/provenance-bearing until code/literature/CFD/test evidence supports them.
+6. **Browser-harness security cleanup:** classify and upgrade the isolated Playwright harness that currently reports one high advisory during temporary install; canonical application dependencies remain clean.
+7. **Phase 2 browser acceptance:** independently verify the remaining Phase 2 manual UI path and record the Phase 2 exit SHA only after it actually passes.
+8. **Later synchronized comparison:** add A/B simulation/replay only after the single-panel post-release force model is reviewable and tested.
+9. **Vercel lifecycle:** create/link a canonical RPE Vercel project when the connector/deployment path permits, then use it for persistent preview/review rather than replacing GitHub/browser CI as evidence.
+10. **Maintain systems model:** when architecture/data/state relationships materially change, update the corresponding Figma architecture/state/sequence/ERD/system diagram and reference it from GitHub documentation.
+11. **Scientific-analysis handoff:** as material/test datasets become available, route sensitivity, calibration, validation, uncertainty, comparisons, charts, and experiment reports through Data Analytics with traceable source data and explicit evidence labels.
 
 ## Evidence boundary
 
