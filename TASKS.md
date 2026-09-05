@@ -36,7 +36,8 @@
 - [ ] Define aerodynamic torque only in a future separately justified contract; do not infer it from current drag force.
 
 ## Phase 4 — Small House Wind System — ACTIVE
-### Staged specimen / viewer
+
+### Staged specimen / viewer — COMPLETE FOR CURRENT TOPOLOGY SCOPE
 - [x] Define versioned small-house wind topology/staging types.
 - [x] Lock stage order: empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection.
 - [x] Preserve stable object identity across envelope, structural components, and connections.
@@ -52,103 +53,88 @@
 
 ### Primary-support gate — COMPLETE FOR CURRENT ISOLATED FORMULA SCOPE
 - [x] Define explicit primary-support mechanics readiness/input contract referencing a validated staged component by stable ID.
-- [x] Preserve support center/size/rotation/material/mass/provenance from the staged specimen rather than duplicating geometry.
 - [x] Require explicit local longitudinal axis and all 12 end-restraint DOF states; no restraint defaults.
 - [x] Keep unknown E, area, principal moments, strength, material, and mass explicit rather than deriving them from rendered geometry.
-- [x] Prove a rendered rectangular box does not silently become section area or second moment.
-- [x] Browser-test readiness inputs, unknown-property display, and stage-removal invalidation.
-- [x] Add first calculated primary-support mechanics path: isolated linear-elastic Euler–Bernoulli fixed–free tip-load benchmark.
+- [x] Add first calculated mechanics path: isolated linear-elastic Euler–Bernoulli fixed–free tip-load benchmark.
 - [x] Require explicit E, selected principal I, signed tip load, and provenance before the benchmark runs.
-- [x] Calculate only transparent formula response `V=|P|`, `M=|P|L`, `δ=PL³/(3EI)`.
+- [x] Calculate only `V=|P|`, `M=|P|L`, `δ=PL³/(3EI)`.
 - [x] Keep strength/capacity `NOT_EVALUATED`; no PASS/FAIL, P-Δ, shear deformation, connection slip, solver, CFD, or whole-house load-path claim.
-- [x] Unit-test the hand-check fixture and browser-test the synthetic Phase 4 fixture result.
-- [x] Confirm normal CI run `33941910807` and browser run `33941910817` green; browser artifact ID `9962116271`.
+- [x] Confirm browser artifact ID `9962116271`.
 
 ### Floor/ring-frame readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
-- [x] Define floor/ring-frame member readiness contract referencing staged `floor_ring_frame_member` IDs.
-- [x] Require explicit member longitudinal axis and endpoint-role semantics.
-- [x] Preserve staged geometry/orientation/provenance without inventing material/stiffness.
-- [x] Deliberately keep joint coordinates unavailable in schema v0.1.0; no rendered intersection or center-to-center point may become a joint.
+- [x] Define member readiness using stable staged IDs, explicit axis, and endpoint roles.
+- [x] Preserve geometry/orientation/provenance without inventing material/stiffness or physical joint coordinates.
 - [x] Keep E/A/I/strength/load transfer/global frame response unavailable.
-- [x] Browser-test readiness and invalidation below the floor/ring stage.
-- [x] Confirm clean-head CI run `33942392860` and browser run `33942392870` green.
 
 ### Wall geometry/exposure readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
-- [x] Define wall-panel geometry/exposure readiness referencing active staged `wall_panel` IDs.
-- [x] Require explicit local normal axis, exposed-face sign, exposure class, provenance, and verification.
-- [x] Permit geometric box-face area from the declared normal axis only; never promote it to effective wind area.
+- [x] Define wall-panel geometry/exposure readiness with explicit local normal, exposed-face sign, exposure class, provenance, and verification.
+- [x] Permit geometry-only face area from declared geometry only; never promote it to effective wind area.
 - [x] Keep wind velocity/density/Cp/internal pressure/net pressure, stiffness/strength, and fastener capacity undefined.
-- [x] Browser-test synthetic wall geometry-only face area `7.140000 m²` and stage invalidation.
-- [x] Confirm clean-head CI run `33942823443` and browser run `33942823436` green; browser artifact ID `9962401294`.
+- [x] Confirm browser artifact ID `9962401294`.
 
 ### Roof geometry/exposure readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
-- [x] Define roof-panel geometry/exposure readiness referencing active staged `roof_panel` IDs.
-- [x] Preserve explicit rotated roof geometry/orientation.
-- [x] Require explicit local normal axis, exposed-face sign, exposure class, provenance, and verification.
-- [x] Permit geometry-only face area from the declared normal axis while keeping roof zone/effective wind area undefined.
+- [x] Define roof-panel geometry/exposure readiness and preserve rotated roof geometry/orientation.
+- [x] Permit geometry-only face area while keeping roof zone/effective wind area undefined.
 - [x] Keep pressure coefficients, net pressure, uplift force, panel mechanics, and connection demand/capacity undefined.
-- [x] Browser-test `synthetic-roof-west`: rotation `0.35 rad`, local-y geometry-only face `9.840000 m²`, uplift calculation unavailable, and stage invalidation.
-- [x] Confirm final clean-head CI run `33943309011` and browser run `33943309015` green; browser artifact ID `9962552182`.
+- [x] Confirm browser artifact ID `9962552182`.
 
 ### Connections — COMPLETE FOR CURRENT JOINT-LOCATION INPUT-REVIEW SCOPE
-- [x] Define a separate connection joint-location readiness contract referencing an active staged connection by stable ID.
-- [x] Preserve original `fromComponentId`, `toComponentId`, capacity state, provenance, and verification state from the staged specimen.
+- [x] Separate topology from physical joint point.
 - [x] Require explicit finite caller-supplied global joint point plus provenance/verification; no coordinate defaults.
-- [x] Prove a missing joint point stays unresolved even when component boxes visibly intersect or a center-to-center midpoint looks plausible.
-- [x] Keep connector path/axis/shape, stiffness, slip, fastener count, demand/capacity assessment, PASS/FAIL, load transfer, and whole-house response unavailable in this location-readiness gate.
-- [x] Add deterministic unit tests and production-browser acceptance.
-- [x] Confirm CI run `33949048522` and browser run `33949048519` green; browser artifact ID `9964232114`.
+- [x] Prove missing joint point stays unresolved even when rendered component boxes appear to intersect.
+- [x] Keep connector path/axis/shape, stiffness, slip, fastener count, demand/capacity, PASS/FAIL, load transfer, and whole-house response unavailable.
+- [x] Confirm browser artifact ID `9964232114`.
 
 ### Bracing topology-readiness — COMPLETE FOR CURRENT TOPOLOGY SCOPE
-- [x] Define a bracing topology-readiness contract referencing an active staged `brace` by stable ID.
-- [x] Require two distinct caller-selected active connection records explicitly incident to the selected brace before topology can become `review_ready_topology`.
+- [x] Require two distinct explicit active brace-end connection records before `review_ready_topology`.
 - [x] Prove visible diagonal geometry never creates a missing second brace end or physical joint location.
-- [x] Keep axial force, tension/compression state, stiffness, effective length, slenderness, buckling, racking contribution, demand/capacity, utilization, PASS/FAIL, and load-path adequacy unavailable.
-- [x] Preserve current canonical `synthetic-brace-north-west` as intentionally topology-incomplete: one explicit incident connection → `load_path_incomplete`, `1 / 2` selected ends.
-- [x] Add QA-only augmented test fixture proving two separately declared ends can reach topology review while mechanics remain unavailable.
-- [x] Wire Bracing review into the Small House chamber without adding a fake second end.
-- [x] Production-browser acceptance proves incomplete-load-path semantics and invalidation below `bracing`.
-- [x] Confirm RPE CI run `33949445089` and browser run `33949445200` green; browser artifact ID `9964350351`.
+- [x] Preserve canonical `synthetic-brace-north-west` as `load_path_incomplete`, `1 / 2` ends.
+- [x] Keep axial force, stiffness, buckling, racking contribution, demand/capacity, utilization, PASS/FAIL, and adequacy unavailable.
+- [x] Confirm browser artifact ID `9964350351`.
 
 ### Anchorage interface-readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
-- [x] Define anchorage topology/interface readiness referencing an active staged `anchor` by stable ID.
-- [x] Preserve anchor geometry/orientation/material/mass/provenance exactly from the stage snapshot.
-- [x] Require an explicit active anchor-to-primary-support topology connection; do not infer attachment from marker position, proximity, visible touching, or ground-plane coincidence.
-- [x] Confirm the opposite endpoint is an active `primary_support`.
-- [x] Preserve `materialId`, `massKg`, and topology `capacityN` as UNKNOWN when the staged specimen says `null`.
-- [x] Keep physical attachment point, bolt/rod properties, embedment, base plate, weld/fastener details, pedestal/footing, concrete/soil properties, reactions, uplift/sliding/overturning resistance, pullout/breakout, demand/capacity, utilization, and PASS/FAIL unavailable.
-- [x] Wire the Anchorage panel into the Small House chamber with explicit provenance/verification review inputs only.
-- [x] Add deterministic unit tests and production-browser acceptance including invalidation below `anchorage`.
-- [x] Confirm RPE CI run `33950699730` and browser run `33950699741` green; browser artifact ID `9964743865`.
+- [x] Require explicit active anchor-to-primary-support topology; no inferred interface from proximity/touching/ground coincidence.
+- [x] Keep attachment point, bolt/embedment/base plate, footing/soil, reactions/resistance, demand/capacity, utilization, and PASS/FAIL unavailable.
+- [x] Confirm production-browser artifact ID `9964743865`; clean-head artifact `9964831153`.
 
 ### Storm-protection restraint topology-readiness — COMPLETE FOR CURRENT TOPOLOGY SCOPE
-- [x] Define a storm-protection restraint topology contract referencing an active staged `storm_protection_member` by stable ID.
-- [x] Require two distinct explicit active connection records incident to the selected restraint member and two distinct active opposite endpoint components before topology can become review-ready.
-- [x] Prove visible strap/line geometry cannot manufacture a missing second restraint endpoint or physical attachment point.
-- [x] Preserve canonical `synthetic-storm-strap-west` as intentionally incomplete: one explicit roof-side relationship to `synthetic-roof-west` → `restraint_path_incomplete`, `1 / 2` selected ends.
-- [x] Reject two different connection records that both terminate at the same opposite component as a fake two-ended path.
-- [x] Keep tension/preload, stiffness, elongation/slack, fastener/attachment details, member strength, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house improvement unavailable.
-- [x] Add a QA-only augmented fixture with a separately declared second restraint-end relationship to `synthetic-anchor-nw`; topology may become `review_ready_topology` while mechanics remain unavailable.
-- [x] Wire the Storm Protection review panel into the Small House chamber without adding a fake second end.
-- [x] Add deterministic regressions and real production-browser acceptance, including invalidation below `storm_protection`.
-- [x] Confirm RPE CI run `33951312722` and production-browser run `33951312736` green; browser artifact ID `9964940298`.
+- [x] Require two distinct explicit incident connections and two distinct active opposite endpoint components before topology review.
+- [x] Preserve canonical `synthetic-storm-strap-west` as one-ended: `restraint_path_incomplete`, `1 / 2` ends.
+- [x] Reject duplicate records to the same opposite endpoint as a fake complete path.
+- [x] Keep physical attachment coordinates, tension/preload, stiffness/slack, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house benefit unavailable.
+- [x] Confirm production-browser artifact ID `9964940298`; final clean-head Storm artifact `9965015712`.
 
-### Controlled A/B specimen difference — CURRENT GATE
-- [ ] Define a deterministic comparison contract for two validated Small House specimen definitions.
-- [ ] Require identical schema/envelope/component geometry/identity/material/mass/orientation and all unrelated connection records unless the caller explicitly declares the one allowed structural variable.
-- [ ] First QA pair: Variant A = canonical house; Variant B = same house plus exactly one explicit second Storm restraint-end topology relationship from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
-- [ ] Prove the comparison detects exactly one connection-record addition and zero unrelated geometry/component/property mutations.
-- [ ] Reject zero-difference pairs, multi-variable differences, geometry drift, component property drift, reordered/rewritten unrelated records, or undeclared mutations.
-- [ ] Preserve result as `controlled_input_difference` / input-review evidence only; do not call Variant B stronger, safer, more resilient, code-compliant, or better-performing.
-- [ ] Add deterministic regression tests and production-browser evidence for the controlled-difference audit.
+### Controlled A/B specimen difference — COMPLETE FOR CURRENT INPUT-CONTROL SCOPE
+- [x] Define deterministic comparison contract for two validated Small House specimen definitions.
+- [x] Compare stable-ID canonicalized content so array reordering alone is not a structural difference.
+- [x] Require identical specimen metadata, envelope, component records/geometry, and all pre-existing connection records except the one caller-declared structural variable.
+- [x] Canonical QA pair: A = canonical house; B = same house plus only `synthetic-connection-storm-west-second-end` from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
+- [x] Reject missing declared change, geometry drift, component/property drift, unrelated connection edits/additions, and multiple variables.
+- [x] Preserve successful result as `controlled_input_difference` / `rpe_input_review` only.
+- [x] Keep mechanics, performance comparison, structural result, winner/ranking, and benefit claim unavailable.
+- [x] Add deterministic regression coverage and production-browser acceptance including stage invalidation.
+- [x] Confirm RPE CI run `33959003440` and production-browser run `33959003346` green; browser artifact ID `9967337114`.
 
-### Later Phase 4 topology/mechanics layers
+### Analytical surface wind action — CURRENT GATE
+- [ ] Define a Phase 4 surface wind-action contract referencing one active staged wall or roof panel by stable ID.
+- [ ] Require explicit finite air density, wind speed, effective wind area, signed pressure/force coefficient basis, global action direction, provenance, and verification; no defaults.
+- [ ] Keep geometry-only panel face area distinct from caller-declared effective wind area.
+- [ ] Calculate only a transparent first-slice analytical action such as `q = 0.5ρV²`, signed scalar surface action from explicit coefficient inputs, and an explicit global force vector.
+- [ ] Do not infer code pressure coefficients, roof/wall zones, internal pressure, gust/topographic factors, shielding, tributary load paths, joint reactions, or connection demand.
+- [ ] Require the global action direction to be explicit and finite in the first slice rather than silently deriving it from rendered panel normal/scene geometry.
+- [ ] Add regressions proving missing/invalid inputs block calculation and unrelated geometry cannot manufacture aerodynamic inputs.
+- [ ] Wire one synthetic wall/roof QA case into the browser with strong `RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE` labeling.
+- [ ] Production-browser acceptance must prove pressure/load vector output while downstream connection/reaction/capacity claims remain unavailable.
+
+### Later Phase 4 mechanics layers
+- [ ] Extend surface wind action to controlled multi-surface house loading only after the first surface contract is accepted.
 - [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
 - [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
 - [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
 - [ ] Add storm-protection mechanics only after a two-ended restraint path, attachment geometry, member properties, loads, and failure modes are explicit.
-- [ ] Connect controlled A/B specimen differences to explicit analytical/solver evidence only when the corresponding mechanics gates exist.
-- [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one declared structural variable changed and the evidence layer is reported honestly.
+- [ ] Connect controlled A/B specimen differences to explicit analytical/solver evidence only when corresponding mechanics gates exist.
+- [ ] Produce the Phase 4 roadmap outputs: pressure/load vectors, connection demand/capacity, uplift/sliding reactions, racking indicators, failure sequence, detached debris, and residual state where supported.
+- [ ] Reach Phase 4 exit only after the required house-level evidence exists and same-geometry A/B runs change exactly one declared structural variable.
 
 ## Failed-check record retained
 - [x] Keep Genesis Browser Acceptance run `33936435595` visible: old selector matched two verification controls after aerodynamic UI expansion.
@@ -157,7 +143,7 @@
 - [x] Keep Phase 4 orientation intermediate RPE CI failure at commit `c089e0e4423a2853a50b41066e1320fd1fbbe437` visible; later tests/build were skipped rather than waived.
 - [x] Keep Roof readiness RPE CI run `33942967313` visible: exact floating-point assertion expected `9.84` while raw multiplication returned `9.839999999999998`; contract unchanged, test repaired with `1e-12` tolerance.
 - [x] Keep Roof Browser Acceptance Patch run `33943182691` visible: one-shot text anchor matched twice and failed before changing acceptance code; repaired with a unique multiline anchor.
-- [x] Keep Bracing Readiness Patch run `33949368220` visible: deterministic patch and `git diff --check` passed, but GitHub correctly refused bot modification of a workflow file without workflow permission. No permission escalation was used; the write boundary was narrowed and repaired run `33949425974` passed.
+- [x] Keep Bracing Readiness Patch run `33949368220` visible: deterministic patch and `git diff --check` passed, but GitHub correctly refused bot modification of a workflow file without workflow permission. No permission escalation was used; repaired run `33949425974` passed.
 
 ## Later mechanics gates — not to be invented early
 - [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
