@@ -58,14 +58,15 @@ export default function ConnectionJointLocationReadinessPanel({
       return null;
     }
 
+    const normalizedJointVerification: GenesisVerificationState | null =
+      allCoordinatesReady && jointVerification !== "" ? jointVerification : null;
+
     const input: ConnectionJointLocationReadinessInput = {
       schemaVersion: CONNECTION_JOINT_LOCATION_READINESS_SCHEMA_VERSION,
       connectionId,
       jointPointM: allCoordinatesReady ? { x, y, z } : null,
       jointPointSourceNote: allCoordinatesReady ? jointSource : null,
-      jointPointVerificationState: allCoordinatesReady
-        ? jointVerification
-        : null,
+      jointPointVerificationState: normalizedJointVerification,
       sourceNote,
       verificationState: verification,
     };
