@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.3.0",
+  schemaVersion: "0.4.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -42,6 +42,7 @@ const record = {
     "Connection topology has no physical joint-coordinate contract yet, so the viewer intentionally draws no connection lines.",
     "Primary-support readiness is an input-review evidence layer, not a structural-response calculation.",
     "The isolated cantilever calculator is an RPE analytical formula benchmark only; it does not evaluate strength, PASS/FAIL, whole-house load path, solver response, or code compliance.",
+    "Floor/ring readiness is member/topology review only; schema v0.1.0 deliberately accepts no joint coordinates and performs no global frame calculation.",
   ],
 };
 
@@ -60,10 +61,13 @@ try {
   await waitForBodyText(page, "Synthetic Phase 4 staged-house QA fixture");
   await waitForBodyText(page, "VISIBLE ≠ ADEQUATE");
   await waitForBodyText(page, "Primary-support mechanics readiness");
+  await waitForBodyText(page, "Floor/ring-frame member readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
+  await waitForBodyText(page, "Global frame calculation: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
+  record.checks.floorRingReadinessPanelVisible = true;
 
   const stage = page.getByLabel("Phase 4 stage", { exact: true });
   if ((await stage.count()) !== 1) fail(`Expected one Phase 4 stage selector; found ${await stage.count()}`);
@@ -154,8 +158,6 @@ try {
   await page.getByLabel("Calculation source note", { exact: true }).fill("Synthetic browser QA Euler-Bernoulli formula benchmark only");
   await page.getByLabel("Calculation verification", { exact: true }).selectOption("unverified");
 
-  // L=2.7 m from explicit local_y size, P=1000 N, E=10 GPa, I=1e-4 m^4.
-  // Expected V=1000 N, M=2700 N-m, delta=0.006561 m.
   await waitForBodyText(page, "Cantilever analytical result: READY");
   await waitForBodyText(page, "Evidence: rpe_analytical");
   await waitForBodyText(page, "Length L: 2.700000 m");
@@ -168,11 +170,45 @@ try {
   record.checks.cantileverHandFormulaBenchmarkVerified = true;
   record.checks.cantileverCapacityNotEvaluated = true;
 
-  // Returning to envelope-only must invalidate both readiness and analytical response.
+  // Floor/ring readiness: semantic endpoints only. Joint coordinates remain unavailable by schema.
+  await stage.selectOption("floor_ring_frame");
+  await page.getByLabel("Floor ring member component", { exact: true }).selectOption("synthetic-ring-north");
+  await page.getByLabel("Floor ring member longitudinal axis", { exact: true }).selectOption("local_x");
+  await page.getByLabel("Floor ring End A role", { exact: true }).fill("west end role");
+  await page.getByLabel("Floor ring End B role", { exact: true }).fill("east end role");
+  await page.getByLabel("Floor ring End A source note", { exact: true }).fill("Synthetic browser QA endpoint role only");
+  await page.getByLabel("Floor ring End B source note", { exact: true }).fill("Synthetic browser QA endpoint role only");
+  await page.getByLabel("Floor ring End A verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Floor ring End B verification", { exact: true }).selectOption("unverified");
+  await page.getByLabel("Floor ring readiness source note", { exact: true }).fill("Synthetic browser QA floor-ring readiness only");
+  await page.getByLabel("Floor ring readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Floor/ring readiness state: review_ready");
+  await waitForBodyText(page, "Member ID: synthetic-ring-north");
+  await waitForBodyText(page, "Global frame calculation: NO");
+  await waitForBodyText(page, "End A joint coordinate: UNKNOWN — NOT ACCEPTED IN SCHEMA v0.1.0");
+  await waitForBodyText(page, "End B joint coordinate: UNKNOWN — NOT ACCEPTED IN SCHEMA v0.1.0");
+  await waitForBodyText(page, "Elastic modulus / A / I / strength: UNKNOWN — NOT DEFINED IN THIS CONTRACT");
+  await waitForBodyText(page, "Load-transfer model: UNKNOWN / NONE");
+  if (await page.locator('input[aria-label*="joint coordinate" i]').count()) {
+    fail("Floor/ring readiness schema unexpectedly exposed a joint-coordinate input");
+  }
+  record.checks.floorRingReadinessExplicitInputsAccepted = true;
+  record.checks.floorRingJointCoordinatesRemainUnavailable = true;
+  record.checks.floorRingGlobalFrameCalculationBlocked = true;
+
+  // Lowering below floor/ring activation must block retained readiness assumptions.
+  await stage.selectOption("primary_supports");
+  await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
+  await waitForBodyTextAbsent(page, "Member ID: synthetic-ring-north");
+  record.checks.floorRingReadinessBlockedBelowActivationStage = true;
+
+  // Returning to envelope-only must invalidate all physical-member review/results.
   await stage.selectOption("empty_envelope");
   await waitForBodyText(page, "Structural result: N/A");
   await waitForBodyText(page, "Readiness state: blocked_stage_before_primary_supports");
   await waitForBodyText(page, "Cantilever analytical result: NOT AVAILABLE");
+  await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
