@@ -22,6 +22,12 @@ import {
 import { assessGenesisRigidBodyReleaseGate } from "@/lib/genesis/rigidBodyGate";
 import { assessGenesisDebrisDynamicsGate } from "@/lib/genesis/debrisDynamicsGate";
 import {
+  assessGenesisAerodynamicForceApplicationGate,
+  createGenesisAerodynamicForceApplicationPlan,
+} from "@/lib/genesis/aerodynamicForceApplication";
+import type { GenesisAerodynamicForceApplicationPlan } from "@/types/genesisForceApplication";
+import type { GenesisAerodynamicForceStepEvaluation } from "@/lib/genesis/aerodynamicForceWindow";
+import {
   assessGenesisPostReleaseAerodynamicGate,
   calculateGenesisPostReleaseAerodynamics,
 } from "@/lib/genesis/postReleaseAerodynamics";
@@ -32,9 +38,13 @@ import {
 } from "@/lib/genesis/collisionTarget";
 import {
   createGenesisLiveSimulationEvidence,
+  recordGenesisAerodynamicForceApplication,
   recordGenesisRapierCollisionEnter,
   type GenesisLiveSimulationEvidenceSnapshot,
 } from "@/lib/genesis/liveSimulationEvidence";
+import GenesisAerodynamicForceDriver, {
+  GENESIS_RAPIER_FIXED_STEP_SECONDS,
+} from "@/components/GenesisAerodynamicForceDriver";
 import GenesisEventLedgerPanel from "@/components/GenesisEventLedgerPanel";
 import { rpeTokens } from "@/lib/ui/tokens";
 
@@ -159,14 +169,20 @@ function DynamicPanel({
   releaseGate,
   dynamicsGate,
   collisionTarget,
+  aerodynamicForcePlan,
+  runContextKey,
   onCollisionEnter,
+  onAerodynamicForceStep,
 }: {
   widthM: number;
   heightM: number;
   releaseGate: GenesisRigidBodyGateResult;
   dynamicsGate: GenesisDebrisDynamicsGateResult;
   collisionTarget: GenesisCollisionTargetContract | null;
+  aerodynamicForcePlan: GenesisAerodynamicForceApplicationPlan | null;
+  runContextKey: string;
   onCollisionEnter: (otherUserData: unknown) => void;
+  onAerodynamicForceStep: (evaluation: GenesisAerodynamicForceStepEvaluation) => void;
 }) {
   const rigidBodyRef = useRef<RapierRigidBody>(null);
 
@@ -205,7 +221,13 @@ function DynamicPanel({
   const gravity = dynamicsGate.gravityMps2;
 
   return (
-    <Physics gravity={[gravity.x, gravity.y, gravity.z]}>
+    <Physics gravity={[gravity.x, gravity.y, gravity.z]} timeStep={GENESIS_RAPIER_FIXED_STEP_SECONDS}>
+      <GenesisAerodynamicForceDriver
+        rigidBodyRef={rigidBodyRef}
+        plan={aerodynamicForcePlan}
+        runContextKey={runContextKey}
+        onForceStepEvidence={onAerodynamicForceStep}
+      />
       <RigidBody
         ref={rigidBodyRef}
         colliders="cuboid"
@@ -246,7 +268,10 @@ function GenesisPanelScene({
   releaseGate,
   dynamicsGate,
   collisionTarget,
+  aerodynamicForcePlan,
+  runContextKey,
   onCollisionEnter,
+  onAerodynamicForceStep,
 }: {
   widthM: number;
   heightM: number;
@@ -255,7 +280,10 @@ function GenesisPanelScene({
   releaseGate: GenesisRigidBodyGateResult | null;
   dynamicsGate: GenesisDebrisDynamicsGateResult | null;
   collisionTarget: GenesisCollisionTargetContract | null;
+  aerodynamicForcePlan: GenesisAerodynamicForceApplicationPlan | null;
+  runContextKey: string;
   onCollisionEnter: (otherUserData: unknown) => void;
+  onAerodynamicForceStep: (evaluation: GenesisAerodynamicForceStepEvaluation) => void;
 }) {
   const halfWidth = widthM / 2;
   const halfHeight = heightM / 2;
@@ -293,7 +321,10 @@ function GenesisPanelScene({
           releaseGate={releaseGate}
           dynamicsGate={dynamicsGate}
           collisionTarget={collisionTarget}
+          aerodynamicForcePlan={aerodynamicForcePlan}
+          runContextKey={runContextKey}
           onCollisionEnter={onCollisionEnter}
+          onAerodynamicForceStep={onAerodynamicForceStep}
         />
       ) : (
         <>
@@ -418,6 +449,10 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
   const [aeroDragCoefficientText, setAeroDragCoefficientText] = useState("");
   const [aeroSourceNoteText, setAeroSourceNoteText] = useState("");
   const [aeroVerificationText, setAeroVerificationText] = useState<TargetVerificationText>("");
+  const [aeroApplicationEnabled, setAeroApplicationEnabled] = useState(false);
+  const [aeroApplicationBodyIdText, setAeroApplicationBodyIdText] = useState("");
+  const [aeroApplicationSourceNoteText, setAeroApplicationSourceNoteText] = useState("");
+  const [aeroApplicationVerificationText, setAeroApplicationVerificationText] = useState<TargetVerificationText>("");
   const [collisionEvidenceState, setCollisionEvidenceState] = useState<CollisionEvidenceState>({
     inputKey: "",
     snapshot: null,
@@ -557,6 +592,51 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     }
   }, [postReleaseAerodynamicGate]);
 
+  const aerodynamicForceApplicationGate = useMemo(() => {
+    if (!dynamicsGate || aeroApplicationVerificationText === "") return null;
+    try {
+      return assessGenesisAerodynamicForceApplicationGate(
+        dynamicsGate,
+        postReleaseAerodynamicGate,
+        postReleaseAerodynamicResult,
+        {
+          enabled: aeroApplicationEnabled,
+          bodyId: aeroApplicationBodyIdText,
+          sourceNote: aeroApplicationSourceNoteText,
+          verificationState: aeroApplicationVerificationText,
+        },
+      );
+    } catch {
+      return null;
+    }
+  }, [
+    dynamicsGate,
+    postReleaseAerodynamicGate,
+    postReleaseAerodynamicResult,
+    aeroApplicationEnabled,
+    aeroApplicationBodyIdText,
+    aeroApplicationSourceNoteText,
+    aeroApplicationVerificationText,
+  ]);
+
+  const aerodynamicForceApplicationPlan = useMemo<GenesisAerodynamicForceApplicationPlan | null>(() => {
+    if (
+      !aerodynamicForceApplicationGate?.canApply ||
+      aerodynamicForceApplicationGate.state !== "force_application_ready" ||
+      !postReleaseAerodynamicResult
+    ) {
+      return null;
+    }
+    try {
+      return createGenesisAerodynamicForceApplicationPlan(
+        aerodynamicForceApplicationGate,
+        postReleaseAerodynamicResult,
+      );
+    } catch {
+      return null;
+    }
+  }, [aerodynamicForceApplicationGate, postReleaseAerodynamicResult]);
+
   const collisionTarget = useMemo<GenesisCollisionTargetContract | null>(() => {
     if (
       targetIdText.trim() === "" ||
@@ -613,6 +693,19 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
     targetSizeZText,
     targetSourceNoteText,
     targetVerificationText,
+    aeroIntervalText,
+    aeroDensityText,
+    aeroRelativeXText,
+    aeroRelativeYText,
+    aeroRelativeZText,
+    aeroProjectedAreaText,
+    aeroDragCoefficientText,
+    aeroSourceNoteText,
+    aeroVerificationText,
+    aeroApplicationEnabled ? "enabled" : "disabled",
+    aeroApplicationBodyIdText,
+    aeroApplicationSourceNoteText,
+    aeroApplicationVerificationText,
   ].join("|");
 
   const baseLiveEvidence = useMemo<GenesisLiveSimulationEvidenceSnapshot | null>(() => {
@@ -650,6 +743,36 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             panelId: "genesis-panel-001",
             otherObjectId,
             sourceNote,
+          }),
+        };
+      } catch {
+        return current;
+      }
+    });
+  };
+
+  const handleAerodynamicForceStep = (evaluation: GenesisAerodynamicForceStepEvaluation) => {
+    if (!baseLiveEvidence || !aerodynamicForceApplicationPlan) return;
+
+    setCollisionEvidenceState((current) => {
+      const startingSnapshot =
+        current.inputKey === liveEvidenceInputKey && current.snapshot
+          ? current.snapshot
+          : baseLiveEvidence;
+
+      try {
+        return {
+          inputKey: liveEvidenceInputKey,
+          snapshot: recordGenesisAerodynamicForceApplication(startingSnapshot, {
+            bodyId: evaluation.bodyId,
+            state: evaluation.state,
+            elapsedSeconds: evaluation.elapsedSeconds,
+            physicsStepSeconds: evaluation.physicsStepSeconds,
+            activeDurationSeconds: evaluation.activeDurationSeconds,
+            activeFractionOfPhysicsStep: evaluation.activeFractionOfPhysicsStep,
+            effectiveForceN: evaluation.effectiveForceN,
+            expectedImpulseNs: evaluation.expectedImpulseNs,
+            sourceNote: `${aerodynamicForceApplicationPlan.provenance.sourceNote} Live fixed-step Rapier center-of-mass application observation; no aerodynamic torque, CFD authority, solver authority, or physical-test claim.`,
           }),
         };
       } catch {
@@ -714,7 +837,10 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             releaseGate={releaseGate}
             dynamicsGate={dynamicsGate}
             collisionTarget={collisionTarget}
+            aerodynamicForcePlan={aerodynamicForceApplicationPlan}
+            runContextKey={liveEvidenceInputKey}
             onCollisionEnter={handlePanelCollisionEnter}
+            onAerodynamicForceStep={handleAerodynamicForceStep}
           />
         ) : viewMode === "genesis_panel" ? (
           <GenesisNullHouse directionDegrees={smokeEnabled ? directionDegrees : null} />
@@ -789,7 +915,7 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
             <VectorInputs label="Relative air velocity" unit="m/s" values={[aeroRelativeXText, aeroRelativeYText, aeroRelativeZText]} setters={[setAeroRelativeXText, setAeroRelativeYText, setAeroRelativeZText]} />
             <label className="mt-2 block text-slate-300">Aerodynamic source note<input className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroSourceNoteText} onChange={(event) => setAeroSourceNoteText(event.target.value)} placeholder="required provenance" /></label>
             <label className="mt-2 block text-slate-300">Aerodynamic verification state
-              <select className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroVerificationText} onChange={(event) => setAeroVerificationText(event.target.value as TargetVerificationText)}>
+              <select aria-label="Aerodynamic verification state" className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroVerificationText} onChange={(event) => setAeroVerificationText(event.target.value as TargetVerificationText)}>
                 <option value="">required; no default</option>
                 <option value="verified">verified</option>
                 <option value="provisional">provisional</option>
@@ -806,9 +932,35 @@ export default function Viewport3D({ specimen, activeFailureEvent }: Viewport3DP
                   <div>Drag magnitude: <strong>{postReleaseAerodynamicResult.dragForceMagnitudeN.toFixed(2)} N</strong></div>
                   <div>Drag vector: <strong>({postReleaseAerodynamicResult.dragForceN.x.toFixed(2)}, {postReleaseAerodynamicResult.dragForceN.y.toFixed(2)}, {postReleaseAerodynamicResult.dragForceN.z.toFixed(2)}) N</strong></div>
                   <div>Constant-force FΔt: <strong>({postReleaseAerodynamicResult.constantForceImpulseNs.x.toFixed(2)}, {postReleaseAerodynamicResult.constantForceImpulseNs.y.toFixed(2)}, {postReleaseAerodynamicResult.constantForceImpulseNs.z.toFixed(2)}) N·s</strong></div>
-                  <div className="pt-1 font-semibold text-amber-300">NOT APPLIED TO RAPIER — analytical evidence only</div>
+                  <div className="pt-1 font-semibold text-amber-300">ANALYTICAL RESULT ONLY — live application still requires the explicit force-application gate below.</div>
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="mt-3 border-t border-slate-800 pt-2">
+            <div className="font-semibold text-cyan-200">Live aerodynamic force application — explicit opt-in</div>
+            <p className="mt-1 text-[10px] text-slate-500">Default is OFF. When ready, only the tested fixed-step scheduler output is applied at the rigid-body center of mass. Aerodynamic torque remains unmodeled.</p>
+            <label className="mt-2 flex items-center gap-2 text-slate-300">
+              <input aria-label="Enable post-release aerodynamic force" type="checkbox" checked={aeroApplicationEnabled} onChange={(event) => setAeroApplicationEnabled(event.target.checked)} />
+              Enable post-release aerodynamic force
+            </label>
+            <label className="mt-2 block text-slate-300">Force application body ID<input className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroApplicationBodyIdText} onChange={(event) => setAeroApplicationBodyIdText(event.target.value)} placeholder="required; must match aerodynamic body" /></label>
+            <label className="mt-2 block text-slate-300">Force application source note<input className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroApplicationSourceNoteText} onChange={(event) => setAeroApplicationSourceNoteText(event.target.value)} placeholder="required provenance" /></label>
+            <label className="mt-2 block text-slate-300">Force application verification state
+              <select aria-label="Force application verification state" className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={aeroApplicationVerificationText} onChange={(event) => setAeroApplicationVerificationText(event.target.value as TargetVerificationText)}>
+                <option value="">required; no default</option>
+                <option value="verified">verified</option>
+                <option value="provisional">provisional</option>
+                <option value="unverified">unverified</option>
+              </select>
+            </label>
+            <div className="mt-2 rounded border border-cyan-950 bg-slate-900/60 p-2 text-[10px] text-slate-300">
+              <div>Force application gate: <strong>{aerodynamicForceApplicationGate?.state ?? "NOT EVALUATED"}</strong></div>
+              <div className="mt-1">Force application plan: <strong>{aerodynamicForceApplicationPlan ? "READY — LIVE COM FORCE" : "NONE"}</strong></div>
+              <div className="mt-1">Physics step: <strong>{GENESIS_RAPIER_FIXED_STEP_SECONDS.toFixed(6)} s fixed</strong></div>
+              <div className="mt-1">Aerodynamic torque: <strong>NOT MODELED</strong></div>
+              {aerodynamicForceApplicationGate && <div className="mt-1 text-slate-500">{aerodynamicForceApplicationGate.reason}</div>}
             </div>
           </div>
 
