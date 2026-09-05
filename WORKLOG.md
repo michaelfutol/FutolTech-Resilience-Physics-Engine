@@ -1,5 +1,19 @@
 # Worklog
 
+## [2026-09-05] - Genesis Live Browser Collision Gate Passed
+- Continued from the canonical `lum-rpe-takeover` branch and the locked scientific-orchestration skill.
+- Confirmed the connected Vercel account still has no RPE project. A direct connector deployment attempt could not be completed because the exposed deployment action did not provide the required file payload contract, so no Vercel deployment was fabricated.
+- Added `scripts/genesis-browser-acceptance.mjs` and `.github/workflows/genesis-browser-acceptance.yml` to run the actual production Next.js app in headless Chromium and exercise the live Rapier path rather than relying on the synthetic unit fixture.
+- First browser run `33935001119` correctly failed before physics acceptance because the Playwright selector could not resolve the `Verification state` select. The application built/started cleanly and recorded no page/console errors; the failure was kept as a real test-plumbing defect rather than waived.
+- Repaired only the selector logic in commit `510dc5c3b9892f40e82428e8aea64e3d2251b75b`; the synthetic physics/geometry inputs and acceptance criteria were not weakened.
+- Normal RPE CI run `33935187251` passed dependency install, lint, strict TypeScript, automated tests, and production build on that commit.
+- Genesis Browser Acceptance run `33935187278` then passed in the real production build under headless Chromium.
+- Browser evidence recorded: analytical threshold exceeded; `release_ready`; `simulation_ready`; Rapier active; declared target visible; genuine `collision_enter` observed; `otherObjectId=synthetic-browser-target-001` matched the declared target; evidence-boundary disclaimer present; changing explicit target center input cleared the prior collision observation; no console errors; no page errors.
+- Evidence artifact: `genesis-browser-acceptance-510dc5c3b9892f40e82428e8aea64e3d2251b75b`, artifact ID `9959936762`, containing the JSON record and screenshot.
+- This gate validates the software event/wiring behavior for the synthetic QA fixture only. It does not validate impact force/energy, damage, friction/restitution, material response, post-release aerodynamics, code compliance, structural solver results, CFD, or physical-test behavior.
+- Canonical `npm ci` remained at zero vulnerabilities. The browser workflow's isolated no-save `playwright@1.55.0` install reported one high advisory; that temporary harness is now an explicit security-cleanup task and is not conflated with the clean committed application dependency graph.
+- Exact next mechanics gate: define/test a provenance-bearing post-release aerodynamic loading/time contract before applying any continuing wind force or aerodynamic torque to the released panel. Pre-release panel force must never be silently converted to impulse.
+
 ## [2026-09-05] - Canonical RPE Scientific Orchestration Skill Locked
 - Converted the preferred RPE plugin stack into a durable repository skill at `skills/rpe-scientific-orchestration/SKILL.md` so the workflow no longer depends on chat memory alone.
 - Locked the preferred lifecycle/responsibility order as **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**.
