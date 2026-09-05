@@ -21,7 +21,7 @@ jobs:
         with:
           ref: lum-rpe-takeover
 
-      - name: Apply inspectable roof browser patch
+      - name: Apply repaired inspectable roof browser patch
         run: python scripts/patch-roof-browser-acceptance.py
 
       - name: Commit browser acceptance if changed
