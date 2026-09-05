@@ -43,6 +43,17 @@ async function fillLabel(page, label, value) {
   await locator.fill(String(value));
 }
 
+async function selectVerificationState(page, value) {
+  const locator = page
+    .locator("label")
+    .filter({ hasText: "Verification state" })
+    .locator("select");
+  if ((await locator.count()) !== 1) {
+    fail(`Expected exactly one Verification state select; found ${await locator.count()}`);
+  }
+  await locator.selectOption(value);
+}
+
 const browser = await chromium.launch({
   headless: true,
   args: ["--use-angle=swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"],
@@ -88,7 +99,7 @@ try {
   await fillLabel(page, "Target box size y", 1);
   await fillLabel(page, "Target box size z", 1);
   await fillLabel(page, "Source note", "Synthetic browser-QA fixture only");
-  await page.getByLabel("Verification state", { exact: true }).selectOption("unverified");
+  await selectVerificationState(page, "unverified");
 
   await waitForBodyText(page, "Analytical state: THRESHOLD EXCEEDED");
   await waitForBodyText(page, "Release gate: release_ready");
