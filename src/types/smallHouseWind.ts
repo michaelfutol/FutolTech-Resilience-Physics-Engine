@@ -36,6 +36,7 @@ export interface SmallHouseStructuralComponentInput {
   activationStage: Exclude<SmallHouseWindStage, "empty_envelope" | "connections">;
   centerM: GenesisVector3;
   sizeM: GenesisVector3;
+  rotationRad: GenesisVector3;
   materialId: string | null;
   massKg: number | null;
   sourceNote: string;
