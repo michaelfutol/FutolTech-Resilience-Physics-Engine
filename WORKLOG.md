@@ -1,5 +1,17 @@
 # Worklog
 
+## [2026-09-05] - Canonical RPE Scientific Orchestration Skill Locked
+- Converted the preferred RPE plugin stack into a durable repository skill at `skills/rpe-scientific-orchestration/SKILL.md` so the workflow no longer depends on chat memory alone.
+- Locked the preferred lifecycle/responsibility order as **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**.
+- Defined the stack as a routing/lifecycle doctrine rather than a requirement to invoke every plugin for every task; unavailable layers must be left pending rather than fabricated.
+- Locked GitHub as the durable source-of-truth layer; OpenAI Developers as the agent/API layer; Supabase as structured experiment/application data; Vercel as deployment/reproducible preview; Data Analytics as scientific analysis; PostHog as product telemetry; Figma as maintained systems-model/diagram infrastructure; and Codex Security as the security review gate.
+- Explicitly separated PostHog product telemetry from engineering/scientific validation evidence.
+- Explicitly promoted Figma beyond UI polish to maintained architecture, state, sequence, ERD, timeline, system, experiment-flow, and data-lineage diagrams.
+- Explicitly promoted Data Analytics as a core scientific layer for test datasets, sensitivity studies, material experiments, calibration, comparisons, validation, uncertainty, charts, and experiment reports.
+- Preserved the permanent RPE doctrine **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY** and required disagreement between evidence layers to remain visible and investigated.
+- Updated `AGENT.md`, `AGENTS.md`, `STATUS_REPORT.md`, `TASKS.md`, and `NEXT_STEPS.md` to reference and enforce the new skill. Also reconciled `AGENT.md` with the current installed Rapier state.
+- No engineering property, simulation result, dataset, validation claim, or scientific evidence was introduced by this documentation/orchestration batch.
+
 ## [2026-09-05] - Genesis Browser-Acceptance Fixture Gate
 - Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch head `81b8a5e3d36ab1d99c230bba073c14115c5921bb` had successful RPE CI run 134 before changing repository state.
 - The connected Vercel project list did not contain an RPE deployment, so the required live browser collision acceptance could not be truthfully executed from a deployed canonical build in this run. The gate remains open.
