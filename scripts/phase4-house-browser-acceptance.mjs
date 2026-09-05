@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.6.0",
+  schemaVersion: "0.7.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -45,6 +45,7 @@ const record = {
     "Floor/ring readiness is member/topology review only; schema v0.1.0 deliberately accepts no joint coordinates and performs no global frame calculation.",
     "Wall-panel readiness derives box-face geometry only from an explicitly declared local normal; it does not define effective wind area, pressure coefficients, net pressure, stiffness, fastener capacity, or wind resistance.",
     "Roof-panel readiness preserves rotated geometry and explicit local-normal/exposed-face declarations only; it does not define roof zones, effective wind area, pressure coefficients, uplift force, connection demand/capacity, or wind resistance.",
+    "Connection joint-location readiness preserves topology and accepts only an explicit caller-declared global joint point; it never infers midpoint/intersection/touching geometry and does not calculate connection mechanics.",
   ],
 };
 
@@ -66,16 +67,19 @@ try {
   await waitForBodyText(page, "Floor/ring-frame member readiness");
   await waitForBodyText(page, "Wall-panel geometry / exposure readiness");
   await waitForBodyText(page, "Roof-panel geometry / exposure readiness");
+  await waitForBodyText(page, "Connection joint-location readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
   await waitForBodyText(page, "Uplift calculation: NO");
+  await waitForBodyText(page, "Connection mechanics: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
   record.checks.floorRingReadinessPanelVisible = true;
   record.checks.wallExposureReadinessPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
+  record.checks.connectionJointLocationPanelVisible = true;
 
   const stage = page.getByLabel("Phase 4 stage", { exact: true });
   if ((await stage.count()) !== 1) fail(`Expected one Phase 4 stage selector; found ${await stage.count()}`);
@@ -270,6 +274,51 @@ try {
   record.checks.roofZoneAndEffectiveWindAreaRemainUndefined = true;
   record.checks.roofUpliftCalculationBlocked = true;
 
+  // Connection joint-location readiness: topology known first, physical point unknown until explicitly declared.
+  await stage.selectOption("connections");
+  await page.getByLabel("Connection component relationship", { exact: true }).selectOption("synthetic-connection-support-ring-nw");
+  await page.getByLabel("Connection readiness source note", { exact: true }).fill("Synthetic browser QA connection-location review only");
+  await page.getByLabel("Connection readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Connection location state: location_unknown");
+  await waitForBodyText(page, "Connection ID: synthetic-connection-support-ring-nw");
+  await waitForBodyText(page, "From component: synthetic-support-nw");
+  await waitForBodyText(page, "To component: synthetic-ring-north");
+  await waitForBodyText(page, "Stored topology capacity: UNKNOWN");
+  await waitForBodyText(page, "Physical global joint point: UNKNOWN");
+  await waitForBodyText(page, "Coordinate basis: unknown");
+  await waitForBodyText(page, "Inferred joint point: NONE — PROHIBITED");
+  await waitForBodyText(page, "Connection mechanics: NO");
+  record.checks.connectionTopologyKnownLocationUnknown = true;
+  record.checks.connectionNoInferredPointVisible = true;
+
+  await page.getByLabel("Connection joint X (m)", { exact: true }).fill("-1.7");
+  await page.getByLabel("Connection joint Y (m)", { exact: true }).fill("0.6");
+  await page.getByLabel("Connection joint Z (m)", { exact: true }).fill("-2.2");
+  await page.getByLabel("Connection joint source note", { exact: true }).fill("Synthetic browser QA explicitly declared global joint point only");
+  await page.getByLabel("Connection joint verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Connection location state: review_ready");
+  await waitForBodyText(page, "Physical global joint point: (-1.7, 0.6, -2.2) m — CALLER DECLARED");
+  await waitForBodyText(page, "Coordinate basis: caller_declared_global_point");
+  await waitForBodyText(page, "Inferred joint point: NONE — PROHIBITED");
+  await waitForBodyText(page, "Connector path / axis / shape / bearing area: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Stiffness / slip / fasteners / welds: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Demand / capacity assessment / utilization / PASS-FAIL / load transfer: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Connection mechanics: NO");
+  if (await page.locator('input[aria-label*="connection demand" i], input[aria-label*="connection capacity" i], input[aria-label*="fastener count" i], input[aria-label*="connector path" i]').count()) {
+    fail("Connection location readiness unexpectedly exposed mechanics inputs");
+  }
+  record.checks.connectionExplicitJointPointAccepted = true;
+  record.checks.connectionMechanicsRemainUnavailable = true;
+
+  // Lowering below connection activation must invalidate the retained location while roof review remains valid.
+  await stage.selectOption("roof");
+  await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
+  await waitForBodyTextAbsent(page, "Connection ID: synthetic-connection-support-ring-nw");
+  await waitForBodyText(page, "Roof readiness state: review_ready");
+  record.checks.connectionLocationBlockedBelowActivationStage = true;
+
   // Lowering below roof activation must block retained roof assumptions while walls remain active.
   await stage.selectOption("walls");
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
@@ -298,6 +347,7 @@ try {
   await waitForBodyText(page, "Floor/ring readiness state: blocked_stage_before_floor_ring_frame");
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
+  await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
