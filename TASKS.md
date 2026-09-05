@@ -1,77 +1,60 @@
 # Tasks
 
-## Completed foundation
-- [x] Phase 0 repository foundation and durable project records.
-- [x] Phase 1 engineering cockpit / scripted visual MVP shell.
-- [x] Phase 1.5 UI refinement and token system.
-- [x] Lock finite RPE v1.0 roadmap and validation doctrine.
-- [x] Lock canonical RPE plugin/scientific orchestration skill: **GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**.
-- [x] Treat Figma as maintained architecture/state/sequence/ERD/timeline/system-diagram infrastructure and Data Analytics as a core scientific-analysis layer.
+## Permanent gates
+- [x] Lock finite RPE v1.0 roadmap.
+- [x] Preserve `CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY`.
+- [x] Keep manual/code, solver, RPE analytical, RPE simulation, browser QA/visualization, and future physical-test evidence distinct.
+- [x] Require explicit provenance/verification state for Genesis engineering/simulation inputs where the contract requires them.
+- [x] Never invent missing material, code, aerodynamic, contact, or engineering properties.
 
-## Phase 2 — Data Spine, Costing, Immutable Prototypes
-- [x] Product / Assembly / CostRate separation and runtime validation.
-- [x] Unknown engineering properties remain explicit `null` / unverified.
-- [x] Deterministic assembly/specimen costing with separated material/labor/equipment/installation.
-- [x] Local rate and quantity/takeoff overrides remain non-destructive context.
-- [x] A0 immutable → temporary draft → explicit candidate derivation.
-- [x] Candidate persistence/revalidation and lineage display.
-- [x] Assembly-backed upgrade flow; incomplete engineering definitions remain blocked.
-- [x] Retire legacy Material/CostItem/fixed UpgradeRule paths from active application code.
-- [x] Automated catalog/cost/derivation/persistence/workflow tests and CI.
-- [ ] Perform manual browser visual acceptance: selectors, quantity/rate overrides, upgrade Apply, Reset, Create Candidate, refresh persistence, lineage, validation warnings.
-- [ ] Record final Phase 2 exit checkpoint after browser acceptance.
+## Phase 2
+- [x] Deterministic catalog validation/costing/candidate derivation/persistence foundation.
+- [x] Automated regression coverage and CI.
+- [ ] Complete final manual Phase 2 browser visual acceptance and record the exit checkpoint.
 
-## Cross-Cutting Dependency / Security Hygiene
-- [x] Classify the direct Next.js advisory gate.
-- [x] Upgrade `next` + matching `eslint-config-next` to `16.3.4`.
-- [x] Regenerate `package-lock.json` without hand-editing integrity data.
-- [x] Run fresh canonical-application dependency audit and record clean audit gate.
-- [x] Install `@react-three/rapier@2.2.0` only after the dependency gate became green.
-- [ ] Classify and replace/upgrade the temporary Playwright browser harness version that currently reports one high advisory during its isolated no-save install. Do not confuse this with the clean committed application dependency graph.
+## Dependency / QA toolchain
+- [x] Remediate canonical Next.js dependency gate and regenerate lockfile through package-manager automation.
+- [x] Install and gate `@react-three/rapier@2.2.0`.
+- [x] Isolate browser acceptance tooling from committed application dependencies.
+- [x] Upgrade isolated browser harness to pinned Playwright 1.62.1 and verify `npm audit --audit-level=high` reports zero vulnerabilities.
 
-## Phase 3 — Genesis Test Chamber
-- [x] Define versioned Genesis wind, panel, connection, evidence-layer and result types.
-- [x] Add tested kph↔m/s conversion.
-- [x] Add simplified analytical dynamic pressure `q = 0.5ρV²` with caller-supplied density.
-- [x] Add panel action `F = qAC` with caller-supplied area and coefficient.
-- [x] Add deterministic connection demand/capacity assessment; unknown capacity remains `unverified`.
-- [x] Lock Null House result to `N/A / no_physical_specimen`.
-- [x] Add Null House viewport and NON-CFD Fast Smoke requiring explicit wind input.
-- [x] Add one panel wired to analytical wind action and explicit equivalent connection state.
-- [x] Add deterministic A/B analytical comparison path and tests.
-- [x] Add deterministic rigid-body release eligibility gate and tests.
-- [x] Add explicit debris-dynamics gate; no gravity/velocity/spin is silently invented.
-- [x] Wire explicit mass/gravity/initial linear/angular velocity into Genesis UI.
-- [x] Instantiate a Rapier rigid body only on `release_ready` + `simulation_ready`.
-- [x] Add deterministic ordered simulation-event ledger for release gate → dynamics gate → activation → optional collision-enter records.
-- [x] Ensure release-to-simulation integration regression is executed by CI.
-- [x] Add immutable live-simulation evidence bridge for Rapier collision-enter observations with upstream activation enforcement.
-- [x] Add reusable ordered Genesis evidence-ledger UI component.
-- [x] Add and execute live-simulation-evidence regression tests in CI.
-- [x] Wire the live evidence bridge into the actual Rapier `onCollisionEnter` callback and mount the ledger component in Genesis UI.
-- [x] Define and test an explicit provenance-bearing collision-target contract: box identity, center, dimensions, source note, verification state only; no inferred contact/engineering properties.
-- [x] Wire explicit collision-target inputs into `Viewport3D`, validate before rendering, and instantiate the validated fixed target in the same Rapier world as released Panel 001.
-- [x] Carry target identity through tested narrow runtime metadata and accept it only when it matches the currently validated explicit target.
-- [x] Add an executable synthetic browser-QA fixture plus documented live acceptance procedure without promoting fixture geometry into collision evidence.
-- [x] Add a reproducible headless-Chromium production-build acceptance workflow and evidence artifact.
-- [x] Verify a genuine live Rapier collision callback with declared target identity and confirm changed explicit target input clears the prior collision observation. Accepted on commit `510dc5c3b9892f40e82428e8aea64e3d2251b75b`, browser run `33935187278`, artifact `9959936762`.
-- [ ] Define a provenance-bearing post-release aerodynamic loading/time contract before applying continuing wind force or aerodynamic torque to debris.
-- [ ] Add tests proving post-release aerodynamic loading cannot run with missing time/aerodynamic inputs and cannot reuse pre-release force as an unstated impulse.
-- [ ] Wire the post-release aerodynamic model only after the pure contract/calculation gate passes.
-- [ ] Add synchronized A/B simulation/replay path.
+## Genesis analytical and simulation foundation
+- [x] Null House `N/A / no_physical_specimen` contract.
+- [x] Fast Smoke explicitly NON-CFD.
+- [x] Explicit analytical wind/panel path `q = 0.5ρV²` → `F = qAC`.
+- [x] Connection demand/capacity assessment with unknown capacity remaining unverified.
+- [x] A/B analytical comparison.
+- [x] Rigid-body release gate.
+- [x] Debris-dynamics gate with explicit mass/gravity/initial velocities.
+- [x] Rapier activation only when release + dynamics gates are ready.
+- [x] Deterministic ordered analytical→simulation event ledger.
+- [x] Live Rapier collision callback evidence bridge.
+- [x] Explicit provenance-bearing collision-target contract and runtime identity matching.
+- [x] Real Chromium synthetic collision-path acceptance and stale-context reset.
 
-## Later phases
-- [ ] Whole-house hazard mechanics.
-- [ ] Dignity Studio/1BR/2BR/3BR controlled family.
-- [ ] BIM/IFC supported import subset.
-- [ ] OpenSees/CalculiX structural-solver coupling.
-- [ ] OpenFOAM CFD coupling.
-- [ ] Multi-hazard layers.
-- [ ] Permanent benchmark library (`RPE-WIN-001`, `RPE-RC-001`, `RPE-MAS-001`, `RPE-RC-002`).
-- [ ] Physical-validation/calibration interface and later test evidence.
-- [ ] RPE v1.0 reproducible release and freeze.
+## Post-release aerodynamics
+- [x] Define/test explicit post-release aerodynamic analytical contract with interval, density, relative air velocity, projected area, drag coefficient, body identity, and provenance.
+- [x] Keep pre-release panel action distinct; do not convert it into post-release impulse.
+- [x] Define/test explicit opt-in aerodynamic force-application plan gated by ready dynamics + ready aerodynamic result + matching body ID.
+- [x] Keep force application at center of mass and aerodynamic torque explicitly unmodeled.
+- [x] Add deterministic per-physics-step force-window scheduler.
+- [x] Preserve the declared load interval on a partial terminal physics step by scaling effective force rather than silently extending duration.
+- [x] Add scheduler regression coverage to the actual `npm test` command.
+- [ ] Wire explicit aerodynamic application opt-in/provenance into Genesis UI/live run context.
+- [ ] Apply only scheduler-returned center-of-mass force to the released Rapier body during the declared interval.
+- [ ] Record force-application start/active/partial/complete state as `rpe_simulation` evidence without promoting it to solver/CFD/physical-test authority.
+- [ ] Browser-test declared start/stop behavior and stale-context reset after any relevant aerodynamic/run input change.
+- [ ] Define aerodynamic torque only in a future separately justified contract; do not infer it from current drag force.
 
-## Permanent Validation Doctrine
-- [ ] For every serious benchmark: **CALCULATE → SOLVE → SIMULATE → TEST → CALIBRATE → THEN SIMPLIFY**.
-- [ ] Preserve discrepancies; investigate rather than hide or average them away.
-- [ ] Keep manual/code, solver, RPE analytical/simulation, visualization, and physical-test evidence distinct.
+## Failed-check record retained
+- [x] Keep Genesis Browser Acceptance run `33936435595` failure visible: old selector matched two verification controls after aerodynamic UI expansion.
+- [x] Keep Genesis Browser Acceptance run `33936534126` failure visible: first repair used an inaccessible exact-label selector and found zero target selects.
+- [x] Repair browser selector by scoping from collision-target `Source note` to its sibling verification select without weakening acceptance criteria.
+- [x] Confirm RPE CI run `33936665268` green and Genesis Browser Acceptance run `33936665296` green on repair commit `4bad29c6d44fd7f08abcead1298dc1c61f89bdc6`.
+
+## Later Genesis gates — not to be invented early
+- [ ] Contact-property contract, only if justified and explicitly sourced/supplied.
+- [ ] Impact mechanics contract, only after required physical quantities/evidence are defined.
+- [ ] Damage/failure model tied to solver/test/calibration evidence.
+- [ ] Physical-test data ingestion and calibration loop.
+- [ ] Controlled simplification only after calculate/solve/simulate/test/calibrate evidence supports it.

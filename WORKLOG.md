@@ -1,5 +1,22 @@
 # Worklog
 
+## [2026-09-05] - Deterministic Aerodynamic Force-Window Scheduler + Browser QA Repair
+- Re-read `ROADMAP.md`, `STATUS_REPORT.md`, `TASKS.md`, `NEXT_STEPS.md`, and `WORKLOG.md`, confirmed active branch `lum-rpe-takeover`, and verified pre-batch canonical head `77f0f650f454ca787b45c83addad241446223696` had successful RPE CI before changing code.
+- Reconciled documentation against canonical code truth before implementing anything: the provenance-bearing post-release aerodynamic analytical contract and the separate non-executing aerodynamic force-application gate had already landed and were tested. Live Rapier aerodynamic application was still absent.
+- Added `src/lib/genesis/aerodynamicForceWindow.ts`, a pure `rpe_simulation` scheduling layer for one future physics step. It does not mutate Rapier or advance simulation time.
+- The scheduler validates finite/nonnegative timing and force inputs, reports before-window/full-step/partial-terminal-step/complete states, and applies no force outside the caller-declared interval.
+- If the declared interval ends part-way through a coarse physics step, the scheduler scales the effective force by `activeDuration / physicsStep` so integrating over that step preserves only `F × activeDuration`; the implementation does not silently extend the load duration.
+- Added `tests/genesis-aerodynamic-force-window.test.ts` with synthetic arithmetic fixtures only and added the suite to the actual `npm test` command. Tests cover full step, partial terminal step, total declared impulse preservation, completed interval, invalid/non-finite inputs, and evidence-boundary fields.
+- No adopted material, code, site, aerodynamic coefficient, contact, impact, solver, CFD, or physical-test property was introduced by the scheduler tests.
+- Implementation commit `5e611c8c55830282bcba9f43fd93f30be24dfc73` passed RPE CI run `33936435420`: dependency installation, lint, strict TypeScript, automated tests, and production build all succeeded.
+- The existing live browser workflow then exposed a real QA regression caused by the newer aerodynamic UI adding another verification control. Genesis Browser Acceptance run `33936435595` failed because the old broad selector found two `Verification state` controls. The failure was not waived.
+- First repair commit `363c7beb94330d0279b088c3522bea9d60d7be72` switched to an exact accessible label. Normal RPE CI run `33936534121` passed, but Genesis Browser Acceptance run `33936534126` failed because the visually nested target `<select>` had no accessible label association and the selector found zero controls. That second failure was also retained and not waived.
+- Final repair commit `4bad29c6d44fd7f08abcead1298dc1c61f89bdc6` scopes from the unique collision-target `Source note` control to the adjacent target verification select. Physics inputs and acceptance criteria were unchanged.
+- RPE CI run `33936665268` passed dependency install, lint, strict TypeScript, automated tests, and production build.
+- Genesis Browser Acceptance run `33936665296` passed the real production Next.js / headless Chromium gate. Evidence artifact `genesis-browser-acceptance-4bad29c6d44fd7f08abcead1298dc1c61f89bdc6`, artifact ID `9960419250`, contains the JSON record and screenshot.
+- The successful browser workflow installed isolated pinned `playwright@1.62.1`; its `npm audit --audit-level=high` reported zero vulnerabilities. This closes the earlier temporary Playwright 1.55.0 high-advisory cleanup item without changing the canonical application dependency graph.
+- Exact next mechanics gate: wire explicit user opt-in + the already-tested aerodynamic result/application plan + fixed-step scheduler into released Panel 001; apply only scheduler-returned center-of-mass force inside the declared interval and record it as `rpe_simulation` evidence. Do not add aerodynamic torque, hidden coefficients, pre-release impulse conversion, contact mechanics, or material properties.
+
 ## [2026-09-05] - Genesis Live Browser Collision Gate Passed
 - Continued from the canonical `lum-rpe-takeover` branch and the locked scientific-orchestration skill.
 - Confirmed the connected Vercel account still has no RPE project. A direct connector deployment attempt could not be completed because the exposed deployment action did not provide the required file payload contract, so no Vercel deployment was fabricated.
