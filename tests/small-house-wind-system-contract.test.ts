@@ -29,6 +29,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "primary_supports",
         centerM: { x: -1.5, y: 1, z: -2 },
         sizeM: { x: 0.2, y: 2, z: 0.2 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic primary-support geometry only",
@@ -40,6 +41,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "floor_ring_frame",
         centerM: { x: 0, y: 0.6, z: -2 },
         sizeM: { x: 3.2, y: 0.15, z: 0.15 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic ring-frame geometry only",
@@ -51,6 +53,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "walls",
         centerM: { x: 0, y: 1.6, z: -2.4 },
         sizeM: { x: 3.6, y: 2, z: 0.08 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic wall geometry only",
@@ -62,6 +65,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "roof",
         centerM: { x: 0, y: 2.9, z: 0 },
         sizeM: { x: 3.8, y: 0.08, z: 4.8 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic roof geometry only",
@@ -73,6 +77,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "bracing",
         centerM: { x: 0, y: 1.5, z: -2.2 },
         sizeM: { x: 0.1, y: 2.2, z: 0.1 },
+        rotationRad: { x: 0, y: 0, z: 0.6 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic brace placeholder geometry only",
@@ -84,6 +89,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "anchorage",
         centerM: { x: -1.5, y: 0.05, z: -2 },
         sizeM: { x: 0.1, y: 0.1, z: 0.1 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic anchor placeholder geometry only",
@@ -95,6 +101,7 @@ function syntheticHouse(): SmallHouseWindSpecimenInput {
         activationStage: "storm_protection",
         centerM: { x: 0, y: 3.1, z: 0 },
         sizeM: { x: 0.08, y: 0.08, z: 5 },
+        rotationRad: { x: 0, y: 0, z: 0 },
         materialId: null,
         massKg: null,
         sourceNote: "Synthetic storm-protection placeholder geometry only",
@@ -163,6 +170,33 @@ test("unknown material, mass, and connection capacity remain explicitly null", (
   assert.equal(specimen.connections[0]?.capacityN, null);
 });
 
+test("explicit component rotation is preserved and cloned independently", () => {
+  const source = syntheticHouse();
+  const specimen = validateSmallHouseWindSpecimen(source);
+  const brace = specimen.components.find((item) => item.id === "synthetic-brace-001");
+
+  assert.deepEqual(brace?.rotationRad, { x: 0, y: 0, z: 0.6 });
+  if (!brace) throw new Error("Synthetic brace fixture missing");
+  brace.rotationRad.z = 1.2;
+  assert.equal(
+    source.components.find((item) => item.id === "synthetic-brace-001")?.rotationRad.z,
+    0.6,
+  );
+});
+
+test("contract rejects non-finite component orientation rather than normalizing it", () => {
+  const invalid = syntheticHouse();
+  invalid.components[0] = {
+    ...invalid.components[0]!,
+    rotationRad: { x: 0, y: Number.NaN, z: 0 },
+  };
+
+  assert.throws(
+    () => validateSmallHouseWindSpecimen(invalid),
+    /rotationRad.y must be finite/,
+  );
+});
+
 test("contract rejects duplicate identity and missing connection endpoints", () => {
   const duplicate = syntheticHouse();
   duplicate.components[0] = {
@@ -223,5 +257,7 @@ test("stage materialization is deterministic and returns copies rather than muta
 
   assert.deepEqual(first, second);
   first.components[0]!.centerM.x = 999;
+  first.components[0]!.rotationRad.z = 999;
   assert.notEqual(source.components[0]!.centerM.x, 999);
+  assert.notEqual(source.components[0]!.rotationRad.z, 999);
 });
