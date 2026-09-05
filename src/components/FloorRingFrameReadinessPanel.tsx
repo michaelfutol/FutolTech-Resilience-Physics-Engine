@@ -128,8 +128,26 @@ export default function FloorRingFrameReadinessPanel({
       </label>
 
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <label className="text-slate-300">End A role<label className="sr-only" htmlFor="floor-ring-end-a-role">End A role</label><input id="floor-ring-end-a-role" aria-label="Floor ring End A role" className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={endARole} onChange={(event) => setEndARole(event.target.value)} placeholder="semantic role only" /></label>
-        <label className="text-slate-300">End B role<label className="sr-only" htmlFor="floor-ring-end-b-role">End B role</label><input id="floor-ring-end-b-role" aria-label="Floor ring End B role" className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1" value={endBRole} onChange={(event) => setEndBRole(event.target.value)} placeholder="semantic role only" /></label>
+        <label className="text-slate-300">
+          End A role
+          <input
+            aria-label="Floor ring End A role"
+            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+            value={endARole}
+            onChange={(event) => setEndARole(event.target.value)}
+            placeholder="semantic role only"
+          />
+        </label>
+        <label className="text-slate-300">
+          End B role
+          <input
+            aria-label="Floor ring End B role"
+            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1"
+            value={endBRole}
+            onChange={(event) => setEndBRole(event.target.value)}
+            placeholder="semantic role only"
+          />
+        </label>
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2">
