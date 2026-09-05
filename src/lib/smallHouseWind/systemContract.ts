@@ -77,6 +77,7 @@ function cloneComponent(
     ...component,
     centerM: { ...component.centerM },
     sizeM: { ...component.sizeM },
+    rotationRad: { ...component.rotationRad },
   };
 }
 
@@ -120,6 +121,7 @@ export function validateSmallHouseWindSpecimen(
     );
     validateFiniteVector(`component[${id}].centerM`, component.centerM);
     validatePositiveSize(`component[${id}].sizeM`, component.sizeM);
+    validateFiniteVector(`component[${id}].rotationRad`, component.rotationRad);
 
     const expectedStage = EXPECTED_COMPONENT_STAGE[component.kind];
     if (!expectedStage) {
