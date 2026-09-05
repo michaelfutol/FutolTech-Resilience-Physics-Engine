@@ -1,6 +1,6 @@
 name: Genesis Browser Acceptance
 
-# Phase 4 browser contract includes Storm Protection topology acceptance schema 0.10.0.
+# Phase 4 clean-head checkpoint: Storm Protection topology acceptance schema 0.10.0; controlled A/B specimen difference is next.
 
 on:
   push:
