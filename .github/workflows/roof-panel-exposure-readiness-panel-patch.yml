@@ -1,0 +1,38 @@
+name: Roof Panel Exposure Readiness Patch
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/roof-panel-exposure-readiness-panel-patch.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-roof-readiness-panel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout canonical branch
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Apply inspectable roof readiness patch
+        run: python scripts/patch-roof-panel-exposure-readiness-panel.py
+
+      - name: Commit readiness panel wiring if changed
+        run: |
+          git config user.name "RPE Roof Readiness Patch Carrier"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/components/Viewport3D.tsx
+          if git diff --cached --quiet; then
+            echo "Roof readiness panel already wired."
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "Wire roof exposure readiness review into Phase 4"
+          git push origin HEAD:lum-rpe-takeover
