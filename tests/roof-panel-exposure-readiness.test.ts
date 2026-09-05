@@ -88,7 +88,7 @@ test("roof exposure readiness preserves rotated geometry and leaves uplift/aerod
   assert.equal(result.panelNormalAxis, "local_y");
   assert.equal(result.exposedFace, "positive_normal");
   assert.equal(result.exposureClass, "exterior");
-  assert.equal(result.geometricFaceAreaM2, 9.84);
+  assert.ok(Math.abs(result.geometricFaceAreaM2! - 9.84) < 1e-12);
   assert.equal(result.effectiveWindAreaM2, null);
   assert.equal(result.roofZone, null);
   assert.deepEqual(result.aerodynamicInputs, {
