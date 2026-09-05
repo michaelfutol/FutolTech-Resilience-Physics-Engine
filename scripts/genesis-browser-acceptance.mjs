@@ -44,10 +44,15 @@ async function fillLabel(page, label, value) {
 }
 
 async function selectVerificationState(page, value) {
-  // Use the exact accessible label so the collision-target verification state
-  // remains unambiguous even when other evidence contracts add their own
-  // separately labeled verification controls.
-  const locator = page.getByLabel("Verification state", { exact: true });
+  // Scope from the collision-target Source note control to its immediately
+  // following Verification state label. This keeps the browser contract tied
+  // to the target section even when independent evidence forms add their own
+  // verification controls elsewhere in the page.
+  const sourceNote = page.getByLabel("Source note", { exact: true });
+  if ((await sourceNote.count()) !== 1) {
+    fail(`Expected exactly one collision-target Source note control; found ${await sourceNote.count()}`);
+  }
+  const locator = sourceNote.locator("xpath=../following-sibling::label[1]/select");
   if ((await locator.count()) !== 1) {
     fail(`Expected exactly one collision-target Verification state select; found ${await locator.count()}`);
   }
