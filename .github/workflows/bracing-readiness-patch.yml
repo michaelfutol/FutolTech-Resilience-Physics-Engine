@@ -1,0 +1,39 @@
+name: Bracing Readiness Patch
+
+on:
+  push:
+    branches:
+      - lum-rpe-takeover
+    paths:
+      - .github/workflows/bracing-readiness-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout takeover branch
+        uses: actions/checkout@v4
+        with:
+          ref: lum-rpe-takeover
+
+      - name: Apply deterministic Bracing UI/browser patch
+        run: python scripts/patch-bracing-readiness-ui-and-browser.py
+
+      - name: Verify patch hygiene
+        run: git diff --check
+
+      - name: Commit patched canonical files
+        run: |
+          if git diff --quiet -- src/components/Viewport3D.tsx .github/workflows/genesis-browser-acceptance.yml scripts/phase4-house-browser-acceptance.mjs; then
+            echo "No Bracing patch changes were produced."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/Viewport3D.tsx .github/workflows/genesis-browser-acceptance.yml scripts/phase4-house-browser-acceptance.mjs
+          git commit -m "Wire Bracing topology readiness into Phase 4 browser gate"
+          git push origin HEAD:lum-rpe-takeover
