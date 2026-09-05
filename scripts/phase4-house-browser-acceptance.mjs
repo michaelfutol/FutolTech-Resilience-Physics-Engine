@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.8.0",
+  schemaVersion: "0.9.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -47,6 +47,7 @@ const record = {
     "Roof-panel readiness preserves rotated geometry and explicit local-normal/exposed-face declarations only; it does not define roof zones, effective wind area, pressure coefficients, uplift force, connection demand/capacity, or wind resistance.",
     "Connection joint-location readiness preserves topology and accepts only an explicit caller-declared global joint point; it never infers midpoint/intersection/touching geometry and does not calculate connection mechanics.",
     "Bracing topology readiness requires two distinct explicit brace-end connection records; visible diagonal geometry cannot create a missing end, physical joint point, stiffness, axial force, buckling model, racking contribution, capacity, or adequacy verdict.",
+    "Anchorage interface readiness identifies only an explicit anchor-to-primary-support topology relationship; it does not infer the physical attachment point, bolt/rod, embedment, base plate, pedestal/footing, concrete/soil properties, reactions, resistance, capacity, or adequacy.",
   ],
 };
 
@@ -70,18 +71,21 @@ try {
   await waitForBodyText(page, "Roof-panel geometry / exposure readiness");
   await waitForBodyText(page, "Connection joint-location readiness");
   await waitForBodyText(page, "Bracing topology readiness");
+  await waitForBodyText(page, "Anchorage interface readiness");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
   await waitForBodyText(page, "Uplift calculation: NO");
   await waitForBodyText(page, "Connection mechanics: NO");
   await waitForBodyText(page, "Bracing mechanics: NO");
+  await waitForBodyText(page, "Anchorage mechanics: NO");
   record.checks.phase4ViewerOpened = true;
   record.checks.performanceDisclaimerVisible = true;
   record.checks.primarySupportReadinessPanelVisible = true;
   record.checks.floorRingReadinessPanelVisible = true;
   record.checks.wallExposureReadinessPanelVisible = true;
   record.checks.bracingTopologyReadinessPanelVisible = true;
+  record.checks.anchorageInterfaceReadinessPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -343,6 +347,40 @@ try {
   record.checks.bracingIncompleteLoadPathVisible = true;
   record.checks.bracingMechanicsRemainUnavailable = true;
 
+  // Anchorage interface readiness: explicit topology identity only; no physical anchorage mechanics.
+  await stage.selectOption("anchorage");
+  await page.getByLabel("Anchorage component", { exact: true }).selectOption("synthetic-anchor-nw");
+  await page.getByLabel("Anchorage attachment connection", { exact: true }).selectOption("synthetic-connection-anchor-nw");
+  await page.getByLabel("Anchorage readiness source note", { exact: true }).fill("Synthetic browser QA anchorage interface identity only");
+  await page.getByLabel("Anchorage readiness verification", { exact: true }).selectOption("unverified");
+
+  await waitForBodyText(page, "Anchorage interface state: review_ready_interface");
+  await waitForBodyText(page, "Anchor ID: synthetic-anchor-nw");
+  await waitForBodyText(page, "Attachment connection: synthetic-connection-anchor-nw");
+  await waitForBodyText(page, "Support ID: synthetic-support-nw");
+  await waitForBodyText(page, "Anchor material: UNKNOWN");
+  await waitForBodyText(page, "Anchor mass: UNKNOWN");
+  await waitForBodyText(page, "Topology capacity: UNKNOWN");
+  await waitForBodyText(page, "Physical attachment point: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Inferred attachment point: NONE — PROHIBITED");
+  await waitForBodyText(page, "Anchorage mechanics: NO");
+  await waitForBodyText(page, "Bolt/rod type & diameter / embedment / base plate / weld-fastener details: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Pedestal / footing / concrete strength / soil model / bearing / friction: UNKNOWN / NOT DEFINED");
+  await waitForBodyText(page, "Uplift & shear reactions / sliding & overturning resistance / pullout & breakout: UNKNOWN / NOT EVALUATED");
+  await waitForBodyText(page, "Demand / capacity / utilization / PASS-FAIL: UNKNOWN / NOT EVALUATED");
+  if (await page.locator('input[aria-label*="bolt" i], input[aria-label*="embedment" i], input[aria-label*="footing" i], input[aria-label*="soil" i], input[aria-label*="uplift" i], input[aria-label*="sliding" i], input[aria-label*="anchorage capacity" i]').count()) {
+    fail("Anchorage interface readiness unexpectedly exposed mechanics/capacity inputs");
+  }
+  record.checks.anchorageExplicitInterfaceIdentityAccepted = true;
+  record.checks.anchoragePhysicalAttachmentNotInferred = true;
+  record.checks.anchorageMechanicsRemainUnavailable = true;
+
+  // Lowering below anchorage activation must block retained anchor-interface review.
+  await stage.selectOption("bracing");
+  await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
+  await waitForBodyTextAbsent(page, "Anchor ID: synthetic-anchor-nw");
+  record.checks.anchorageReadinessBlockedBelowActivationStage = true;
+
   // Lowering below bracing activation must block retained brace topology.
   await stage.selectOption("connections");
   await waitForBodyText(page, "Bracing topology state: blocked_stage_before_bracing");
@@ -385,6 +423,7 @@ try {
   await waitForBodyText(page, "Wall readiness state: blocked_stage_before_walls");
   await waitForBodyText(page, "Roof readiness state: blocked_stage_before_roof");
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
+  await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
