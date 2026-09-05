@@ -44,12 +44,12 @@ async function fillLabel(page, label, value) {
 }
 
 async function selectVerificationState(page, value) {
-  const locator = page
-    .locator("label")
-    .filter({ hasText: "Verification state" })
-    .locator("select");
+  // Use the exact accessible label so the collision-target verification state
+  // remains unambiguous even when other evidence contracts add their own
+  // separately labeled verification controls.
+  const locator = page.getByLabel("Verification state", { exact: true });
   if ((await locator.count()) !== 1) {
-    fail(`Expected exactly one Verification state select; found ${await locator.count()}`);
+    fail(`Expected exactly one collision-target Verification state select; found ${await locator.count()}`);
   }
   await locator.selectOption(value);
 }
