@@ -4,34 +4,41 @@
 
 The Phase 3 Genesis exit gate is satisfied. RPE has crossed from one-panel analytical action into calculated connection release, physically simulated Rapier debris, explicit collision evidence, and explicitly gated post-release center-of-mass aerodynamic force over a declared fixed-step application window.
 
-Phase 4 — **Small House Wind System** — is now active.
+Phase 4 — **Small House Wind System** — is active, and its first staged visual/data gate is now complete.
 
-The first Phase 4 foundation is already implemented as a versioned system contract with the locked progression:
+The validated Phase 4 contract and test-chamber viewer preserve the locked progression:
 
 **empty envelope → primary supports → floor/ring frame → walls → roof → connections → bracing → anchorage → storm protection**
 
-The contract preserves stable object identity and explicit provenance while allowing material identity, mass, and connection capacity to remain unknown (`null`). Geometry alone never creates a capacity or performance claim.
+The viewer uses a clearly labeled synthetic software-QA house. It preserves stable object identity/provenance, explicit component orientation, unknown material/mass/capacity state, `N/A / no_physical_specimen` for the empty envelope, and `DECLARED_COMPONENTS_ONLY` for later geometry-only stages. Connection topology is listed without inventing joint coordinates. Visible geometry is explicitly not structural adequacy.
+
+## Completed viewer/browser gate
+
+- Staged-house viewer landed in the canonical test chamber.
+- Deterministic Chromium QA traverses every roadmap stage, confirms stage-specific object counts/identities, verifies explicit rotated-member metadata, checks unknown engineering properties remain visible, confirms the empty envelope is `N/A`, and confirms higher-stage identities disappear when returning to the empty envelope.
+- Workflow commit `135a874d40982e293fd0763e43531d0bf0b0b71e` runs both Genesis and Phase 4 browser acceptance against the production build using the isolated pinned Playwright 1.62.1 harness.
+- RPE CI run `33939397709` passed.
+- Browser run `33939397798` passed and produced artifact `browser-acceptance-135a874d40982e293fd0763e43531d0bf0b0b71e`, artifact ID `9961290314`.
 
 ## Exact next gated batch
 
-Build a reviewable staged-house chamber driven from the validated Phase 4 contract.
+Define the first explicit **primary-support mechanics readiness/input contract** before calculating any support response.
 
 Requirements:
-- Add a dedicated Phase 4 small-house view/mode rather than repurposing the conceptual Phase 1 playback.
-- Use a clearly labeled synthetic software-QA house fixture first; do not silently adopt Dignity production dimensions or engineering properties.
-- Let the user select/review each roadmap construction stage in order.
-- The `empty_envelope` stage must show the transparent envelope and report `N/A / no_physical_specimen`.
-- At later stages, instantiate only the components and connections returned by `materializeSmallHouseWindStage`.
-- Expose component IDs, kinds, activation stages, verification states, and whether material/mass/capacity remain unknown.
-- Do not label visible geometry PASS/FAIL or structurally adequate merely because it exists.
-- Keep Fast Smoke / wind visualization separate from structural mechanics unless an explicit small-house wind-action contract is introduced.
-- Add deterministic browser QA proving stage progression and empty-envelope semantics before introducing whole-house wind loads.
+- Select/reference a `primary_support` by stable component ID from a validated `SmallHouseWindSpecimenInput` / `primary_supports` stage snapshot rather than duplicating or silently replacing its geometry.
+- Preserve the component’s explicit center, size, orientation, material ID, mass, source note, and verification state from the validated specimen.
+- Require caller-supplied support/restraint assumptions with explicit provenance and verification state; no restraint condition may be silently defaulted.
+- Represent unknown material identity, mass, stiffness, strength, and capacity as missing/unverified rather than inventing values.
+- Do not calculate reaction, displacement, stress, utilization, capacity, PASS/FAIL, or whole-house wind performance in this readiness batch.
+- Reject missing component identity, wrong component kind/stage, non-finite restraint/input values, unsupported verification state, or absent provenance where the new contract requires it.
+- Add deterministic regression coverage and include it in the actual `npm test` command.
+- Expose the readiness result as a reviewable data gate before any solver or Rapier primary-support behavior is introduced.
 
-## After the viewer gate
+## After the readiness gate
 
-Introduce Phase 4 mechanics in the same order as the topology:
+Only after all mechanics-driving quantities required by a chosen primary-support calculation are explicitly defined/sourced should RPE add that calculated mechanics path. Then proceed in topology order:
 
-1. **Primary supports** — explicit geometry, mass/material state, restraint/support assumptions, and provenance; no hidden stiffness/strength.
+1. **Primary supports** — calculated mechanics from explicit inputs; keep manual/code calculation, solver results, and RPE analytical/simulation results distinct.
 2. **Floor/ring frame** — explicit member relationships and connection identities.
 3. **Walls and roof** — explicit panel geometry/orientation/exposure and connection mapping.
 4. **Connections** — demand/capacity only from declared/sourced inputs; unknown remains unverified.
@@ -39,15 +46,7 @@ Introduce Phase 4 mechanics in the same order as the topology:
 6. **Storm protection** — separate optional structural variable, not a decorative overlay.
 7. **Controlled A/B comparison** — same house geometry, one declared structural variable changed, with automated proof that unrelated geometry/inputs are unchanged.
 
-Do not jump directly to a complete animated house failure sequence. Phase 4 must remain reviewable member-by-member and gate-by-gate.
-
-## Phase 3 evidence retained
-
-- Genesis Browser Acceptance run `33938570653` passed the live force/collision production-browser gate.
-- Evidence artifact ID `9961013065` records opt-in blocking, readiness, full-step application, partial terminal application, force-window completion, genuine collision, identity match, stale collision reset, stale force-evidence reset, and zero console/page errors.
-- RPE CI run `33938665291` passed after preserving the legacy collision activation error contract and adding a distinct aerodynamic force-application activation error.
-- Clean helper-removal CI run `33938717530` passed.
-- Phase 4 foundation CI run `33938835927` passed.
+Do not jump directly to a complete animated house failure sequence.
 
 ## Independent outstanding gate
 
