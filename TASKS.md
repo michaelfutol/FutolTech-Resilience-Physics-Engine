@@ -110,19 +110,31 @@
 - [x] Production-browser acceptance proves incomplete-load-path semantics and invalidation below `bracing`.
 - [x] Confirm RPE CI run `33949445089` and browser run `33949445200` green; browser artifact ID `9964350351`.
 
-### Anchorage readiness — CURRENT GATE
-- [ ] Define anchorage topology/interface readiness referencing an active staged `anchor` by stable ID.
-- [ ] Preserve anchor geometry/orientation/material/mass/provenance exactly from the stage snapshot.
-- [ ] Require explicit active anchor-to-support topology connection; do not infer attachment from proximity/rendered touching geometry.
-- [ ] Confirm the opposite endpoint is an active intended support.
-- [ ] Keep physical attachment point, bolt/rod properties, embedment, base plate, pedestal/footing, concrete/soil properties, uplift/sliding/overturning mechanics, demand/capacity, utilization, and PASS/FAIL unavailable.
-- [ ] Add deterministic unit tests and production-browser acceptance.
+### Anchorage interface-readiness — COMPLETE FOR CURRENT INPUT-REVIEW SCOPE
+- [x] Define anchorage topology/interface readiness referencing an active staged `anchor` by stable ID.
+- [x] Preserve anchor geometry/orientation/material/mass/provenance exactly from the stage snapshot.
+- [x] Require an explicit active anchor-to-primary-support topology connection; do not infer attachment from marker position, proximity, visible touching, or ground-plane coincidence.
+- [x] Confirm the opposite endpoint is an active `primary_support`.
+- [x] Preserve `materialId`, `massKg`, and topology `capacityN` as UNKNOWN when the staged specimen says `null`.
+- [x] Keep physical attachment point, bolt/rod properties, embedment, base plate, weld/fastener details, pedestal/footing, concrete/soil properties, reactions, uplift/sliding/overturning resistance, pullout/breakout, demand/capacity, utilization, and PASS/FAIL unavailable.
+- [x] Wire the Anchorage panel into the Small House chamber with explicit provenance/verification review inputs only.
+- [x] Add deterministic unit tests and production-browser acceptance including invalidation below `anchorage`.
+- [x] Confirm RPE CI run `33950699730` and browser run `33950699741` green; browser artifact ID `9964743865`.
+
+### Storm-protection restraint topology-readiness — CURRENT GATE
+- [ ] Define a storm-protection restraint topology contract referencing an active staged `storm_protection_member` by stable ID.
+- [ ] Require two distinct explicit active connection records incident to the selected restraint member before a restraint path can be considered topology-complete.
+- [ ] Prove visible strap/line geometry cannot manufacture a missing second restraint endpoint or physical attachment point.
+- [ ] Preserve the current canonical `synthetic-storm-strap-west` as intentionally incomplete: it has only one explicit storm-protection relationship, to `synthetic-roof-west`.
+- [ ] Keep tension/preload, stiffness, elongation/slack, fastener/attachment details, member strength, wind/uplift demand, load sharing, capacity, utilization, PASS/FAIL, and whole-house improvement unavailable in the first topology gate.
+- [ ] Add a QA-only augmented fixture with a separately declared second restraint-end relationship to prove topology review without mechanics.
+- [ ] Add deterministic unit tests and production-browser acceptance before any storm-restraint mechanics or A/B performance claim.
 
 ### Later Phase 4 topology/mechanics layers
 - [ ] Add explicit connection mechanics only after joint location and all mechanics-driving quantities are sourced.
 - [ ] Add bracing mechanics only after two-ended topology, physical joint locations, member section/material/stiffness, boundary conditions, and loads are explicit.
 - [ ] Add anchorage mechanics only after attachment/foundation/ground interface and failure-mode data are explicit.
-- [ ] Add storm-protection restraint as a separate optional structural variable.
+- [ ] Add storm-protection mechanics only after a two-ended restraint path, attachment geometry, member properties, loads, and failure modes are explicit.
 - [ ] Add controlled A/B house comparison proving geometry is held constant while exactly one declared structural variable changes.
 - [ ] Reach Phase 4 exit: same house geometry runs controlled A/B tests with only one structural variable changed.
 
