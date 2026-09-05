@@ -11,7 +11,7 @@ RPE has a trustworthy Phase 2 data/cost/candidate spine, a completed Phase 3 Gen
 
 Current Phase 4 progression:
 
-**staged topology ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → analytical surface wind action 🔵**
+**staged topology ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → single-surface analytical wind action ✅ → controlled multi-surface load set ✅ → explicit force-application points 🔵**
 
 The older Typhoon playback remains conceptual and is not promoted to calculated physics.
 
@@ -44,67 +44,72 @@ Evidence boundaries remain explicit: analytical calculations are not solver/CFD 
 
 ### Controlled A/B specimen difference — COMPLETE FOR CURRENT INPUT-CONTROL SCOPE
 
-RPE now has a deterministic stable-ID A/B invariant comparator.
-
-Canonical QA pair:
-- Case A = canonical `SYNTHETIC_PHASE4_HOUSE`.
-- Case B = the same specimen plus one declared QA-only connection record `synthetic-connection-storm-west-second-end`, from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
-- Added connection capacity remains UNKNOWN (`null`).
-
-The comparator requires all unrelated inputs to remain invariant:
-- specimen metadata;
-- envelope;
-- component identity and every component field;
-- component geometry/orientation;
-- every pre-existing connection record.
-
-It rejects missing declared changes, geometry/property drift, unrelated connection changes, and multiple simultaneous variables. Array order alone is ignored through stable-ID canonicalization.
-
-Successful evidence is limited to:
-- `state = controlled_input_difference`;
-- `evidenceLayer = rpe_input_review`;
-- mechanics unavailable;
-- performance comparison unavailable;
-- structural result `N/A`;
-- no winner/strength ranking/benefit conclusion.
+The stable-ID comparator proves exactly one declared connection-record difference while specimen metadata, envelope, every component record/geometry, and all pre-existing connections remain invariant. Successful evidence is `rpe_input_review` only: mechanics, performance ranking, winner, and benefit claims remain unavailable.
 
 Evidence:
-- RPE CI `33959003440` passed all permanent software gates.
-- Production Chromium `33959003346` passed the retained Genesis + Phase 4 browser suite.
-- Browser artifact ID `9967337114`.
+- RPE CI `33959003440`.
+- Production Chromium `33959003346`.
+- Browser artifact `9967337114`.
 
-### Analytical surface wind action — CURRENT GATE
+### Single-surface analytical wind action — COMPLETE FOR CURRENT ANALYTICAL SCOPE
 
-The next Phase 4 bridge is a transparent single-surface wind action. It will reference one active wall/roof panel and require explicit aerodynamic/action inputs rather than deriving them from rendered geometry.
+One active wall/roof panel may receive a transparent analytical action only from explicit inputs: stable surface ID, air density, wind speed, caller-supplied effective wind area, signed coefficient, explicit global action direction, provenance, and verification.
 
-First-slice required inputs:
-- stable wall/roof panel ID;
-- air density;
-- wind speed;
-- explicitly supplied effective wind area;
-- explicit signed coefficient basis;
-- explicit finite global action direction;
-- provenance and verification state.
+Canonical north-wall QA case:
+- geometry-only face area `7.140000 m²`;
+- declared `A_eff = 5.000000 m²`;
+- `ρ = 1.2 kg/m³`;
+- `V = 20 m/s`;
+- `C = -0.8`;
+- explicit direction `(0,0,2)` → normalized `(0,0,1)`;
+- `q = 240 Pa`;
+- `qC = -192 Pa`;
+- scalar force `-960 N`;
+- global force vector `(0,0,-960) N`.
 
-Planned first transparent result:
-- `q = 0.5ρV²`;
-- signed scalar surface action from supplied coefficient inputs;
-- global force vector from the explicit direction vector.
+Permanent boundary: **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**. Geometry never becomes `A_eff`, rendered orientation never manufactures force direction, and no code coefficient/zone, internal pressure, tributary path, reaction, connection demand, racking result, or PASS/FAIL is inferred.
 
-It will remain **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**. It must not infer code coefficients/zones, internal pressure, gust/topographic/shielding factors, tributary load paths, connection demand, support reactions, uplift/sliding resistance, or PASS/FAIL.
+Evidence:
+- RPE CI `33959585363`.
+- Production Chromium `33959585360`.
+- Browser artifact `9967518320`.
+
+### Controlled multi-surface analytical load set — COMPLETE FOR CURRENT VECTOR-ALGEBRA SCOPE
+
+The load-set contract reuses the accepted single-surface calculator for two or more unique active wall/roof surfaces. Every surface must independently be `analytical_ready`; one blocked/invalid surface blocks the complete set and no partial sum is produced. Duplicate surface IDs are prohibited in schema `0.1.0`, and output is canonicalized by stable surface ID so caller array order is not engineering meaning.
+
+Canonical two-wall QA case:
+- north wall vector `(0,0,-960) N`;
+- east wall vector `(480,0,0) N`;
+- algebraic global vector sum `(480,0,-960) N`;
+- pure vector magnitude `1073.313 N`.
+
+Permanent boundary: **RPE_ANALYTICAL / VECTOR ALGEBRA ONLY / NON-CFD / NON-CODE-COMPLIANCE**. The sum is explicitly **not** a reaction, structural-model base shear, uplift/sliding demand, racking demand, connection demand, moment/torque, load-path distribution, CFD integration, code wind load, or adequacy verdict. No moment is calculated because no explicit force-application points or moment reference exist yet.
+
+Evidence:
+- Core regression/CI gate `33960418016` passed.
+- Permanent clean-head RPE CI `33960633262` passed.
+- Production Chromium `33960633248` passed retained Genesis + Phase 4 acceptance.
+- Browser artifact `9967837588`.
+
+### Current gate — explicit surface force-application points
+
+The next bridge is to attach each already-valid analytical surface force vector to an **explicit caller-declared global application point** while keeping the force itself unchanged.
+
+First-slice rules:
+- reference an already-valid surface-action result by stable surface ID;
+- require an explicit finite global application point plus provenance/verification;
+- do not infer centroid, center of pressure, panel center, joint, support, or solver node from rendered geometry;
+- preserve the original force vector exactly;
+- application-point identity is mapping evidence only, not load-path distribution;
+- no moment/torque until a separate explicit reference-point contract is approved;
+- no reaction, connection demand, base shear, racking, or PASS/FAIL.
+
+After this mapping gate, RPE may define a traceable structural load-case adapter instead of inferring tributary paths from scene geometry.
 
 ## Why Phase 4 remains open
 
-The locked roadmap requires more than topology and an A/B input audit. Phase 4 still needs house-level evidence for:
-- pressure/load vectors;
-- connection demand/capacity state;
-- uplift and sliding reactions;
-- racking indicators;
-- failure sequence;
-- detached-component debris;
-- residual state after load removal where supported.
-
-Therefore the current A/B success does **not** close Phase 4.
+The locked roadmap still needs house-level evidence for pressure/load vectors, connection demand/capacity state, uplift/sliding reactions, racking indicators, failure sequence, detached-component debris, and residual state where supported. Multi-surface vector aggregation alone does not satisfy those mechanics/solver requirements.
 
 ## Engine integration ladder
 
@@ -117,7 +122,7 @@ OpenSees-class structural coupling and one OpenFOAM CFD workflow remain mandator
 ## Open gates / limitations
 
 - Final Phase 2 manual browser visual acceptance remains outstanding.
-- No Phase 4 whole-house wind performance result exists yet.
+- No Phase 4 whole-house structural wind performance result exists yet.
 - No global frame/load-path solver result exists yet.
 - Bracing, anchorage, and storm-restraint structural mechanics remain intentionally unavailable until their physical inputs are explicit.
 - No OpenSees, CalculiX, OpenFOAM, or physical-test evidence has yet been generated for the Phase 4 house.
