@@ -6,107 +6,119 @@ Phase 3 — Genesis Test Chamber — has satisfied its roadmap exit gate.
 
 Phase 4 — **Small House Wind System** — remains active. The current progression is:
 
-**topology/staging spine ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → analytical surface wind action 🔵**
+**topology/staging spine ✅ → primary-support isolated formula ✅ → wall/roof exposure readiness ✅ → connection location review ✅ → bracing topology ✅ → anchorage interface ✅ → storm-protection topology ✅ → controlled A/B input audit ✅ → single-surface analytical wind action ✅ → controlled multi-surface load set 🔵**
 
-The exact next layer is **Phase 4 analytical surface wind action**.
+The exact next layer is **controlled multi-surface analytical load aggregation**.
 
-Phase 4 is **not** complete merely because the A/B invariant audit passed. The locked roadmap still requires house-level pressure/load vectors, connection demand/capacity state, uplift/sliding reactions, racking indicators, failure sequence, detached debris, and residual state where supported.
+Phase 4 is not complete. The locked roadmap still requires traceable house-level pressure/load vectors and, through later explicitly sourced mechanics/solver gates, connection demand/capacity state, uplift/sliding reactions, racking indicators, failure sequence, detached debris, and residual state where supported.
 
-## Newly completed — Controlled A/B specimen difference
+## Newly completed — Single-surface analytical wind action
 
-The first stable-ID A/B contract is complete for **input-control evidence only**.
+The first Phase 4 pressure/load-vector contract is complete for one active staged `wall_panel` or `roof_panel`.
 
-Canonical QA pair:
-- Case A = canonical `SYNTHETIC_PHASE4_HOUSE`.
-- Case B = the same validated specimen plus exactly one declared connection record, `synthetic-connection-storm-west-second-end`, from `synthetic-storm-strap-west` to `synthetic-anchor-nw`.
-- Added connection capacity remains `null` / UNKNOWN.
+Required explicit inputs are:
+- stable surface component ID;
+- declared local axis used only to report geometry-only face area;
+- air density `ρ`;
+- wind speed `V`;
+- caller-supplied effective wind area `A_eff`;
+- explicit signed coefficient;
+- explicit finite global action direction vector;
+- separate provenance and verification states.
 
-The comparator proves:
-- specimen metadata unchanged;
-- envelope unchanged;
-- component records unchanged;
-- component geometry unchanged;
-- every pre-existing connection record unchanged;
-- exactly the declared connection record added.
+The transparent first-slice path is:
+- `q = 0.5ρV²`;
+- signed surface pressure `qC`;
+- scalar surface force `qA_effC`;
+- global force vector = scalar force × normalized explicit global action direction.
 
-It rejects missing declared differences, geometry/property drift, unrelated connection edits/additions, and multiple simultaneous variables. Stable-ID sorting means array ordering alone is not treated as an engineering change.
+Canonical wall QA case:
+- `synthetic-wall-north`;
+- geometry-only local-z face area = `7.140000 m²`;
+- declared `A_eff = 5.000000 m²`;
+- `ρ = 1.2 kg/m³`;
+- `V = 20 m/s`;
+- signed coefficient `C = -0.8`;
+- explicit direction `(0,0,2)` normalized to `(0,0,1)`;
+- `q = 240 Pa`;
+- `qC = -192 Pa`;
+- scalar force `-960 N`;
+- global force vector `(0,0,-960) N`.
 
-Evidence boundary:
-- state: `controlled_input_difference`;
-- evidence layer: `rpe_input_review`;
-- mechanics available: NO;
-- performance comparison: NO;
-- winner/strength ranking: NOT AVAILABLE.
+Permanent boundary:
+- evidence layer = `rpe_analytical`;
+- **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**;
+- geometry-only face area is never substituted for `A_eff`;
+- rendered rotation never manufactures the action direction;
+- no code pressure coefficient/zone, internal pressure, gust/topographic/shielding factor, tributary load path, connection demand, support reaction, uplift/sliding resistance, racking result, PASS/FAIL, or adequacy is inferred.
 
-Canonical evidence:
-- RPE CI run `33959003440` passed install, lint, strict TypeScript, full regressions, and production build.
-- Production Chromium run `33959003346` passed retained Genesis + Phase 4 acceptance.
-- Browser artifact ID `9967337114`.
+Evidence:
+- RPE CI run `33959585363` passed install, lint, strict TypeScript, all regressions, and production build.
+- Production Chromium run `33959585360` passed retained Genesis + Phase 4 acceptance.
+- Browser artifact ID `9967518320`.
 
-## Exact next gated batch — Analytical surface wind action
+## Exact next gated batch — Controlled multi-surface analytical load set
 
-The next step begins the actual Phase 4 pressure/load-vector path without skipping directly to whole-house mechanics.
+The next gate should reuse the proven single-surface calculator rather than create a second aerodynamic formula path.
 
 ### First-slice scope
 
-Reference **one active staged wall or roof panel** by stable ID and require all aerodynamic/action-driving quantities explicitly. The first contract should calculate a transparent `rpe_analytical` surface action only when every required input is present.
+Accept a caller-declared set of **two or more unique active wall/roof surface action records**. Each record must independently satisfy the single-surface contract. The aggregation layer may then perform only deterministic algebra on those already-proven global force vectors.
 
-Required explicit inputs:
-- active wall/roof panel ID;
-- air density `ρ`;
-- wind speed `V`;
-- effective wind area `A_eff` supplied explicitly and kept distinct from geometry-only panel face area;
-- explicit signed coefficient basis for the first analytical action;
-- explicit finite global action direction vector;
-- source/provenance note;
-- verification state.
-
-First transparent calculation path:
-- dynamic pressure: `q = 0.5ρV²`;
-- signed scalar surface action from the explicitly supplied coefficient basis;
-- global force vector using the explicit direction vector.
+Required behavior:
+- require at least two surface-action records;
+- require unique `surfaceComponentId` values in the first schema; duplicate load patches on one surface are not silently combined;
+- run every record through `calculateSmallHouseSurfaceWindAction`;
+- if any individual action is blocked/invalid, block the load set and identify the failed surface rather than summing partial data;
+- preserve each surface result and its provenance;
+- sort/canonicalize output by stable surface ID so input array order is not engineering meaning;
+- calculate the algebraic sum of the explicit global force vectors only;
+- optionally report resultant vector magnitude as pure vector algebra, clearly not a reaction or capacity demand;
+- keep structural result `N/A` and evidence layer `rpe_analytical`.
 
 ### Permanent anti-inference rules
 
-The first surface-action gate must **not** silently create:
-- code pressure coefficients;
-- roof/wall zones;
-- internal pressure coefficient;
-- gust, topographic, shielding, or directionality factors;
-- effective wind area from rendered dimensions;
-- wind direction from the camera or scene;
-- surface normal/action direction from apparent geometry unless a later contract explicitly authorizes that derivation;
-- tributary load path;
-- connection demand;
-- support reactions;
-- uplift/sliding resistance;
-- PASS/FAIL or code-compliance result.
+The multi-surface sum must not be labeled or reused as:
+- a support or foundation reaction;
+- anchorage uplift/sliding demand;
+- frame base shear from a structural model;
+- racking demand;
+- connection/joint force;
+- center-of-pressure moment or torque;
+- load-path distribution;
+- CFD pressure integration;
+- code-compliance wind load;
+- whole-house resistance, adequacy, or PASS/FAIL.
 
-The browser must label this output **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**.
+No moment/torque may be calculated until explicit force application points and a justified moment reference contract exist.
 
-### Required regression/browser proof
+### Canonical first regression target
 
-1. Stage before the selected panel exists → blocked.
-2. Missing/wrong-kind panel → blocked.
-3. Missing or non-finite `ρ`, `V`, `A_eff`, coefficient, or direction vector → blocked.
-4. Non-positive `ρ`, `V`, or `A_eff` → blocked.
-5. Direction vector must be explicit, finite, non-zero, and normalized deterministically before use.
-6. Geometry-only panel face area remains separately reported and never becomes `A_eff` automatically.
-7. Transparent numerical fixture reproduces `q`, scalar action, and force-vector components within tolerance.
-8. No downstream joint reaction, connection demand/capacity, structural adequacy, CFD, or code-compliance field becomes available.
-9. Real Chromium proves the live panel and stale-stage invalidation.
+Use two explicit wall actions at the `walls` stage so no future roof data is read early. A suitable QA pair is:
+- north wall: the accepted `-960 N` global Z action;
+- east wall: a separately declared explicit X-directed action with its own `A_eff`, coefficient, direction, provenance, and verification.
 
-Only after this first surface action is accepted should RPE expand to multiple surfaces and later distribute loads into explicit structural/load-path mechanics.
+The test should hand-check both individual actions and the exact vector sum. Reversing input array order must produce the same canonical load-set result.
+
+### Required browser proof
+
+1. Multi-surface panel visibly identifies itself as **RPE_ANALYTICAL / NON-CFD / NON-CODE-COMPLIANCE**.
+2. Both selected stable surface IDs and their explicit inputs/results are visible.
+3. The vector sum matches the hand calculation.
+4. The panel explicitly says `REACTION: N/A`, `MOMENT/TORQUE: N/A`, `CONNECTION DEMAND: N/A`, and `PASS/FAIL: N/A`.
+5. Lowering below wall activation clears/blocks the load set.
+
+Only after this aggregation gate is accepted should we define how analytical surface actions are mapped to explicitly declared load-application points or structural solver nodes.
 
 ## Following Phase 4 order
 
-After the first surface-action gate:
+After multi-surface aggregation:
 
-1. Extend to controlled multi-surface house loading with each surface input traceable.
-2. Define connection mechanics only after joint coordinates and all demand/capacity-driving quantities are explicit.
-3. Define bracing, anchorage, and storm-restraint mechanics through their own sourced input contracts.
-4. Reuse the controlled A/B invariant engine when analytical/solver evidence is available so only one structural variable changes.
-5. Generate the roadmap-required house-level outputs before declaring Phase 4 complete.
+1. Define explicit surface force application points / mapping semantics before any moment or structural distribution.
+2. Build a traceable structural load-case adapter rather than inferring tributary paths from scene geometry.
+3. Define connection, bracing, anchorage, and storm-restraint mechanics only when their required physical/mechanical inputs are explicit.
+4. Reuse the controlled A/B invariant engine when corresponding analytical/solver evidence exists so exactly one structural variable changes.
+5. Generate the locked roadmap outputs before declaring Phase 4 complete.
 
 ## Engine integration ladder
 
