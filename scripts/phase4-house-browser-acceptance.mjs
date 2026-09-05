@@ -27,7 +27,7 @@ async function waitForBodyTextAbsent(page, text, timeout = 5000) {
 }
 
 const record = {
-  schemaVersion: "0.10.0",
+  schemaVersion: "0.11.0",
   evidenceLayer: "browser_qa",
   browser: "chromium",
   baseUrl,
@@ -49,6 +49,7 @@ const record = {
     "Bracing topology readiness requires two distinct explicit brace-end connection records; visible diagonal geometry cannot create a missing end, physical joint point, stiffness, axial force, buckling model, racking contribution, capacity, or adequacy verdict.",
     "Anchorage interface readiness identifies only an explicit anchor-to-primary-support topology relationship; it does not infer the physical attachment point, bolt/rod, embedment, base plate, pedestal/footing, concrete/soil properties, reactions, resistance, capacity, or adequacy.",
     "Storm-protection topology readiness requires two distinct explicit incident connection records to two distinct active opposite endpoint components; visible strap geometry cannot create a missing end, attachment point, preload, stiffness, demand, capacity, PASS/FAIL, or whole-house benefit.",
+    "Controlled A/B comparison in this gate proves only that exactly one declared connection record differs while unrelated specimen inputs remain invariant; it does not compare structural performance or establish a stronger/better variant.",
   ],
 };
 
@@ -74,6 +75,7 @@ try {
   await waitForBodyText(page, "Bracing topology readiness");
   await waitForBodyText(page, "Anchorage interface readiness");
   await waitForBodyText(page, "Storm Protection restraint topology readiness");
+  await waitForBodyText(page, "Controlled A/B specimen difference");
   await waitForBodyText(page, "Readiness contract calculation: NO");
   await waitForBodyText(page, "Global frame calculation: NO");
   await waitForBodyText(page, "Wind-action calculation: NO");
@@ -90,6 +92,7 @@ try {
   record.checks.bracingTopologyReadinessPanelVisible = true;
   record.checks.anchorageInterfaceReadinessPanelVisible = true;
   record.checks.stormProtectionTopologyReadinessPanelVisible = true;
+  record.checks.controlledABPanelVisible = true;
   record.checks.roofExposureReadinessPanelVisible = true;
   record.checks.connectionJointLocationPanelVisible = true;
 
@@ -408,11 +411,38 @@ try {
   record.checks.stormProtectionVisibleStrapDoesNotCreateSecondEnd = true;
   record.checks.stormProtectionMechanicsRemainUnavailable = true;
 
-  // Lowering below storm-protection activation must block retained restraint topology.
+  // Controlled A/B input-review: exactly one declared connection record differs; no performance ranking.
+  await waitForBodyText(page, "Controlled A/B state: controlled_input_difference");
+  await waitForBodyText(page, "Evidence layer: rpe_input_review");
+  await waitForBodyText(page, "Case A: A — canonical one-ended storm strap");
+  await waitForBodyText(page, "Case B: B — QA-only explicit second storm endpoint");
+  await waitForBodyText(page, "Same specimen ID: synthetic-phase4-house-browser-001");
+  await waitForBodyText(page, "Change kind: connection_record_added");
+  await waitForBodyText(page, "Connection record: synthetic-connection-storm-west-second-end");
+  await waitForBodyText(page, "Explicit topology: synthetic-storm-strap-west → synthetic-anchor-nw");
+  await waitForBodyText(page, "Added capacity: UNKNOWN");
+  await waitForBodyText(page, "Specimen metadata unchanged: YES");
+  await waitForBodyText(page, "Envelope unchanged: YES");
+  await waitForBodyText(page, "Component records unchanged: YES");
+  await waitForBodyText(page, "Component geometry unchanged: YES");
+  await waitForBodyText(page, "Existing connections unchanged: YES");
+  await waitForBodyText(page, "Only declared connection added: YES");
+  await waitForBodyText(page, "Mechanics available: NO");
+  await waitForBodyText(page, "Performance comparison: NO");
+  await waitForBodyText(page, "Performance conclusion: NOT AVAILABLE");
+  await waitForBodyText(page, "NO WINNER / NO STRENGTH RANKING");
+  record.checks.controlledABExactlyOneDeclaredDifference = true;
+  record.checks.controlledABUnrelatedInputsInvariant = true;
+  record.checks.controlledABPerformanceRankingUnavailable = true;
+
+  // Lowering below storm-protection activation must block retained restraint topology and A/B review.
   await stage.selectOption("anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
+  await waitForBodyText(page, "Controlled A/B state: BLOCKED — STORM PROTECTION STAGE REQUIRED");
   await waitForBodyTextAbsent(page, "Restraint member ID: synthetic-storm-strap-west");
+  await waitForBodyTextAbsent(page, "Connection record: synthetic-connection-storm-west-second-end");
   record.checks.stormProtectionReadinessBlockedBelowActivationStage = true;
+  record.checks.controlledABBlockedBelowStormProtectionStage = true;
 
   // Lowering below anchorage activation must block retained anchor-interface review.
   await stage.selectOption("bracing");
@@ -464,6 +494,7 @@ try {
   await waitForBodyText(page, "Connection location state: blocked_stage_before_connections");
   await waitForBodyText(page, "Anchorage interface state: blocked_stage_before_anchorage");
   await waitForBodyText(page, "Storm restraint topology state: blocked_stage_before_storm_protection");
+  await waitForBodyText(page, "Controlled A/B state: BLOCKED — STORM PROTECTION STAGE REQUIRED");
   await waitForBodyTextAbsent(page, "synthetic-support-nw");
   await waitForBodyTextAbsent(page, "synthetic-roof-west");
   await waitForBodyTextAbsent(page, "synthetic-storm-strap-west");
