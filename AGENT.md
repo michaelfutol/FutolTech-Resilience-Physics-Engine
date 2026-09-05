@@ -18,9 +18,22 @@ Manual/code-based calculations, conventional engineering solvers, RPE visualizat
 - Never invent engineering strengths/capacities to make a demo look complete. Unknown values remain null/unverified until a credible source, calculation basis, supplier certificate, calibration, or test supports them.
 
 ## Current Tech Stack
-- **Installed:** React / Next.js, Three.js / React Three Fiber, Drei, Tailwind CSS, TypeScript.
-- **Planned visual physics:** Rapier.js or cannon-es (not yet installed/integrated at takeover).
+- **Installed:** React / Next.js, Three.js / React Three Fiber, Drei, Rapier via `@react-three/rapier`, Tailwind CSS, TypeScript.
 - **Future integrations:** Project Chrono / PyChrono, OpenSees, OpenFOAM, CalculiX / Code_Aster, Blender, BlueQubit as appropriate to the layer being solved.
+
+## Canonical Plugin Orchestration
+
+The durable RPE plugin/scientific workflow is defined in:
+
+`skills/rpe-scientific-orchestration/SKILL.md`
+
+Preferred stack:
+
+**GitHub → OpenAI Developers → Supabase → Vercel → Data Analytics → PostHog → Figma → Codex Security**
+
+Agents must treat that skill as the canonical routing doctrine for substantial RPE architecture, experiment, data, deployment, analytics, observability, diagramming, and security work. Not every task requires every plugin, but the evidence boundaries and responsibility ownership in the skill must be preserved.
+
+Figma is a maintained systems-model layer for architecture/state/sequence/ERD/timeline/system diagrams, not merely a UI-design tool. Data Analytics is the scientific analysis layer for datasets, sensitivity studies, material experiments, calibration, comparisons, validation, uncertainty, charts, and experiment reports. PostHog product telemetry must never be treated as engineering-validation evidence.
 
 ## Repository-First Record Rule
 1. GitHub is the code/source-of-truth record for RPE development.
