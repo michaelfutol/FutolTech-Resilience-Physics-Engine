@@ -21,6 +21,12 @@ import { SMALL_HOUSE_SURFACE_FORCE_APPLICATION_POINT_SCHEMA_VERSION } from "../s
 import { SMALL_HOUSE_SURFACE_FORCE_MOMENT_SCHEMA_VERSION } from "../src/types/smallHouseSurfaceForceMoment";
 import { SMALL_HOUSE_SURFACE_WIND_ACTION_SCHEMA_VERSION } from "../src/types/smallHouseSurfaceWindAction";
 
+function near(actual: number | null | undefined, expected: number, tolerance = 1e-9): void {
+  assert.notEqual(actual, null);
+  assert.notEqual(actual, undefined);
+  assert.ok(Math.abs((actual as number) - expected) <= tolerance, `${actual} != ${expected}`);
+}
+
 function readyAdapter(): SmallHouseStructuralLoadCaseAdapterResult {
   const snapshot = materializeSmallHouseWindStage(SYNTHETIC_PHASE4_HOUSE, "walls");
   const action = calculateSmallHouseSurfaceWindAction(snapshot, {
@@ -84,28 +90,14 @@ function qaModel(): SmallHouseStructuralModelInput {
       {
         id: "NODE-SUPPORT-QA-001",
         globalM: { x: 0.1, y: -2.8, z: -2.0 },
-        restraints: {
-          ux: "fixed",
-          uy: "fixed",
-          uz: "fixed",
-          rx: "fixed",
-          ry: "fixed",
-          rz: "fixed",
-        },
+        restraints: { ux: "fixed", uy: "fixed", uz: "fixed", rx: "fixed", ry: "fixed", rz: "fixed" },
         sourceNote: "Synthetic fixed support node for software verification only",
         verificationState: "unverified",
       },
       {
         id: "NODE-WIND-NORTH-QA-001",
         globalM: { x: 0.1, y: 0.2, z: -2.0 },
-        restraints: {
-          ux: "free",
-          uy: "free",
-          uz: "free",
-          rx: "free",
-          ry: "free",
-          rz: "free",
-        },
+        restraints: { ux: "free", uy: "free", uz: "free", rx: "free", ry: "free", rz: "free" },
         sourceNote: "Explicit mapped load node from accepted Phase 4 adapter evidence",
         verificationState: "unverified",
       },
@@ -133,13 +125,7 @@ function qaModel(): SmallHouseStructuralModelInput {
         verificationState: "unverified",
       },
     ],
-    loadCases: [
-      {
-        id: "LC-WIND-QA-001",
-        sourceNote: "Explicit load-case identity required by accepted adapter evidence",
-        verificationState: "unverified",
-      },
-    ],
+    loadCases: [{ id: "LC-WIND-QA-001", sourceNote: "Explicit load-case identity required by accepted adapter evidence", verificationState: "unverified" }],
     sourceNote: "Synthetic OpenSeesPy model-readiness fixture; not adopted Dignity geometry",
     verificationState: "unverified",
   };
@@ -147,8 +133,7 @@ function qaModel(): SmallHouseStructuralModelInput {
 
 test("explicit two-node model reaches solver_model_ready without creating solver response", () => {
   const adapter = readyAdapter();
-  const model = qaModel();
-  const result = assessSmallHouseStructuralModelReadiness(model, adapter);
+  const result = assessSmallHouseStructuralModelReadiness(qaModel(), adapter);
 
   assert.equal(adapter.state, "mapping_ready");
   assert.equal(result.state, "solver_model_ready");
@@ -162,13 +147,15 @@ test("explicit two-node model reaches solver_model_ready without creating solver
   assert.equal(result.nodes.length, 2);
   assert.equal(result.elements.length, 1);
   assert.equal(result.loadCases.length, 1);
-  assert.deepEqual(result.acceptedMappedLoad, {
-    loadCaseId: "LC-WIND-QA-001",
-    solverNodeId: "NODE-WIND-NORTH-QA-001",
-    solverNodeGlobalM: { x: 0.1, y: 0.2, z: -2.0 },
-    forceVectorN: { x: 0, y: 0, z: -960 },
-    momentVectorNm: { x: -988.8, y: 259.2, z: 0 },
-  });
+  assert.equal(result.acceptedMappedLoad?.loadCaseId, "LC-WIND-QA-001");
+  assert.equal(result.acceptedMappedLoad?.solverNodeId, "NODE-WIND-NORTH-QA-001");
+  assert.deepEqual(result.acceptedMappedLoad?.solverNodeGlobalM, { x: 0.1, y: 0.2, z: -2.0 });
+  near(result.acceptedMappedLoad?.forceVectorN.x, 0);
+  near(result.acceptedMappedLoad?.forceVectorN.y, 0);
+  near(result.acceptedMappedLoad?.forceVectorN.z, -960);
+  near(result.acceptedMappedLoad?.momentVectorNm.x, -988.8);
+  near(result.acceptedMappedLoad?.momentVectorNm.y, 259.2);
+  near(result.acceptedMappedLoad?.momentVectorNm.z, 0);
   assert.deepEqual(result.solverResponse, {
     reactions: null,
     displacementsM: null,
@@ -187,82 +174,48 @@ test("explicit two-node model reaches solver_model_ready without creating solver
 test("all six node restraint DOFs must be explicit supported states", () => {
   const model = qaModel();
   model.nodes[0].restraints.rz = "locked" as never;
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(model, readyAdapter()),
-    /restraints\.rz must be explicitly fixed or free/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(model, readyAdapter()), /restraints\.rz must be explicitly fixed or free/);
 });
 
 test("duplicate node, element, and load-case IDs are rejected", () => {
   const duplicateNode = qaModel();
   duplicateNode.nodes.push(structuredClone(duplicateNode.nodes[0]));
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(duplicateNode, readyAdapter()),
-    /Duplicate structural node ID/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(duplicateNode, readyAdapter()), /Duplicate structural node ID/);
 
   const duplicateElement = qaModel();
   duplicateElement.elements.push(structuredClone(duplicateElement.elements[0]));
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(duplicateElement, readyAdapter()),
-    /Duplicate structural element ID/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(duplicateElement, readyAdapter()), /Duplicate structural element ID/);
 
   const duplicateLoadCase = qaModel();
   duplicateLoadCase.loadCases.push(structuredClone(duplicateLoadCase.loadCases[0]));
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(duplicateLoadCase, readyAdapter()),
-    /Duplicate structural load-case ID/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(duplicateLoadCase, readyAdapter()), /Duplicate structural load-case ID/);
 });
 
 test("missing endpoints and zero-length elements are rejected", () => {
   const missing = qaModel();
   missing.elements[0].nodeJId = "NODE-NOT-DECLARED";
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(missing, readyAdapter()),
-    /references a missing endpoint node/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(missing, readyAdapter()), /references a missing endpoint node/);
 
   const zero = qaModel();
   zero.nodes[1].globalM = structuredClone(zero.nodes[0].globalM);
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(zero, readyAdapter()),
-    /zero or degenerate length/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(zero, readyAdapter()), /zero or degenerate length/);
 });
 
 test("element orientation is explicit, unit length, and perpendicular to the element axis", () => {
   const nonUnit = qaModel();
   nonUnit.elements[0].localYDirectionGlobal = { x: 0, y: 0, z: 2 };
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(nonUnit, readyAdapter()),
-    /must be an explicit unit vector/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(nonUnit, readyAdapter()), /must be an explicit unit vector/);
 
   const parallel = qaModel();
   parallel.elements[0].localYDirectionGlobal = { x: 0, y: 1, z: 0 };
-  assert.throws(
-    () => assessSmallHouseStructuralModelReadiness(parallel, readyAdapter()),
-    /must be perpendicular to the element axis/,
-  );
+  assert.throws(() => assessSmallHouseStructuralModelReadiness(parallel, readyAdapter()), /must be perpendicular to the element axis/);
 });
 
 test("all mechanics-driving elastic element properties must be positive finite explicit inputs", () => {
-  for (const key of [
-    "areaM2",
-    "elasticModulusPa",
-    "shearModulusPa",
-    "iyM4",
-    "izM4",
-    "torsionConstantM4",
-  ] as const) {
+  for (const key of ["areaM2", "elasticModulusPa", "shearModulusPa", "iyM4", "izM4", "torsionConstantM4"] as const) {
     const model = qaModel();
     model.elements[0].properties[key] = key === "areaM2" ? Number.NaN : 0;
-    assert.throws(
-      () => assessSmallHouseStructuralModelReadiness(model, readyAdapter()),
-      new RegExp(`properties\\.${key} must be finite and greater than zero`),
-    );
+    assert.throws(() => assessSmallHouseStructuralModelReadiness(model, readyAdapter()), new RegExp(`properties\\.${key} must be finite and greater than zero`));
   }
 });
 
@@ -287,7 +240,6 @@ test("model node coordinate must match accepted mapped solver-node coordinate; n
   const model = qaModel();
   model.nodes[1].globalM.x += 0.001;
   const result = assessSmallHouseStructuralModelReadiness(model, readyAdapter());
-
   assert.equal(result.state, "blocked_adapter_node_coordinate_mismatch");
   assert.equal(result.canExecuteSolver, false);
   assert.equal(result.acceptedMappedLoad, null);
@@ -300,7 +252,6 @@ test("blocked adapter evidence cannot be promoted into solver model readiness", 
   adapter.canMap = false;
   adapter.mappedNodalLoad = null;
   const result = assessSmallHouseStructuralModelReadiness(qaModel(), adapter);
-
   assert.equal(result.state, "blocked_adapter_evidence");
   assert.equal(result.canExecuteSolver, false);
   assert.equal(result.solverExecuted, false);
@@ -324,5 +275,7 @@ test("readiness result deep-copies model and mapped load inputs", () => {
 
   assert.deepEqual(result.nodes[0].globalM, { x: 0.1, y: -2.8, z: -2.0 });
   assert.equal(result.elements[0].properties.areaM2, 0.01);
-  assert.deepEqual(result.acceptedMappedLoad?.forceVectorN, { x: 0, y: 0, z: -960 });
+  near(result.acceptedMappedLoad?.forceVectorN.x, 0);
+  near(result.acceptedMappedLoad?.forceVectorN.y, 0);
+  near(result.acceptedMappedLoad?.forceVectorN.z, -960);
 });
